@@ -2,6 +2,7 @@ package com.example.pdoh
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
@@ -11,27 +12,16 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val debugView = findViewById<TextView>(R.id.debug_output)
-        debugOutput = Output(debugView)
-        val errorView = findViewById<TextView>(R.id.error_output)
-        errorOutput = Output(errorView)
-        errorOutput.hide()
 
-        val buttonError = findViewById<TextView>(R.id.button_error)
+        val errorButton = findViewById<Button>(R.id.error_button)
+        val debugButton = findViewById<Button>(R.id.debug_button)
+        val debugTextView = findViewById<TextView>(R.id.debug_output)
+        val errorTextView = findViewById<TextView>(R.id.error_output)
 
-        buttonError.setOnClickListener {
-            debugOutput.hide()
-            errorOutput.show()
-        }
+        debugOutput = Output (errorButton, debugButton, debugTextView, errorTextView)
 
-        val buttonDebug = findViewById<TextView>(R.id.button_debug)
-
-        buttonDebug.setOnClickListener {
-            errorOutput.hide()
-            debugOutput.show()
-        }
-        debugOutput.write("[MainActivity.onCreate] app created")
-        debugOutput.write("[MainActivity.onCreate] other log")
+        debugOutput.writeDebug("[MainActivity.onCreate] app created")
+        debugOutput.writeDebug("[MainActivity.onCreate] other log")
     }
 
 }
