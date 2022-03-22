@@ -6,18 +6,30 @@ import android.widget.TextView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var debugOutput: Output
-    init {
-        println("[MainActivity.init 1]")
-
-        val textView = findViewById<TextView>(R.id.debug_output)
-        debugOutput = Output()
-        println("[MainActivity.init 2] ${textView.text}")
-    }
+    private lateinit var errorOutput: Output
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        val debugView = findViewById<TextView>(R.id.debug_output)
+        debugOutput = Output(debugView)
+        val errorView = findViewById<TextView>(R.id.error_output)
+        errorOutput = Output(errorView)
+        errorOutput.hide()
 
+        val buttonError = findViewById<TextView>(R.id.button_error)
+
+        buttonError.setOnClickListener {
+            debugOutput.hide()
+            errorOutput.show()
+        }
+
+        val buttonDebug = findViewById<TextView>(R.id.button_debug)
+
+        buttonDebug.setOnClickListener {
+            errorOutput.hide()
+            debugOutput.show()
+        }
         debugOutput.write("[MainActivity.onCreate] app created")
         debugOutput.write("[MainActivity.onCreate] other log")
     }

@@ -1,20 +1,24 @@
 package com.example.pdoh
 
+import android.content.Context
+import android.view.View
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatTextView
 
-class Output : TextView.Ada {
+class Output (textView: TextView) {
 
-    init {
-        println("[Output.init 1] ")
-    }
+    private val view = textView
 
-    private var view: TextView = findViewById<TextView>(R.id.debug_output)
-
-    init {
-        println("[Output.init 2]")
-    }
     fun write(newOutputLine: String) {
         val newOutput = "${view.text}\n$newOutputLine"
         view.text = newOutput
+    }
+
+    fun show() {
+        view.visibility = View.VISIBLE
+    }
+
+    fun hide() {
+        view.visibility = View.INVISIBLE
     }
 }
