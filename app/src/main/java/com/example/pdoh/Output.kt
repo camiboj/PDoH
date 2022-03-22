@@ -1,53 +1,61 @@
 package com.example.pdoh
 
 import android.content.Context
+import android.graphics.Color
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 
-class OutputText (textView: TextView) {
+class OutputType (_button: Button, _textView: TextView) {
 
-    private val view = textView
+    private val button = _button
+    private val textView = _textView
+
+    fun disable () {
+        button.isClickable = true
+        button.setBackgroundColor(Color.BLUE)
+        textView.visibility = View.INVISIBLE
+    }
+
+    fun enable () {
+        button.isClickable = false
+        button.setBackgroundColor(Color.GRAY)
+        textView.visibility = View.VISIBLE
+    }
 
     fun write(newOutputLine: String) {
-        val newOutput = "${view.text}\n$newOutputLine"
-        view.text = newOutput
-    }
-
-    fun show() {
-        view.visibility = View.VISIBLE
-    }
-
-    fun hide() {
-        view.visibility = View.INVISIBLE
+        val newOutput = "${textView.text}\n$newOutputLine"
+        textView.text = newOutput
     }
 }
 
-class Output (_errorButton: Button,
-              _debugButton: Button,
+class Output (errorButton: Button,
+              debugButton: Button,
               debugTextView: TextView,
               errorTextView: TextView) {
-    private val errorButton = _errorButton
-    private val debugButton = _debugButton
-    private val debugOutputText = OutputText(debugTextView)
-    private val errorOutputText = OutputText(errorTextView)
+    private val errorOutput = OutputType(errorButton, errorTextView)
+    private val debugOutput = OutputType(debugButton, debugTextView)
 
     init {
+        errorOutput.enable()
+        debugOutput.disable()
+
         errorButton.setOnClickListener {
-            debugOutputText.hide()
-            errorOutputText.show()
+            errorOutput.enable()
+            debugOutput.disable()
+
         }
         debugButton.setOnClickListener {
-            errorOutputText.hide()
-            debugOutputText.show()
+            debugOutput.enable()
+            errorOutput.disable()
         }
     }
 
     fun writeError (newOutputLine: String) {
-        errorOutputText.write(newOutputLine)
+        errorOutput.write(newOutputLine)
     }
     fun writeDebug (newOutputLine: String) {
-        debugOutputText.write(newOutputLine)
+        debugOutput.write(newOutputLine)
     }
 }
