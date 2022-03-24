@@ -14,7 +14,7 @@
  ** limitations under the License.
  */
 
-package xyz.hexene.localvpn;
+package com.example.pdoh.vpn;
 
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -36,8 +36,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.example.pdoh.vpn.R;
+
 public class LocalVPNService extends VpnService {
-    public static final String BROADCAST_VPN_STATE = "xyz.hexene.localvpn.VPN_STATE";
+    public static final String BROADCAST_VPN_STATE = "com.example.pdoh.vpn.VPN_STATE";
     private static final String TAG = LocalVPNService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
@@ -105,6 +107,7 @@ public class LocalVPNService extends VpnService {
             builder.addAddress(VPN_ADDRESS, 32);
             builder.addRoute(VPN_ROUTE, 0);
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
+            // CC: pending intent is null and this could be an issue
         }
     }
 
@@ -130,7 +133,7 @@ public class LocalVPNService extends VpnService {
         closeResources(udpSelector, tcpSelector, vpnInterface);
     }
 
-    private static class VPNRunnable implements Runnable {
+    private static class VPNRunnable implements Runnable { // CC: for security reasons only one VPN connection is allowed, why is this ok?
         private static final String TAG = VPNRunnable.class.getSimpleName();
 
         private final FileDescriptor vpnFileDescriptor;
@@ -142,7 +145,7 @@ public class LocalVPNService extends VpnService {
         public VPNRunnable(FileDescriptor vpnFileDescriptor,
                            ConcurrentLinkedQueue<Packet> deviceToNetworkUDPQueue,
                            ConcurrentLinkedQueue<Packet> deviceToNetworkTCPQueue,
-                           ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue) {
+                           ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue) { // CC: still not understanding why only one queue
             this.vpnFileDescriptor = vpnFileDescriptor;
             this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
             this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;

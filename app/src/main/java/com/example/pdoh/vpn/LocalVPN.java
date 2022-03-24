@@ -1,5 +1,3 @@
-package com.example.pdoh.vpn;
-
 /*
  ** Copyright 2015, Mohamed Naufal
  **
@@ -16,29 +14,31 @@ package com.example.pdoh.vpn;
  ** limitations under the License.
  */
 
+package com.example.pdoh.vpn;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.VpnService;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import xyz.hexene.localvpn.R;
+import com.example.pdoh.vpn.R;
 
-public class VpnServiceActivity extends AppCompatActivity {
+public class LocalVPN extends AppCompatActivity {
     private static final int VPN_REQUEST_CODE = 0x0F;
 
     private boolean waitingForVPNStart;
 
     private final BroadcastReceiver vpnStateReceiver = new BroadcastReceiver() {
-
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (VpnServiceWrapper.BROADCAST_VPN_STATE.equals(intent.getAction())) {
+            if (LocalVPNService.BROADCAST_VPN_STATE.equals(intent.getAction())) {
                 if (intent.getBooleanExtra("running", false))
                     waitingForVPNStart = false;
             }
@@ -49,11 +49,16 @@ public class VpnServiceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_vpn);
-        final Button vpnButton = findViewById(R.id.vpn);
-        vpnButton.setOnClickListener(v -> startVPN());
+        final Button vpnButton = (Button) findViewById(R.id.vpn);
+        vpnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startVPN();
+            }
+        });
         waitingForVPNStart = false;
         LocalBroadcastManager.getInstance(this).registerReceiver(vpnStateReceiver,
-                new IntentFilter(VpnServiceWrapper.BROADCAST_VPN_STATE)); // CC: why using a broadcast
+                new IntentFilter(LocalVPNService.BROADCAST_VPN_STATE)); // CC: why using a broadcast
     }
 
     private void startVPN() {
@@ -69,7 +74,7 @@ public class VpnServiceActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             waitingForVPNStart = true;
-            startService(new Intent(this, VpnServiceActivity.class));
+            startService(new Intent(this, LocalVPNService.class));
             enableButton(false);
         }
     }
@@ -78,11 +83,11 @@ public class VpnServiceActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        enableButton(!waitingForVPNStart && !VpnServiceWrapper.isRunning());
+        enableButton(!waitingForVPNStart && !LocalVPNService.isRunning());
     }
 
     private void enableButton(boolean enable) {
-        final Button vpnButton = findViewById(R.id.vpn);
+        final Button vpnButton = (Button) findViewById(R.id.vpn);
         if (enable) {
             vpnButton.setEnabled(true);
             vpnButton.setText(R.string.start_vpn);
