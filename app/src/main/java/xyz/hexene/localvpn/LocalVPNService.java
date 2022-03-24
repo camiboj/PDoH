@@ -1,5 +1,3 @@
-package com.example.pdoh.vpn;
-
 /*
  ** Copyright 2015, Mohamed Naufal
  **
@@ -15,6 +13,8 @@ package com.example.pdoh.vpn;
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  */
+
+package xyz.hexene.localvpn;
 
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -36,11 +36,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import xyz.hexene.localvpn.R;
-
-public class VpnServiceWrapper extends VpnService {
-    public static final String BROADCAST_VPN_STATE = "com.example.pdoh.vpn.VPN_STATE";
-    private static final String TAG = VpnServiceWrapper.class.getSimpleName();
+public class LocalVPNService extends VpnService {
+    public static final String BROADCAST_VPN_STATE = "xyz.hexene.localvpn.VPN_STATE";
+    private static final String TAG = LocalVPNService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
     private static boolean isRunning = false;
@@ -61,6 +59,7 @@ public class VpnServiceWrapper extends VpnService {
         return isRunning;
     }
 
+    // TODO: Move this to a "utils" class for reuse
     private static void closeResources(Closeable... resources) {
         for (Closeable resource : resources) {
             try {
@@ -106,7 +105,6 @@ public class VpnServiceWrapper extends VpnService {
             builder.addAddress(VPN_ADDRESS, 32);
             builder.addRoute(VPN_ROUTE, 0);
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
-            // CC: pending intent is null and this could be an issue
         }
     }
 
@@ -132,7 +130,7 @@ public class VpnServiceWrapper extends VpnService {
         closeResources(udpSelector, tcpSelector, vpnInterface);
     }
 
-    private static class VPNRunnable implements Runnable { // CC: for security reasons only one VPN connection is allowed, why is this ok?
+    private static class VPNRunnable implements Runnable {
         private static final String TAG = VPNRunnable.class.getSimpleName();
 
         private final FileDescriptor vpnFileDescriptor;
@@ -144,7 +142,7 @@ public class VpnServiceWrapper extends VpnService {
         public VPNRunnable(FileDescriptor vpnFileDescriptor,
                            ConcurrentLinkedQueue<Packet> deviceToNetworkUDPQueue,
                            ConcurrentLinkedQueue<Packet> deviceToNetworkTCPQueue,
-                           ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue) { // CC: still not understanding why only one queue
+                           ConcurrentLinkedQueue<ByteBuffer> networkToDeviceQueue) {
             this.vpnFileDescriptor = vpnFileDescriptor;
             this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
             this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;

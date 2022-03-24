@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 
-class MainActivity : AppCompatActivity() {
+/*class MainActivity : AppCompatActivity() {
     private lateinit var output: Output
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,4 +23,4 @@ class MainActivity : AppCompatActivity() {
         output.writeDebug("[MainActivity.onCreate] other log")
     }
 
-}
+}*/
