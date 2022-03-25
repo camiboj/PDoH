@@ -184,6 +184,9 @@ public class LocalVPNService extends VpnService {
                             Log.w(TAG, packet.ip4Header.toString());
                             dataSent = false;
                         }
+                        Log.i(TAG, String.format("[LocalVPNService][run] Packet: %s", packet));
+                        Log.i(TAG, String.format("[LocalVPNService][run] packet protocol: %s", packet.getTransportProtocol()));
+                        Log.i(TAG, String.format("[LocalVPNService][run] packet type: %s", packet.getType()));
                     } else {
                         dataSent = false;
                     }

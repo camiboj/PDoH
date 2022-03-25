@@ -210,6 +210,16 @@ public class Packet
             tcpHeader.fillHeader(buffer);
     }
 
+    public String getTransportProtocol() {
+        return this.ip4Header.protocol.toString();
+    }
+
+    public String getType() {
+        if (isUDP) return "UDP";
+        if (isTCP) return "TCP";
+        return "Other";
+    }
+
     public static class IP4Header
     {
         public byte version;
