@@ -11,24 +11,11 @@ import com.mocyx.basic_client.bio.BioTcpHandler;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.DatagramPacket;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.nio.channels.DatagramChannel;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
@@ -119,74 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    public void clickHttp(View view) {
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    long ts = System.currentTimeMillis();
-                    //URL yahoo = new URL("https://www.google.com/");
-                    URL yahoo = new URL("https://www.baidu.com/");
-                    HttpURLConnection yc = (HttpURLConnection) yahoo.openConnection();
-
-                    yc.setRequestProperty("Connection", "close");
-                    yc.setConnectTimeout(30000);
-
-                    yc.setReadTimeout(30000);
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(yc.getInputStream()));
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null) {
-                        System.out.println(inputLine);
-                    }
-
-                    yc.disconnect();
-                    in.close();
-                    long te = System.currentTimeMillis();
-                    Log.i(TAG, String.format("http cost %d", te - ts));
-
-                    System.out.printf("http readline end\n");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        t.start();
-    }
-
     public void clickStop(View view) {
         //
-    }
-
-    public static void displayStuff(String whichHost, InetAddress inetAddress) {
-        System.out.println("--------------------------");
-        System.out.println("Which Host:" + whichHost);
-        System.out.println("Canonical Host Name:" + inetAddress.getCanonicalHostName());
-        System.out.println("Host Name:" + inetAddress.getHostName());
-        System.out.println("Host Address:" + inetAddress.getHostAddress());
-    }
-
-    public void clickDns(View view) {
-
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    long ts = System.currentTimeMillis();
-                    String host = "www.baidu.com";
-
-                    for (InetAddress inetAddress : InetAddress.getAllByName(host)) {
-                        displayStuff(host, inetAddress);
-                    }
-                    long te = System.currentTimeMillis();
-                    Log.i(TAG, String.format("dns cost %d", te - ts));
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        t.start();
     }
 }
