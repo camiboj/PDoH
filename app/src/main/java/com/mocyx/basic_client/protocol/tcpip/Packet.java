@@ -1,8 +1,6 @@
 package com.mocyx.basic_client.protocol.tcpip;
 
 
-import android.util.Log;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
