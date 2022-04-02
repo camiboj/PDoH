@@ -26,6 +26,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.dns.DefaultDnsRecordDecoder;
+import io.netty.handler.codec.dns.DnsQuestion;
+import io.netty.handler.codec.dns.DnsRecord;
+import io.netty.handler.codec.dns.DnsRecordDecoder;
+
 public class LocalVPNService extends VpnService {
     private static final String TAG = LocalVPNService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
@@ -184,6 +191,8 @@ public class LocalVPNService extends VpnService {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message. DO SOMETHING");
+                                ByteBuf byteBuf = Unpooled.copiedBuffer(packet.backingBuffer);
+                                DnsQuestion dnsQuestion = DnsRecordDecoder.DEFAULT.decodeQuestion(byteBuf);
                                 deviceToNetworkUDPQueue.offer(packet);;
 
                                 // Log.i(TAG, String.format("[dns] DNS header: %s", packet.backingBuffer.get(2)));
@@ -207,6 +216,8 @@ public class LocalVPNService extends VpnService {
                 }
             } catch (IOException e) {
                 Log.w(TAG, e.toString(), e);
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
                 closeResources(vpnInput, vpnOutput);
             }
