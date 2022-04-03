@@ -7,10 +7,11 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import com.mocyx.basic_client.bio.BioTcpHandler;
 import com.mocyx.basic_client.bio.BioUdpHandler;
 import com.mocyx.basic_client.bio.NioSingleThreadTcpHandler;
 import com.mocyx.basic_client.config.Config;
+import com.mocyx.basic_client.dns.DnsHeader;
+import com.mocyx.basic_client.dns.DnsQuestion;
 import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
@@ -183,11 +184,15 @@ public class LocalVPNService extends VpnService {
                         if (packet.isUDP()) {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
-                                Log.i(TAG, "[dns] this is a dns message. DO SOMETHING");
-                                deviceToNetworkUDPQueue.offer(packet);;
+                                Log.i(TAG, "[dns] this is a dns message");
+                                ByteBuffer copyBackingBuffer = packet.backingBuffer.duplicate();
+                                DnsHeader dnsHeader = new DnsHeader(copyBackingBuffer);
+                                DnsQuestion dnsQuestion = new DnsQuestion(copyBackingBuffer);
 
-                                // Log.i(TAG, String.format("[dns] DNS header: %s", packet.backingBuffer.get(2)));
-                                // Log.i(TAG, String.format("[dns] DNS name?: %s", packet.backingBuffer.get(10)));
+                                Log.i(TAG, String.format("[dns] DNS header: %s", dnsHeader));
+                                Log.i(TAG, String.format("[dns] DNS name: %s", dnsQuestion));
+
+                                deviceToNetworkUDPQueue.offer(packet);
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }
@@ -207,6 +212,8 @@ public class LocalVPNService extends VpnService {
                 }
             } catch (IOException e) {
                 Log.w(TAG, e.toString(), e);
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
                 closeResources(vpnInput, vpnOutput);
             }

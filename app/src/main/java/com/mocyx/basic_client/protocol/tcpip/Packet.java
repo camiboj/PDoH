@@ -1,7 +1,7 @@
 package com.mocyx.basic_client.protocol.tcpip;
 
 
-import android.util.Log;
+import com.mocyx.basic_client.BitUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -459,20 +459,6 @@ public class Packet {
             sb.append(", checksum=").append(checksum);
             sb.append('}');
             return sb.toString();
-        }
-    }
-
-    private static class BitUtils {
-        private static short getUnsignedByte(byte value) {
-            return (short) (value & 0xFF);
-        }
-
-        private static int getUnsignedShort(short value) {
-            return value & 0xFFFF;
-        }
-
-        private static long getUnsignedInt(int value) {
-            return value & 0xFFFFFFFFL;
         }
     }
 }
