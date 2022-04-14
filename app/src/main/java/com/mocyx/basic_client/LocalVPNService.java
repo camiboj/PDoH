@@ -11,6 +11,7 @@ import com.mocyx.basic_client.bio.BioUdpHandler;
 import com.mocyx.basic_client.bio.NioSingleThreadTcpHandler;
 import com.mocyx.basic_client.config.Config;
 import com.mocyx.basic_client.dns.DnsHeader;
+import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.dns.DnsQuestion;
 import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
@@ -186,11 +187,10 @@ public class LocalVPNService extends VpnService {
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
                                 ByteBuffer copyBackingBuffer = packet.backingBuffer.duplicate();
-                                DnsHeader dnsHeader = new DnsHeader(copyBackingBuffer);
-                                DnsQuestion dnsQuestion = new DnsQuestion(copyBackingBuffer);
+                                DnsPacket dnsPacket = new DnsPacket(copyBackingBuffer);
 
-                                Log.i(TAG, String.format("[dns] DNS header: %s", dnsHeader));
-                                Log.i(TAG, String.format("[dns] DNS name: %s", dnsQuestion));
+                                Log.i(TAG, String.format("[dns] DNS header: %s", dnsPacket.getHeader()));
+                                Log.i(TAG, String.format("[dns] DNS questions: %s", dnsPacket.getQuestions()));
 
                                 deviceToNetworkUDPQueue.offer(packet);
                             } else {

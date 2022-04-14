@@ -21,6 +21,10 @@ public class DnsHeader {
         this.nAdditionalRRs = BitUtils.getUnsignedShort(buffer.getShort());
     }
 
+    public int getNQuestions () {
+        return nQuestions;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("DnsHeader{");
