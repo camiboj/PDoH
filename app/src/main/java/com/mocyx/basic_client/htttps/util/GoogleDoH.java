@@ -45,6 +45,7 @@ public class GoogleDoH implements Runnable {
     }
 
     public void setParameter(String parameter, String value) {
+        // Possible parameters https://developers.google.com/speed/public-dns/docs/doh/json
         parameters.put(parameter, value);
     }
 
