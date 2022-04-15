@@ -3,16 +3,13 @@ package com.mocyx.basic_client.htttps.util;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,26 +33,42 @@ class ParameterStringBuilder {
     }
 }
 
-public class Https implements Runnable {
+public class GoogleDoH implements Runnable {
     // https://www.baeldung.com/java-http-request
+    // https://www.baeldung.com/httpurlconnection-post
 
-    private final URL url;
+    Map<String, String> parameters = new HashMap<>();
+    static final String ENDPOINT = "https://8.8.8.8/resolve?";
 
-    public Https (String url) throws IOException { // "http://example.com", "GET"
-        this.url = new URL(url);
+    public GoogleDoH(String name) {
+        parameters.put("name", name);
     }
+
+    public void setParameter(String parameter, String value) {
+        parameters.put(parameter, value);
+    }
+
+    private String getParameters() throws UnsupportedEncodingException {
+        return ParameterStringBuilder.getParamsString(parameters);
+    }
+
+    private String getFinalEndpoint() throws UnsupportedEncodingException {
+        String dohUrl = String.format("https://8.8.8.8/resolve?%s", getParameters());
+        Log.i("TAG", String.format("[GoogleDoH] dohUrl: %s", dohUrl));
+        return dohUrl;
+    }
+
 
     @Override
     public void run() {
         HttpURLConnection con = null;
         BufferedReader in = null;
         try {
+            URL url = new URL(getFinalEndpoint());
             con = (HttpURLConnection) url.openConnection();
-
             con.setRequestMethod("GET");
 
             // HEADERS
-            // https://www.baeldung.com/httpurlconnection-post
             //   Set the Request Content-Type Header Parameter
             con.setRequestProperty("Content-Type", "application/json; utf-8");
             //   Set Response Format Type
@@ -64,25 +77,7 @@ public class Https implements Runnable {
             // Ensure the Connection Will Be Used to Send Content
             con.setDoOutput(true);
 
-            // PARAMETERS
-            //Map<String, String> parameters = new HashMap<>();
-            //parameters.put("name", "www.baeldung.com");
-            //DataOutputStream out = new DataOutputStream(con.getOutputStream());
-            //out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
-            //out.flush();
-            //out.close();
-            //Log.i("TAG", String.format("[https] out: %s", ParameterStringBuilder.getParamsString(parameters)));
-
-            // BODY (JSON)
-            //String jsonInputString = "{\"name\": \"www.baeldung.com\"}";
-            //// We would need to write it:
-            //try(OutputStream os = con.getOutputStream()) {
-            //    byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
-            //    os.write(input, 0, input.length);
-            //}
-
-            // status
-            //
+            // STATUS
             // int status = con.getResponseCode();
             // Reader streamReader = null;
             // if (status > 299) {
@@ -90,28 +85,30 @@ public class Https implements Runnable {
             // } else {
             //   streamReader = new InputStreamReader(con.getInputStream());
             // }
-
-
-            Log.i("TAG", String.format("[https] status: %s", con.getResponseCode()));
+            Log.i("TAG", String.format("[GoogleDoH] status: %s", con.getResponseCode()));
 
             // RESPONSE
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                Log.i("TAG", String.format("[https] response: %s", response));
-                System.out.println(response);
+            in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
             }
-
+            Log.i("TAG", String.format("[GoogleDoH] response: %s", response));
 
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             if (con != null) {
                 con.disconnect();
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
