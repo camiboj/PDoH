@@ -10,9 +10,7 @@ import android.util.Log;
 import com.mocyx.basic_client.bio.BioUdpHandler;
 import com.mocyx.basic_client.bio.NioSingleThreadTcpHandler;
 import com.mocyx.basic_client.config.Config;
-import com.mocyx.basic_client.dns.DnsHeader;
 import com.mocyx.basic_client.dns.DnsPacket;
-import com.mocyx.basic_client.dns.DnsQuestion;
 import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
