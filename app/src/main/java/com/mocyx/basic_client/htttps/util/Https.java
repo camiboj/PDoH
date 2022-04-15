@@ -13,6 +13,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ class ParameterStringBuilder {
 }
 
 public class Https implements Runnable {
+    // https://www.baeldung.com/java-http-request
 
     private final URL url;
 
@@ -49,21 +51,35 @@ public class Https implements Runnable {
         BufferedReader in = null;
         try {
             con = (HttpURLConnection) url.openConnection();
-            Log.i("TAG", String.format("[https] con: %s", con));
 
             con.setRequestMethod("GET");
 
-            // parameters
-            //
-            // Map<String, String> parameters = new HashMap<>();
-            // parameters.put("param1", "val");
-            // con.setDoOutput(true);
-            // OutputStream outputStream = con.getOutputStream();
-            // DataOutputStream out = new DataOutputStream(outputStream);
-            // out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
-            // out.flush();
-            // out.close();
-            // Log.i("TAG", String.format("[https] out: %s", out));
+            // HEADERS
+            // https://www.baeldung.com/httpurlconnection-post
+            //   Set the Request Content-Type Header Parameter
+            con.setRequestProperty("Content-Type", "application/json; utf-8");
+            //   Set Response Format Type
+            con.setRequestProperty("Accept", "application/json");
+
+            // Ensure the Connection Will Be Used to Send Content
+            con.setDoOutput(true);
+
+            // PARAMETERS
+            //Map<String, String> parameters = new HashMap<>();
+            //parameters.put("name", "www.baeldung.com");
+            //DataOutputStream out = new DataOutputStream(con.getOutputStream());
+            //out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
+            //out.flush();
+            //out.close();
+            //Log.i("TAG", String.format("[https] out: %s", ParameterStringBuilder.getParamsString(parameters)));
+
+            // BODY (JSON)
+            //String jsonInputString = "{\"name\": \"www.baeldung.com\"}";
+            //// We would need to write it:
+            //try(OutputStream os = con.getOutputStream()) {
+            //    byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+            //    os.write(input, 0, input.length);
+            //}
 
             // status
             //
@@ -75,22 +91,21 @@ public class Https implements Runnable {
             //   streamReader = new InputStreamReader(con.getInputStream());
             // }
 
-            // headers
-            //
-            con.setRequestProperty("Content-Type", "application/json");
 
             Log.i("TAG", String.format("[https] status: %s", con.getResponseCode()));
-            InputStream inputStream = con.getInputStream();
-            Log.i("TAG", String.format("[https] inputStream: %s", inputStream));
-            in = new BufferedReader(
-                    new InputStreamReader(inputStream)
-            );
-            String inputLine;
-            StringBuilder content = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
+
+            // RESPONSE
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                Log.i("TAG", String.format("[https] response: %s", response));
+                System.out.println(response);
             }
-            Log.i("TAG", String.format("[https] content: %s", content));
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -98,14 +113,6 @@ public class Https implements Runnable {
             if (con != null) {
                 con.disconnect();
             }
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
     }
 }

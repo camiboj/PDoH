@@ -108,8 +108,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void clickHttp(View view) throws IOException {
-        Thread t = new Thread(new Https("https://worldtimeapi.org/api/timezone"));
+    public void clickGoogleDoH(View view) throws IOException {
+        Thread t = new Thread(new Https("https://8.8.8.8/resolve?name=www.baeldung.com"));
         t.start();
     }
 }
