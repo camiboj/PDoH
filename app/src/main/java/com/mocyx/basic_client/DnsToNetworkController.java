@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DnsToNetworkController {
     private static final String TAG = "GoogleDoHCONTROLLER";
-    // crate queue?
+    // create queue?
 
     public static void process(ByteBuffer buffer) {
         DnsPacket dnsPacket = new DnsPacket(buffer);
