@@ -36,6 +36,7 @@ class ParameterStringBuilder {
 public class GoogleDoH implements Runnable {
     // https://www.baeldung.com/java-http-request
     // https://www.baeldung.com/httpurlconnection-post
+    private final static String TAG = "GoogleDoH";
 
     Map<String, String> parameters = new HashMap<>();
     static final String ENDPOINT = "https://8.8.8.8/resolve?";
@@ -44,9 +45,11 @@ public class GoogleDoH implements Runnable {
         parameters.put("name", name);
     }
 
-    public void setParameter(String parameter, String value) {
+
+    public void setType(int type) {
         // Possible parameters https://developers.google.com/speed/public-dns/docs/doh/json
-        parameters.put(parameter, value);
+        // name, type, cd, ct, do, edns_client_subnet, random_padding
+        parameters.put("type", Integer.toString(type));
     }
 
     private String getParameters() throws UnsupportedEncodingException {
@@ -55,7 +58,7 @@ public class GoogleDoH implements Runnable {
 
     private String getFinalEndpoint() throws UnsupportedEncodingException {
         String dohUrl = String.format("https://8.8.8.8/resolve?%s", getParameters());
-        Log.i("TAG", String.format("[GoogleDoH] dohUrl: %s", dohUrl));
+        Log.i(TAG, String.format("dohUrl: %s", dohUrl));
         return dohUrl;
     }
 
@@ -86,7 +89,7 @@ public class GoogleDoH implements Runnable {
             // } else {
             //   streamReader = new InputStreamReader(con.getInputStream());
             // }
-            Log.i("TAG", String.format("[GoogleDoH] status: %s", con.getResponseCode()));
+            Log.i(TAG, String.format("status: %s", con.getResponseCode()));
 
             // RESPONSE
             in = new BufferedReader(
@@ -96,7 +99,7 @@ public class GoogleDoH implements Runnable {
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
-            Log.i("TAG", String.format("[GoogleDoH] response: %s", response));
+            Log.i(TAG, String.format("response: %s", response));
 
         } catch (IOException e) {
             e.printStackTrace();

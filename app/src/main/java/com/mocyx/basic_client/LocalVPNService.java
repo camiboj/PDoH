@@ -184,12 +184,12 @@ public class LocalVPNService extends VpnService {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
+                                // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
                                 ByteBuffer copyBackingBuffer = packet.backingBuffer.duplicate();
-                                DnsPacket dnsPacket = new DnsPacket(copyBackingBuffer);
 
-                                Log.i(TAG, String.format("[dns] DNS header: %s", dnsPacket.getHeader()));
-                                Log.i(TAG, String.format("[dns] DNS questions: %s", dnsPacket.getQuestions()));
+                                DnsToNetworkController.process(copyBackingBuffer);
 
+                                // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
                                 deviceToNetworkUDPQueue.offer(packet);
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
