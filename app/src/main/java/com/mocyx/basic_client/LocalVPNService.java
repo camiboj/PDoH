@@ -10,8 +10,7 @@ import android.util.Log;
 import com.mocyx.basic_client.bio.BioUdpHandler;
 import com.mocyx.basic_client.bio.NioSingleThreadTcpHandler;
 import com.mocyx.basic_client.config.Config;
-import com.mocyx.basic_client.dns.DnsHeader;
-import com.mocyx.basic_client.dns.DnsQuestion;
+import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
@@ -185,13 +184,12 @@ public class LocalVPNService extends VpnService {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
+                                // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
                                 ByteBuffer copyBackingBuffer = packet.backingBuffer.duplicate();
-                                DnsHeader dnsHeader = new DnsHeader(copyBackingBuffer);
-                                DnsQuestion dnsQuestion = new DnsQuestion(copyBackingBuffer);
 
-                                Log.i(TAG, String.format("[dns] DNS header: %s", dnsHeader));
-                                Log.i(TAG, String.format("[dns] DNS name: %s", dnsQuestion));
+                                DnsToNetworkController.process(copyBackingBuffer);
 
+                                // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
                                 deviceToNetworkUDPQueue.offer(packet);
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);

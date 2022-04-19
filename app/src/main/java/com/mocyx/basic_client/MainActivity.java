@@ -7,6 +7,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.mocyx.basic_client.bio.BioTcpHandler;
+import com.mocyx.basic_client.htttps.util.GoogleDoH;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
@@ -106,7 +108,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void clickStop(View view) {
-        //
+    public void clickGoogleDoH(View view) throws IOException {
+        Thread t = new Thread(new GoogleDoH("www.baeldung.com"));
+        t.start();
     }
 }

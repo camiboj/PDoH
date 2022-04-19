@@ -9,6 +9,7 @@
     tools:showIn="@layout/activity_main">
 
     <Button
+        android:id="@+id/startVpn"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:onClick="clickSwitch"
@@ -22,12 +23,12 @@
         app:layout_constraintVertical_bias="0.109" />
 
     <Button
+        android:id="@+id/startGoogleDoH"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:onClick="clickStop"
-        android:text="stop"
+        android:onClick="clickGoogleDoH"
+        android:text="GoogleDoH"
         android:textSize="18sp"
-        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.729"
         app:layout_constraintLeft_toLeftOf="parent"
