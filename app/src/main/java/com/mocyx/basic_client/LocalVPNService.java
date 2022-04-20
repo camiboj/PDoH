@@ -10,7 +10,6 @@ import android.util.Log;
 import com.mocyx.basic_client.bio.BioUdpHandler;
 import com.mocyx.basic_client.bio.NioSingleThreadTcpHandler;
 import com.mocyx.basic_client.config.Config;
-import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
@@ -40,6 +39,17 @@ public class LocalVPNService extends VpnService {
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService executorService;
 
+    // TODO: Move this to a "utils" class for reuse
+    private static void closeResources(Closeable... resources) {
+        for (Closeable resource : resources) {
+            try {
+                resource.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -50,7 +60,6 @@ public class LocalVPNService extends VpnService {
 
         executorService = Executors.newFixedThreadPool(10);
         executorService.submit(new BioUdpHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
-        //executorService.submit(new BioTcpHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
         executorService.submit(new NioSingleThreadTcpHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
@@ -82,7 +91,6 @@ public class LocalVPNService extends VpnService {
         return START_STICKY;
     }
 
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -96,17 +104,6 @@ public class LocalVPNService extends VpnService {
         deviceToNetworkUDPQueue = null;
         networkToDeviceQueue = null;
         closeResources(vpnInterface);
-    }
-
-    // TODO: Move this to a "utils" class for reuse
-    private static void closeResources(Closeable... resources) {
-        for (Closeable resource : resources) {
-            try {
-                resource.close();
-            } catch (IOException e) {
-                // Ignore
-            }
-        }
     }
 
     private static class VPNRunnable implements Runnable {
@@ -128,39 +125,6 @@ public class LocalVPNService extends VpnService {
             this.networkToDeviceQueue = networkToDeviceQueue;
         }
 
-
-        static class WriteVpnThread implements Runnable {
-            FileChannel vpnOutput;
-            private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-
-            WriteVpnThread(FileChannel vpnOutput, BlockingQueue<ByteBuffer> networkToDeviceQueue) {
-                this.vpnOutput = vpnOutput;
-                this.networkToDeviceQueue = networkToDeviceQueue;
-            }
-
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
-                        bufferFromNetwork.flip();
-                        while (bufferFromNetwork.hasRemaining()) {
-                            int w = vpnOutput.write(bufferFromNetwork);
-                            if (w > 0) {
-                                MainActivity.downByte.addAndGet(w);
-                            }
-                            if (Config.logRW) {
-                                Log.d(TAG, "vpn write " + w);
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.i(TAG, "WriteVpnThread fail", e);
-                    }
-                }
-
-            }
-        }
-
         @Override
         public void run() {
             Log.i(TAG, "Started");
@@ -169,7 +133,7 @@ public class LocalVPNService extends VpnService {
             Thread t = new Thread(new WriteVpnThread(vpnOutput, networkToDeviceQueue));
             t.start();
             try {
-                ByteBuffer bufferToNetwork = null;
+                ByteBuffer bufferToNetwork;
                 while (!Thread.interrupted()) {
                     bufferToNetwork = ByteBufferPool.acquire();
                     int readBytes = vpnInput.read(bufferToNetwork);
@@ -214,6 +178,38 @@ public class LocalVPNService extends VpnService {
                 e.printStackTrace();
             } finally {
                 closeResources(vpnInput, vpnOutput);
+            }
+        }
+
+        static class WriteVpnThread implements Runnable {
+            FileChannel vpnOutput;
+            private BlockingQueue<ByteBuffer> networkToDeviceQueue;
+
+            WriteVpnThread(FileChannel vpnOutput, BlockingQueue<ByteBuffer> networkToDeviceQueue) {
+                this.vpnOutput = vpnOutput;
+                this.networkToDeviceQueue = networkToDeviceQueue;
+            }
+
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
+                        bufferFromNetwork.flip();
+                        while (bufferFromNetwork.hasRemaining()) {
+                            int w = vpnOutput.write(bufferFromNetwork);
+                            if (w > 0) {
+                                MainActivity.downByte.addAndGet(w);
+                            }
+                            if (Config.logRW) {
+                                Log.d(TAG, "vpn write " + w);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.i(TAG, "WriteVpnThread fail", e);
+                    }
+                }
+
             }
         }
     }

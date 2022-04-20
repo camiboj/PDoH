@@ -27,25 +27,27 @@ import java.util.concurrent.BlockingQueue;
 
 public class NioSingleThreadTcpHandler implements Runnable {
 
-    private static final String TAG = NioSingleThreadTcpHandler.class.getSimpleName();
+    private final BlockingQueue<Packet> queue;
+    private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
+    private final VpnService vpnService;
+    private final ObjAttrUtil objAttrUtil;
 
-    BlockingQueue<Packet> queue;//用于读包
-    BlockingQueue<ByteBuffer> networkToDeviceQueue;//用于写数据
-    VpnService vpnService;//用于保护地址
+    private final String TAG = this.getClass().getSimpleName();
 
-    private ObjAttrUtil objAttrUtil = new ObjAttrUtil();
+
     private Selector selector;
 
     private Map<String, TcpPipe> pipes = new HashMap<>();
 
 
-    public NioSingleThreadTcpHandler(BlockingQueue<Packet> queue,//用于读包
-                                     BlockingQueue<ByteBuffer> networkToDeviceQueue,//用于写数据
-                                     VpnService vpnService//用于保护地址
+    public NioSingleThreadTcpHandler(BlockingQueue<Packet> queue,
+                                     BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                                     VpnService vpnService
     ) {
         this.queue = queue;
         this.vpnService = vpnService;
         this.networkToDeviceQueue = networkToDeviceQueue;
+        this.objAttrUtil = new ObjAttrUtil();
     }
 
     static class TcpPipe {
