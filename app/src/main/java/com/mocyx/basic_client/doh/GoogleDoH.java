@@ -1,4 +1,4 @@
-package com.mocyx.basic_client.htttps.util;
+package com.mocyx.basic_client.doh;
 
 import android.util.Log;
 
@@ -9,8 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
