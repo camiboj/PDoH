@@ -33,6 +33,6 @@ public class UdpPacketBuilder {
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         byteBuffer.flip();
 
-        return new Packet(ip4Header, udpHeader, byteBuffer, false);
+        return new Packet(ip4Header, udpHeader, byteBuffer, true);
     }
 }

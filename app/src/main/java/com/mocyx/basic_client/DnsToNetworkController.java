@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.dns.DnsQuestion;
-import com.mocyx.basic_client.htttps.doh.GoogleDoH;
+import com.mocyx.basic_client.doh.GoogleDoH;
 
 import java.nio.ByteBuffer;
 import java.util.List;
