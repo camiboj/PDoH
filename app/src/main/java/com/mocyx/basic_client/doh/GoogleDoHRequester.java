@@ -1,37 +1,43 @@
 package com.mocyx.basic_client.doh;
 
 import android.util.Log;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 
-class ParameterStringBuilder {
-    public static String getParamsString(Map<String, String> params)
-            throws UnsupportedEncodingException {
-        StringBuilder result = new StringBuilder();
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-            result.append("=");
-            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-            result.append("&");
+
+
+public class GoogleDoHRequester implements Runnable {
+    static class ParameterStringBuilder {
+        public static String getParamsString(Map<String, String> params)
+                throws UnsupportedEncodingException {
+            StringBuilder result = new StringBuilder();
+
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+                result.append("&");
+            }
+
+            String resultString = result.toString();
+            return resultString.length() > 0
+                    ? resultString.substring(0, resultString.length() - 1)
+                    : resultString;
         }
-
-        String resultString = result.toString();
-        return resultString.length() > 0
-                ? resultString.substring(0, resultString.length() - 1)
-                : resultString;
     }
-}
 
-public class GoogleDoH implements Runnable {
     // https://www.baeldung.com/java-http-request
     // https://www.baeldung.com/httpurlconnection-post
     private final static String TAG = "GoogleDoH";
@@ -39,7 +45,7 @@ public class GoogleDoH implements Runnable {
     Map<String, String> parameters = new HashMap<>();
     static final String ENDPOINT = "https://8.8.8.8/resolve?";
 
-    public GoogleDoH(String name) {
+    public GoogleDoHRequester(String name) {
         parameters.put("name", name);
     }
 
@@ -98,7 +104,13 @@ public class GoogleDoH implements Runnable {
                 response.append(inputLine);
             }
             Log.i(TAG, String.format("response: %s", response));
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+            GoogleDohAnswer o = mapper.readValue(response.toString(), GoogleDohAnswer.class);
+            Log.i(TAG, String.format("googleDohAnswer: %s", o));
+        //} catch (IOException e) {
+        //    e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

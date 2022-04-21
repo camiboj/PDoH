@@ -7,7 +7,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.mocyx.basic_client.bio.BioTcpHandler;
-import com.mocyx.basic_client.doh.GoogleDoH;
+import com.mocyx.basic_client.doh.GoogleDoHRequester;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void clickGoogleDoH(View view) throws IOException {
-        Thread t = new Thread(new GoogleDoH("www.baeldung.com"));
+        Thread t = new Thread(new GoogleDoHRequester("www.baeldung.com"));
         t.start();
     }
 }
