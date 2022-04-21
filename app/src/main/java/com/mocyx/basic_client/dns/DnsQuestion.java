@@ -19,16 +19,13 @@ public class DnsQuestion {
     }
 
     private String buildName(ByteBuffer buffer) {
-        // List<String> name = new ArrayList<>();
         final StringBuilder sb = new StringBuilder();
         short labelLength = BitUtils.getUnsignedByte(buffer.get());
         while (labelLength > 0) {
-            // final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < labelLength; i++) { // TODO: investigate if its possible to get many chars at the same time
                 char label = (char) buffer.get();
                 sb.append(label);
             }
-            // name.add(sb.toString());
             sb.append(".");
             labelLength = BitUtils.getUnsignedByte(buffer.get());
         }
