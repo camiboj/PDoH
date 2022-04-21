@@ -2,7 +2,7 @@ package com.mocyx.basic_client;
 
 import android.util.Log;
 
-import com.mocyx.basic_client.protocol.tcpip.Packet;
+import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.FileDescriptor;
@@ -51,7 +51,7 @@ public class VPNRunnable implements Runnable {
                         if (packet.isDNS()) {
                             Log.i(TAG, "[dns] this is a dns message");
                             // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
-                            ByteBuffer copyBackingBuffer = packet.backingBuffer.duplicate();
+                            ByteBuffer copyBackingBuffer = packet.getBackingBuffer().duplicate();
 
                             DnsToNetworkController.process(copyBackingBuffer);
 
