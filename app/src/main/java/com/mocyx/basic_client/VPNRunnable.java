@@ -54,9 +54,12 @@ public class VPNRunnable implements Runnable {
                             ByteBuffer copyBackingBuffer = packet.getBackingBuffer().duplicate();
 
                             DnsToNetworkController.process(copyBackingBuffer);
+
+                            // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
+                            deviceToNetworkUDPQueue.offer(packet);
+                        } else {
+                            deviceToNetworkUDPQueue.offer(packet);
                         }
-                        // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
-                        deviceToNetworkUDPQueue.offer(packet);
                     }
                 } else {
                     try {

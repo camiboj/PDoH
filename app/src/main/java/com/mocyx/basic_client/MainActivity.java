@@ -12,7 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.mocyx.basic_client.doh.GoogleDoH;
+import com.mocyx.basic_client.htttps.doh.GoogleDoH;
 
 import java.util.concurrent.atomic.AtomicLong;
 
