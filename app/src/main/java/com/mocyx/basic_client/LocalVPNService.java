@@ -7,9 +7,9 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import com.mocyx.basic_client.bio.BioUdpHandler;
-import com.mocyx.basic_client.bio.NioSingleThreadTcpHandler;
 import com.mocyx.basic_client.config.Config;
+import com.mocyx.basic_client.handler.TcpPacketHandler;
+import com.mocyx.basic_client.handler.UdpPacketHandler;
 import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
@@ -59,8 +59,8 @@ public class LocalVPNService extends VpnService {
         networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
         executorService = Executors.newFixedThreadPool(10);
-        executorService.submit(new BioUdpHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
-        executorService.submit(new NioSingleThreadTcpHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
+        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
+        executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
                 deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
@@ -200,9 +200,6 @@ public class LocalVPNService extends VpnService {
                             int w = vpnOutput.write(bufferFromNetwork);
                             if (w > 0) {
                                 MainActivity.downByte.addAndGet(w);
-                            }
-                            if (Config.logRW) {
-                                Log.d(TAG, "vpn write " + w);
                             }
                         }
                     } catch (Exception e) {

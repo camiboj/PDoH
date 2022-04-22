@@ -1,4 +1,4 @@
-package com.mocyx.basic_client.bio;
+package com.mocyx.basic_client.handler;
 
 import android.net.VpnService;
 import android.util.Log;
@@ -8,14 +8,12 @@ import com.mocyx.basic_client.protocol.tcpip.IpUtil;
 import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.protocol.tcpip.Packet.TCPHeader;
 import com.mocyx.basic_client.protocol.tcpip.TCBStatus;
-import com.mocyx.basic_client.util.ByteBufferPool;
 import com.mocyx.basic_client.util.ObjAttrUtil;
+import com.mocyx.basic_client.util.SocketUtils;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -25,8 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-public class NioSingleThreadTcpHandler implements Runnable {
-
+public class TcpPacketHandler implements Runnable {
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final VpnService vpnService;
@@ -34,20 +31,17 @@ public class NioSingleThreadTcpHandler implements Runnable {
 
     private final String TAG = this.getClass().getSimpleName();
 
-
     private Selector selector;
+    private Map<String, TcpPipe> pipes;
 
-    private Map<String, TcpPipe> pipes = new HashMap<>();
-
-
-    public NioSingleThreadTcpHandler(BlockingQueue<Packet> queue,
-                                     BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                                     VpnService vpnService
-    ) {
+    public TcpPacketHandler(BlockingQueue<Packet> queue,
+                            BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                            VpnService vpnService) {
         this.queue = queue;
         this.vpnService = vpnService;
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.objAttrUtil = new ObjAttrUtil();
+        this.pipes = new HashMap<>();
     }
 
     static class TcpPipe {
@@ -63,15 +57,11 @@ public class NioSingleThreadTcpHandler implements Runnable {
         public SocketChannel remote;
         public TCBStatus tcbStatus = TCBStatus.SYN_SENT;
         private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(8 * 1024);
-        //
         public boolean upActive = true;
         public boolean downActive = true;
-
         public int packId = 1;
         public long timestamp=0L;
-
         int synCount = 0;
-
     }
 
 
@@ -160,12 +150,7 @@ public class NioSingleThreadTcpHandler implements Runnable {
     private void handleAck(Packet packet, TcpPipe pipe) throws Exception {
         if (pipe.tcbStatus == TCBStatus.SYN_RECEIVED) {
             pipe.tcbStatus = TCBStatus.ESTABLISHED;
-
             Log.i(TAG, String.format("handleAck %s %s", pipe.destinationAddress, pipe.tcbStatus));
-        }
-
-        if (Config.logAck) {
-            Log.d(TAG, String.format("handleAck %d ", packet.packId));
         }
 
         TCPHeader tcpHeader = packet.tcpHeader;
@@ -177,9 +162,6 @@ public class NioSingleThreadTcpHandler implements Runnable {
 
         long newAck = tcpHeader.sequenceNumber + payloadSize;
         if (newAck <= pipe.myAcknowledgementNum) {
-            if (Config.logAck) {
-                Log.d(TAG, String.format("handleAck duplicate ack", pipe.myAcknowledgementNum, newAck));
-            }
             return;
         }
 
@@ -187,7 +169,6 @@ public class NioSingleThreadTcpHandler implements Runnable {
         pipe.theirAcknowledgementNum = tcpHeader.acknowledgementNumber;
 
         pipe.myAcknowledgementNum += payloadSize;
-        //TODO
         pipe.remoteOutBuffer.put(packet.backingBuffer);
         pipe.remoteOutBuffer.flip();
         tryFlushWrite(pipe, pipe.remote);
@@ -333,7 +314,7 @@ public class NioSingleThreadTcpHandler implements Runnable {
 
         while (true) {
             buffer.clear();
-            int n = BioUtil.read(channel, buffer);
+            int n = SocketUtils.read(channel, buffer);
             Log.i(TAG, String.format("read %s", n));
             if (n == -1) {
                 quitType = "fin";
@@ -365,7 +346,7 @@ public class NioSingleThreadTcpHandler implements Runnable {
         }
     }
 
-    private void closeRst(TcpPipe pipe) throws Exception {
+    private void closeRst(TcpPipe pipe) {
         Log.i(TAG, String.format("closeRst %d", pipe.tunnelId));
         cleanPipe(pipe);
         sendTcpPack(pipe, (byte) TCPHeader.RST, null);

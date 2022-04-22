@@ -1,10 +1,8 @@
 package com.mocyx.basic_client.dns;
 
-import com.mocyx.basic_client.BitUtils;
+import com.mocyx.basic_client.util.BitUtils;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DnsQuestion {
     private String name;

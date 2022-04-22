@@ -1,4 +1,4 @@
-package com.mocyx.basic_client.bio;
+package com.mocyx.basic_client.handler;
 
 import android.net.VpnService;
 import android.util.Log;
@@ -19,15 +19,15 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Class in charge of UDP packet handling
  */
-public class BioUdpHandler implements Runnable {
-    private static final String TAG = BioUdpHandler.class.getSimpleName();
+public class UdpPacketHandler implements Runnable {
+    private static final String TAG = UdpPacketHandler.class.getSimpleName();
     private static final Integer TUNNEL_CAPACITY = 100;
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final VpnService vpnService;
     private final Map<String, DatagramChannel> udpSockets;
 
-    public BioUdpHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService) {
+    public UdpPacketHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService) {
         this.queue = queue;
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.vpnService = vpnService;

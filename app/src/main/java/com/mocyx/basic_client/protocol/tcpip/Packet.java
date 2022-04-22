@@ -1,7 +1,7 @@
 package com.mocyx.basic_client.protocol.tcpip;
 
 
-import com.mocyx.basic_client.BitUtils;
+import com.mocyx.basic_client.util.BitUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
