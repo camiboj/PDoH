@@ -1,4 +1,4 @@
-package com.mocyx.basic_client.htttps.doh;
+package com.mocyx.basic_client.htttps.util;
 
 import android.util.Log;
 

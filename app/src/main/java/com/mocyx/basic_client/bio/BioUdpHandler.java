@@ -1,9 +1,9 @@
-package com.mocyx.basic_client.udp;
+package com.mocyx.basic_client.bio;
 
 import android.net.VpnService;
 import android.util.Log;
 
-import com.mocyx.basic_client.protocol.Packet;
+import com.mocyx.basic_client.protocol.tcpip.Packet;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -19,15 +19,15 @@ import java.util.concurrent.BlockingQueue;
 /**
  * Class in charge of UDP packet handling
  */
-public class UdpPacketHandler implements Runnable {
-    private static final String TAG = UdpPacketHandler.class.getSimpleName();
+public class BioUdpHandler implements Runnable {
+    private static final String TAG = BioUdpHandler.class.getSimpleName();
     private static final Integer TUNNEL_CAPACITY = 100;
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final VpnService vpnService;
     private final Map<String, DatagramChannel> udpSockets;
 
-    public UdpPacketHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService) {
+    public BioUdpHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService) {
         this.queue = queue;
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.vpnService = vpnService;
@@ -44,11 +44,10 @@ public class UdpPacketHandler implements Runnable {
 
             while (true) {
                 Packet packet = queue.take();
-                InetAddress destinationAddress = packet.getIp4Header().getDestinationAddress();
-                InetAddress sourceAddress = packet.getIp4Header().getSourceAddress();
-                UDPHeader header = packet.getUdpHeader();
-                int destinationPort = header.getDestinationPort();
-                int sourcePort = header.getSourcePort();
+                InetAddress destinationAddress = packet.ip4Header.destinationAddress;
+                Packet.UDPHeader header = packet.udpHeader;
+                int destinationPort = header.destinationPort;
+                int sourcePort = header.sourcePort;
                 String ipAndPort = destinationAddress.getHostAddress() + ":" + destinationPort + ":" + sourcePort;
 
                 if (!udpSockets.containsKey(ipAndPort)) {
@@ -58,8 +57,8 @@ public class UdpPacketHandler implements Runnable {
                     outputChannel.connect(new InetSocketAddress(destinationAddress, destinationPort));
                     outputChannel.configureBlocking(false);
 
-                    InetSocketAddress local = new InetSocketAddress(sourceAddress, sourcePort);
-                    InetSocketAddress remote = new InetSocketAddress(destinationAddress, destinationPort);
+                    InetSocketAddress local = new InetSocketAddress(packet.ip4Header.sourceAddress, header.sourcePort);
+                    InetSocketAddress remote = new InetSocketAddress(packet.ip4Header.destinationAddress, header.destinationPort);
                     UdpTunnel tunnel = new UdpTunnel(local, remote, outputChannel);
                     tunnelQueue.offer(tunnel);
 
@@ -69,9 +68,9 @@ public class UdpPacketHandler implements Runnable {
                 }
 
                 DatagramChannel outputChannel = udpSockets.get(ipAndPort);
-                ByteBuffer buffer = packet.getBackingBuffer();
+                ByteBuffer buffer = packet.backingBuffer;
                 try {
-                    while (buffer.hasRemaining()) {
+                    while (packet.backingBuffer.hasRemaining()) {
                         outputChannel.write(buffer);
                     }
                 } catch (IOException e) {

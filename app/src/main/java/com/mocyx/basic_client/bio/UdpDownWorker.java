@@ -1,9 +1,9 @@
-package com.mocyx.basic_client.udp;
+package com.mocyx.basic_client.bio;
 
 import android.util.Log;
 
-import com.mocyx.basic_client.protocol.UdpPacketBuilder;
-import com.mocyx.basic_client.protocol.Packet;
+import com.mocyx.basic_client.protocol.tcpip.IpUtil;
+import com.mocyx.basic_client.protocol.tcpip.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class UdpDownWorker implements Runnable {
     private void sendUdpPack(UdpTunnel tunnel, byte[] data) throws IOException {
         int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
 
-        Packet packet = UdpPacketBuilder.build(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
+        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
 
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         byteBuffer.position(this.headerSize);
