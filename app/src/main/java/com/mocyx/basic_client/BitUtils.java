@@ -12,6 +12,10 @@ public class BitUtils {
     public static long getUnsignedInt(int value) {
         return value & 0xFFFFFFFFL;
     }
+
+    public static short intToShort(int value) {
+        return (short) (value & 0xFFFF);
+    }
 }
 
 

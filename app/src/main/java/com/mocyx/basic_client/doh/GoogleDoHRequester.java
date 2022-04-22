@@ -1,7 +1,10 @@
 package com.mocyx.basic_client.doh;
 
 import android.util.Log;
+
+import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import java.io.BufferedReader;
@@ -12,10 +15,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.mocyx.basic_client.dns.DnsAnswer;
+import com.mocyx.basic_client.dns.DnsHeader;
+import com.mocyx.basic_client.dns.DnsQuestion;
 
 
 public class GoogleDoHRequester implements Runnable {
@@ -52,7 +58,6 @@ public class GoogleDoHRequester implements Runnable {
 
     public void setType(int type) {
         // Possible parameters https://developers.google.com/speed/public-dns/docs/doh/json
-        // name, type, cd, ct, do, edns_client_subnet, random_padding
         parameters.put("type", Integer.toString(type));
     }
 
@@ -61,7 +66,7 @@ public class GoogleDoHRequester implements Runnable {
     }
 
     private String getFinalEndpoint() throws UnsupportedEncodingException {
-        String dohUrl = String.format("https://8.8.8.8/resolve?%s", getParameters());
+        String dohUrl = String.format("%s%s",ENDPOINT, getParameters());
         Log.i(TAG, String.format("dohUrl: %s", dohUrl));
         return dohUrl;
     }
@@ -107,10 +112,23 @@ public class GoogleDoHRequester implements Runnable {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            GoogleDohAnswer o = mapper.readValue(response.toString(), GoogleDohAnswer.class);
-            Log.i(TAG, String.format("googleDohAnswer: %s", o));
-        //} catch (IOException e) {
-        //    e.printStackTrace();
+            GoogleDohAnswer dohAnswer = mapper.readValue(response.toString(), GoogleDohAnswer.class);
+            Log.i(TAG, String.format("googleDohAnswer: %s", dohAnswer));
+
+            List<DnsAnswer> dnsAnswers = dohAnswer.getAnswers().stream().map(
+                    x -> new DnsAnswer(x.getName(), x.getType(), x.getTtl(), x.getData())
+            ).collect(Collectors.toList());
+
+            Log.i(TAG, String.format("dnsAnswers: %s", dnsAnswers));
+            ByteBuffer b = ByteBuffer.allocate(1000);
+            if (dnsAnswers.size() > 0) {
+                dnsAnswers.get(0).putOn(b);
+                Log.i(TAG, String.format("dnsAnswers: %s", b));
+                b.position(0);
+                DnsQuestion h = new DnsQuestion(b); // use to check the name is readable
+
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

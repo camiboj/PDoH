@@ -33,7 +33,7 @@ public class GoogleDohAnswer {
     static class Answer {
         private String name = "";
         private int type = 1;
-        private int TTL = 1; // define as time type object(?
+        private int ttl = 1; // define as time type object(?
         private String data = "1.1.1.1"; // difine as IP class? create ip class?
 
         public Answer() {} // needed by Jackson
@@ -44,11 +44,19 @@ public class GoogleDohAnswer {
             final StringBuilder sb = new StringBuilder("Answer{");
             sb.append("name=").append(name);
             sb.append(", type=").append(type);
-            sb.append(", TTL=").append(TTL);
+            sb.append(", ttl=").append(ttl);
             sb.append(", data=").append(data);
             sb.append('}');
             return sb.toString();
         }
+
+        public String getName() { return name; }
+
+        public int getType() { return type; }
+
+        public int getTtl() { return ttl; }
+
+        public String getData() { return data; }
     }
 
 
@@ -74,5 +82,7 @@ public class GoogleDohAnswer {
         return sb.toString();
     }
 
-
+    public List<Answer> getAnswers() {
+        return Answers;
+    }
 }
