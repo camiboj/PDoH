@@ -1,4 +1,4 @@
-package com.mocyx.basic_client.protocol.tcpip;
+package com.mocyx.basic_client.protocol;
 
 public enum  TCBStatus {
     SYN_SENT,

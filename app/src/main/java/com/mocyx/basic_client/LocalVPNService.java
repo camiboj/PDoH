@@ -10,7 +10,7 @@ import android.util.Log;
 import com.mocyx.basic_client.config.Config;
 import com.mocyx.basic_client.handler.TcpPacketHandler;
 import com.mocyx.basic_client.handler.UdpPacketHandler;
-import com.mocyx.basic_client.protocol.tcpip.Packet;
+import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.Closeable;
@@ -39,7 +39,6 @@ public class LocalVPNService extends VpnService {
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService executorService;
 
-    // TODO: Move this to a "utils" class for reuse
     private static void closeResources(Closeable... resources) {
         for (Closeable resource : resources) {
             try {
@@ -54,8 +53,8 @@ public class LocalVPNService extends VpnService {
     public void onCreate() {
         super.onCreate();
         setupVPN();
-        deviceToNetworkUDPQueue = new ArrayBlockingQueue<Packet>(1000);
-        deviceToNetworkTCPQueue = new ArrayBlockingQueue<Packet>(1000);
+        deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(1000);
+        deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(1000);
         networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
         executorService = Executors.newFixedThreadPool(10);
@@ -149,9 +148,11 @@ public class LocalVPNService extends VpnService {
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
                                 // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
-                                ByteBuffer copyBackingBuffer = packet.backingBuffer.duplicate();
+                                ByteBuffer copyBackingBuffer = packet.getBackingBuffer().duplicate();
 
                                 DnsToNetworkController.process(copyBackingBuffer);
+
+                                Log.i(TAG, "procese");
 
                                 // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
                                 deviceToNetworkUDPQueue.offer(packet);
@@ -162,7 +163,8 @@ public class LocalVPNService extends VpnService {
                             Log.i(TAG, "read tcp " + readBytes);
                             deviceToNetworkTCPQueue.offer(packet);
                         } else {
-                            Log.w(TAG, String.format("Unknown packet protocol type %d", packet.ip4Header.protocolNum));
+                            Log.w(TAG, String.format("Unknown packet protocol type %d",
+                                    packet.getIp4Header().getProtocol().getNumber()));
                         }
                     } else {
                         try {
