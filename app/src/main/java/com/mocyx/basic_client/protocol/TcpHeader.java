@@ -13,16 +13,17 @@ public class TcpHeader {
     public static final int ACK = 0x10;
     public static final int URG = 0x20;
 
-    private int sourcePort;
-    private int destinationPort;
+    private final int sourcePort;
+    private final int destinationPort;
+    private final int headerLength;
+    private final int urgentPointer;
+    private final int window;
+
     private long sequenceNumber;
     private long acknowledgementNumber;
     private byte dataOffsetAndReserved;
-    private int headerLength;
     private byte flags;
-    private int window;
     private int checksum;
-    private int urgentPointer;
     private byte[] optionsAndPadding;
 
     public TcpHeader(int sourcePort, int destinationPort, long sequenceNumber,

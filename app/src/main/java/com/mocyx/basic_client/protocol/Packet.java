@@ -4,7 +4,6 @@ package com.mocyx.basic_client.protocol;
 import com.mocyx.basic_client.util.BitUtils;
 
 import java.net.UnknownHostException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 

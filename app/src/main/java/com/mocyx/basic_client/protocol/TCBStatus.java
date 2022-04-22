@@ -5,7 +5,4 @@ public enum  TCBStatus {
     SYN_RECEIVED,
     ESTABLISHED,
     CLOSE_WAIT,
-    LAST_ACK,
-    //new
-    CLOSED,
 }
