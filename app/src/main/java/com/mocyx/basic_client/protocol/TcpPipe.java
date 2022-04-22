@@ -1,4 +1,4 @@
-package com.mocyx.basic_client.protocol.tcpip;
+package com.mocyx.basic_client.protocol;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

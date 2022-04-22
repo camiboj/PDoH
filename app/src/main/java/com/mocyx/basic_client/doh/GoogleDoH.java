@@ -99,6 +99,7 @@ public class GoogleDoH implements Runnable {
                 try {
                     in.close();
                 } catch (IOException e) {
+                    Log.i("tag", "Fallo1");
                     e.printStackTrace();
                 }
             }

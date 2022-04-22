@@ -2,8 +2,8 @@ package com.mocyx.basic_client.handler;
 
 import android.util.Log;
 
-import com.mocyx.basic_client.protocol.tcpip.IpUtil;
-import com.mocyx.basic_client.protocol.tcpip.Packet;
+import com.mocyx.basic_client.protocol.IpUtil;
+import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.IOException;

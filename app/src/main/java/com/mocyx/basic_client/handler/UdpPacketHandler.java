@@ -3,7 +3,9 @@ package com.mocyx.basic_client.handler;
 import android.net.VpnService;
 import android.util.Log;
 
-import com.mocyx.basic_client.protocol.tcpip.Packet;
+import com.mocyx.basic_client.protocol.IP4Header;
+import com.mocyx.basic_client.protocol.Packet;
+import com.mocyx.basic_client.protocol.UdpHeader;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -44,10 +46,10 @@ public class UdpPacketHandler implements Runnable {
 
             while (true) {
                 Packet packet = queue.take();
-                InetAddress destinationAddress = packet.ip4Header.destinationAddress;
-                Packet.UDPHeader header = packet.udpHeader;
-                int destinationPort = header.destinationPort;
-                int sourcePort = header.sourcePort;
+                InetAddress destinationAddress = packet.getIp4Header().getDestinationAddress();
+                UdpHeader header = packet.getUdpHeader();
+                int destinationPort = header.getDestinationPort();
+                int sourcePort = header.getSourcePort();
                 String ipAndPort = destinationAddress.getHostAddress() + ":" + destinationPort + ":" + sourcePort;
 
                 if (!udpSockets.containsKey(ipAndPort)) {
@@ -56,9 +58,12 @@ public class UdpPacketHandler implements Runnable {
                     outputChannel.socket().bind(null);
                     outputChannel.connect(new InetSocketAddress(destinationAddress, destinationPort));
                     outputChannel.configureBlocking(false);
+                    IP4Header ip4Header = packet.getIp4Header();
 
-                    InetSocketAddress local = new InetSocketAddress(packet.ip4Header.sourceAddress, header.sourcePort);
-                    InetSocketAddress remote = new InetSocketAddress(packet.ip4Header.destinationAddress, header.destinationPort);
+                    InetSocketAddress local = new InetSocketAddress(ip4Header.getSourceAddress(),
+                            header.getSourcePort());
+                    InetSocketAddress remote = new InetSocketAddress(ip4Header.getDestinationAddress(),
+                            header.getDestinationPort());
                     UdpTunnel tunnel = new UdpTunnel(local, remote, outputChannel);
                     tunnelQueue.offer(tunnel);
 
@@ -68,9 +73,9 @@ public class UdpPacketHandler implements Runnable {
                 }
 
                 DatagramChannel outputChannel = udpSockets.get(ipAndPort);
-                ByteBuffer buffer = packet.backingBuffer;
+                ByteBuffer buffer = packet.getBackingBuffer();
                 try {
-                    while (packet.backingBuffer.hasRemaining()) {
+                    while (packet.getBackingBuffer().hasRemaining()) {
                         outputChannel.write(buffer);
                     }
                 } catch (IOException e) {
