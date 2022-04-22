@@ -1,4 +1,4 @@
-package com.mocyx.basic_client.htttps.util;
+package com.mocyx.basic_client.doh;
 
 import android.util.Log;
 
@@ -9,8 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,12 +37,10 @@ public class GoogleDoH implements Runnable {
     private final static String TAG = "GoogleDoH";
 
     Map<String, String> parameters = new HashMap<>();
-    static final String ENDPOINT = "https://8.8.8.8/resolve?";
 
     public GoogleDoH(String name) {
         parameters.put("name", name);
     }
-
 
     public void setType(int type) {
         // Possible parameters https://developers.google.com/speed/public-dns/docs/doh/json
@@ -81,14 +77,6 @@ public class GoogleDoH implements Runnable {
             // Ensure the Connection Will Be Used to Send Content
             con.setDoOutput(true);
 
-            // STATUS
-            // int status = con.getResponseCode();
-            // Reader streamReader = null;
-            // if (status > 299) {
-            //   streamReader = new InputStreamReader(con.getErrorStream());
-            // } else {
-            //   streamReader = new InputStreamReader(con.getInputStream());
-            // }
             Log.i(TAG, String.format("status: %s", con.getResponseCode()));
 
             // RESPONSE
