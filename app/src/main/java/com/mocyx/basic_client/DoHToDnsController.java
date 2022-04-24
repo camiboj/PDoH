@@ -13,18 +13,19 @@ public class DoHToDnsController {
 
     public static void process(GoogleDohResponse dohResponse) {
         Log.i(TAG, String.format("dohResponse: %s", dohResponse));
-        DnsPacket dns = new DnsPacket();
+        DnsPacket dnsPacket = new DnsPacket();
 
         dohResponse.getAnswers().forEach(
-                x -> dns.addAnswer(x.getName(), x.getType(), x.getTtl(), x.getData())
+                x -> dnsPacket.addAnswer(x.getName(), x.getType(), x.getTtl(), x.getData())
         );
         dohResponse.getQuestions().forEach(
-                x -> dns.addQuestion(x.getName(), x.getType())
+                x -> dnsPacket.addQuestion(x.getName(), x.getType())
         );
 
+        // TODO: return dnsPacket
 
-        Log.i(TAG, String.format("dns packet: %s", dns));
+        Log.i(TAG, String.format("dns packet: %s", dnsPacket));
         ByteBuffer b = ByteBuffer.allocate(1000);
-        dns.putOn(b);
+        dnsPacket.putOn(b);
     }
 }
