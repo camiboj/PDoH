@@ -4,7 +4,7 @@ import com.mocyx.basic_client.util.BitUtils;
 
 import java.nio.ByteBuffer;
 
-public class TcpHeader {
+public class TcpHeader implements Header {
     public static final int TCP_HEADER_SIZE = 20;
     public static final int FIN = 0x01;
     public static final int SYN = 0x02;
@@ -86,6 +86,7 @@ public class TcpHeader {
         return (flags & URG) == URG;
     }
 
+    @Override
     public void fillBuffer(ByteBuffer buffer) {
         buffer.putShort((short) sourcePort);
         buffer.putShort((short) destinationPort);
@@ -99,6 +100,16 @@ public class TcpHeader {
 
         buffer.putShort((short) checksum);
         buffer.putShort((short) urgentPointer);
+    }
+
+    @Override
+    public boolean isTCP() {
+        return true;
+    }
+
+    @Override
+    public boolean isUDP() {
+        return false;
     }
 
     @Override
@@ -126,14 +137,6 @@ public class TcpHeader {
         this.flags = flags;
     }
 
-    public void setSequenceNumber(long sequenceNum) {
-        this.sequenceNumber = sequenceNum;
-    }
-
-    public void setAcknowledgementNumber(long ackNum) {
-        this.acknowledgementNumber = ackNum;
-    }
-
     public void setDataOffsetAndReserved(byte dataOffset) {
         this.dataOffsetAndReserved = dataOffset;
     }
@@ -146,8 +149,16 @@ public class TcpHeader {
         return sequenceNumber;
     }
 
+    public void setSequenceNumber(long sequenceNum) {
+        this.sequenceNumber = sequenceNum;
+    }
+
     public long getAcknowledgementNumber() {
         return acknowledgementNumber;
+    }
+
+    public void setAcknowledgementNumber(long ackNum) {
+        this.acknowledgementNumber = ackNum;
     }
 
     public int getSourcePort() {

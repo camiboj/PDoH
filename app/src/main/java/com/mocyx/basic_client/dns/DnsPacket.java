@@ -39,10 +39,6 @@ public class DnsPacket extends Packet {
         this.questions.add(new DnsQuestion(name, type));
     }
 
-    public DnsHeader getHeader() {
-        return header;
-    }
-
     public List<DnsQuestion> getQuestions() {
         return questions;
     }

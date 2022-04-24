@@ -4,7 +4,7 @@ import com.mocyx.basic_client.util.BitUtils;
 
 import java.nio.ByteBuffer;
 
-public class UdpHeader {
+public class UdpHeader implements Header {
     private final int sourcePort;
     private final int destinationPort;
     private int length;
@@ -23,11 +23,22 @@ public class UdpHeader {
         this.length = 0;
     }
 
+    @Override
     public void fillBuffer(ByteBuffer buffer) {
         buffer.putShort((short) this.sourcePort);
         buffer.putShort((short) this.destinationPort);
         buffer.putShort((short) this.length);
         buffer.putShort((short) this.checksum);
+    }
+
+    @Override
+    public boolean isTCP() {
+        return false;
+    }
+
+    @Override
+    public boolean isUDP() {
+        return true;
     }
 
     @Override

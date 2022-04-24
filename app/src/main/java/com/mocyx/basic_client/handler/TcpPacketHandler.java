@@ -48,7 +48,7 @@ public class TcpPacketHandler implements Runnable {
     private TcpPipe initPipe(Packet packet) throws Exception {
         TcpPipe pipe = new TcpPipe();
         IP4Header ip4Header = packet.getIp4Header();
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         pipe.sourceAddress = new InetSocketAddress(ip4Header.getSourceAddress(), tcpHeader.getSourcePort());
         pipe.destinationAddress = new InetSocketAddress(ip4Header.getDestinationAddress(), tcpHeader.getDestinationPort());
         pipe.remote = SocketChannel.open();
@@ -100,7 +100,7 @@ public class TcpPacketHandler implements Runnable {
             Log.i(TAG, String.format("handleSyn %s %s", pipe.destinationAddress, pipe.tcbStatus));
         }
         Log.i(TAG, String.format("handleSyn  %d %d", pipe.tunnelId, packet.getPackId()));
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         if (pipe.synCount == 0) {
             pipe.mySequenceNum = 1;
             pipe.theirSequenceNum = tcpHeader.getSequenceNumber();
@@ -127,7 +127,7 @@ public class TcpPacketHandler implements Runnable {
             Log.i(TAG, String.format("handleAck %s %s", pipe.destinationAddress, pipe.tcbStatus));
         }
 
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         int payloadSize = packet.getBackingBuffer().remaining();
 
         if (payloadSize == 0) {
@@ -218,8 +218,9 @@ public class TcpPacketHandler implements Runnable {
 
     private void handleFin(Packet packet, TcpPipe pipe) throws Exception {
         Log.i(TAG, String.format("handleFin %d", pipe.tunnelId));
-        pipe.myAcknowledgementNum = packet.getTcpHeader().getSequenceNumber() + 1;
-        pipe.theirAcknowledgementNum = packet.getTcpHeader().getAcknowledgementNumber();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
+        pipe.myAcknowledgementNum = tcpHeader.getSequenceNumber() + 1;
+        pipe.theirAcknowledgementNum = tcpHeader.getAcknowledgementNumber();
         sendTcpPack(pipe, (byte) (TcpHeader.ACK), null);
         closeUpStream(pipe);
         pipe.tcbStatus = TCBStatus.CLOSE_WAIT;
@@ -229,7 +230,7 @@ public class TcpPacketHandler implements Runnable {
 
     private void handlePacket(TcpPipe pipe, Packet packet) throws Exception {
         boolean end = false;
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         if (tcpHeader.isSYN()) {
             handleSyn(packet, pipe);
             end = true;
@@ -255,13 +256,12 @@ public class TcpPacketHandler implements Runnable {
                 return;
             }
             InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
-            TcpHeader tcpHeader = currentPacket.getTcpHeader();
+            TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
             int destinationPort = tcpHeader.getDestinationPort();
             int sourcePort = tcpHeader.getSourcePort();
             String ipAndPort = destinationAddress.getHostAddress() + ":" +
                     destinationPort + ":" + sourcePort;
-
-
+            
             if (!pipes.containsKey(ipAndPort)) {
                 TcpPipe tcpTunnel = initPipe(currentPacket);
                 tcpTunnel.tunnelKey = ipAndPort;
