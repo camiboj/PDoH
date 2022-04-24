@@ -14,9 +14,9 @@ import lombok.Value;
 
 
 @Value
-public class GoogleDohAnswer {
+public class GoogleDohResponse {
 
-    class Question {
+    static public class Question {
         private String name;
         private int type;
 
@@ -28,9 +28,17 @@ public class GoogleDohAnswer {
             sb.append('}');
             return sb.toString();
         }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getType() {
+            return type;
+        }
     }
 
-    static class Answer {
+    static public class Answer {
         private String name = "";
         private int type = 1;
         private int ttl = 1; // define as time type object(?
@@ -50,6 +58,14 @@ public class GoogleDohAnswer {
             return sb.toString();
         }
 
+        public void setName(String name ) { this.name = name; }
+
+        public void setType(int type ) { this.type = type; }
+
+        public void setTtl(int ttl ) { this.ttl = ttl; }
+
+        public void setData(String data ) { this.data = data; }
+
         public String getName() { return name; }
 
         public int getType() { return type; }
@@ -60,7 +76,7 @@ public class GoogleDohAnswer {
     }
 
 
-    public GoogleDohAnswer() {} // needed by Jackson
+    public GoogleDohResponse() {} // needed by Jackson
 
     private boolean TC = false;
     private boolean RD = false;
@@ -68,15 +84,17 @@ public class GoogleDohAnswer {
     private boolean AD = false;
     private boolean CD = false;
 
-    private Question Question = new Question(); // should be name in lowercase but jakson is stupid. fix it
+    @JsonProperty("Question")
+    private List<Question> Questions = new ArrayList<>(); // should be name in lowercase but jakson is stupid. fix it
+    // TODO: should be a list of questions
 
     @JsonProperty("Answer")
     private List<Answer> Answers = new ArrayList<>();
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GoogleDohAnswer {");
-        sb.append("Question=").append(Question);
+        final StringBuilder sb = new StringBuilder("GoogleDohResponse {");
+        sb.append("Question=").append(Questions);
         sb.append(", Answers=").append(Answers);
         sb.append('}');
         return sb.toString();
@@ -84,5 +102,9 @@ public class GoogleDohAnswer {
 
     public List<Answer> getAnswers() {
         return Answers;
+    }
+
+    public  List<Question> getQuestions() {
+        return Questions;
     }
 }

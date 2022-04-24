@@ -2,9 +2,7 @@ package com.mocyx.basic_client.doh;
 
 import android.util.Log;
 
-import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import java.io.BufferedReader;
@@ -15,13 +13,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.URLEncoder;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocyx.basic_client.dns.DnsAnswer;
-import com.mocyx.basic_client.dns.DnsHeader;
-import com.mocyx.basic_client.dns.DnsQuestion;
+import com.mocyx.basic_client.NetworkToDnsController;
 
 
 public class GoogleDoHRequester implements Runnable {
@@ -112,22 +107,10 @@ public class GoogleDoHRequester implements Runnable {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            GoogleDohAnswer dohAnswer = mapper.readValue(response.toString(), GoogleDohAnswer.class);
+            GoogleDohResponse dohAnswer = mapper.readValue(response.toString(), GoogleDohResponse.class);
             Log.i(TAG, String.format("googleDohAnswer: %s", dohAnswer));
 
-            List<DnsAnswer> dnsAnswers = dohAnswer.getAnswers().stream().map(
-                    x -> new DnsAnswer(x.getName(), x.getType(), x.getTtl(), x.getData())
-            ).collect(Collectors.toList());
-
-            Log.i(TAG, String.format("dnsAnswers: %s", dnsAnswers));
-            ByteBuffer b = ByteBuffer.allocate(1000);
-            if (dnsAnswers.size() > 0) {
-                dnsAnswers.get(0).putOn(b);
-                Log.i(TAG, String.format("dnsAnswers: %s", b));
-                b.position(0);
-                DnsQuestion h = new DnsQuestion(b); // use to check the name is readable
-
-            }
+            NetworkToDnsController.process(dohAnswer);
 
         } catch (IOException e) {
             e.printStackTrace();
