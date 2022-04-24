@@ -1,4 +1,5 @@
 package com.mocyx.basic_client.protocol;
+
 import com.mocyx.basic_client.util.BitUtils;
 
 import java.nio.ByteBuffer;
@@ -46,6 +47,10 @@ public class UdpHeader {
 
     public void setChecksum(int checksum) {
         this.checksum = checksum;
+    }
+
+    public boolean isDNS() {
+        return destinationPort == 53;
     }
 
     public int getDestinationPort() {

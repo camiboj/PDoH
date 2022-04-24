@@ -6,15 +6,13 @@ import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.dns.DnsQuestion;
 import com.mocyx.basic_client.doh.GoogleDoHRequester;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 public class DnsToDoHController {
     private static final String TAG = "DnsToNetworkController";
     // TODO: create queue to avoid synchronic communication
 
-    public static void process(ByteBuffer buffer) { // should it receive a DNS Packet? or a Packet?
-        DnsPacket dnsPacket = new DnsPacket(buffer);
+    public static void process(DnsPacket dnsPacket) {
         List<DnsQuestion> questions = dnsPacket.getQuestions();
         Log.i(TAG, String.format("DNS header: %s", dnsPacket.getHeader()));
         Log.i(TAG, String.format("DNS questions: %s", dnsPacket.getQuestions()));

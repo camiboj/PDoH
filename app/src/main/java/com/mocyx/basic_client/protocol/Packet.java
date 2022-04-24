@@ -15,19 +15,18 @@ public class Packet {
     public static final int TCP_HEADER_SIZE = 20;
     public static final int UDP_HEADER_SIZE = 8;
 
-    private final com.mocyx.basic_client.protocol.IP4Header ip4Header;
-
     private int packId;
     private boolean isTCP;
     private boolean isUDP;
+    private IP4Header ip4Header;
     private TcpHeader tcpHeader;
     private UdpHeader udpHeader;
     private ByteBuffer backingBuffer;
 
-    // TODO: fix this with an interface
+    public Packet() {
+    }
 
-    public Packet(com.mocyx.basic_client.protocol.IP4Header ip4Header,
-                  TcpHeader tcpHeader, ByteBuffer backingBuffer) {
+    public Packet(IP4Header ip4Header, TcpHeader tcpHeader, ByteBuffer backingBuffer) {
         this.ip4Header = ip4Header;
         this.tcpHeader = tcpHeader;
         this.backingBuffer = backingBuffer;
@@ -36,8 +35,7 @@ public class Packet {
         this.setPackId();
     }
 
-    public Packet(com.mocyx.basic_client.protocol.IP4Header ip4Header,
-                  UdpHeader udpHeader, ByteBuffer backingBuffer) {
+    public Packet(IP4Header ip4Header, UdpHeader udpHeader, ByteBuffer backingBuffer) {
         this.ip4Header = ip4Header;
         this.udpHeader = udpHeader;
         this.backingBuffer = backingBuffer;
@@ -47,7 +45,7 @@ public class Packet {
     }
 
     public Packet(ByteBuffer buffer) throws UnknownHostException {
-        this.ip4Header = new com.mocyx.basic_client.protocol.IP4Header(buffer);
+        this.ip4Header = new IP4Header(buffer);
         if (this.ip4Header.getProtocol() == TransportProtocol.TCP) {
             this.tcpHeader = new TcpHeader(buffer);
             this.isTCP = true;
@@ -78,7 +76,7 @@ public class Packet {
     }
 
     public boolean isDNS() {
-        return this.isUDP() && this.udpHeader.getDestinationPort() == 53;
+        return this.isUDP() && this.udpHeader.isDNS();
     }
 
     public boolean isTCP() {

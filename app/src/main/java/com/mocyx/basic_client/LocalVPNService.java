@@ -8,9 +8,11 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.mocyx.basic_client.config.Config;
+import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.handler.TcpPacketHandler;
 import com.mocyx.basic_client.handler.UdpPacketHandler;
 import com.mocyx.basic_client.protocol.Packet;
+import com.mocyx.basic_client.protocol.PacketFactory;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.Closeable;
@@ -142,17 +144,14 @@ public class LocalVPNService extends VpnService {
                     if (readBytes > 0) {
                         bufferToNetwork.flip();
 
-                        Packet packet = new Packet(bufferToNetwork);
+                        Packet packet = PacketFactory.createPacket(bufferToNetwork);
                         if (packet.isUDP()) {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
                                 // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
                                 ByteBuffer copyBackingBuffer = packet.getBackingBuffer().duplicate();
-
-                                DnsToDoHController.process(copyBackingBuffer);
-
-                                Log.i(TAG, "procese");
+                                DnsToDoHController.process((DnsPacket) packet);
 
                                 // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
                                 deviceToNetworkUDPQueue.offer(packet);

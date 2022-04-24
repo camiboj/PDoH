@@ -11,7 +11,7 @@ public class DoHToDnsController {
     private static final String TAG = "NetworkToDnsController";
     // create queue?
 
-    public static void process(GoogleDohResponse dohResponse) { // should it receive a DNS Packet? or a Packet?
+    public static void process(GoogleDohResponse dohResponse) {
         Log.i(TAG, String.format("dohResponse: %s", dohResponse));
         DnsPacket dns = new DnsPacket();
 
