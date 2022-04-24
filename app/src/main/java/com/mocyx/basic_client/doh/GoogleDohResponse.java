@@ -1,10 +1,7 @@
 package com.mocyx.basic_client.doh;
 
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.time.ZonedDateTime; // use latter
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -85,26 +82,25 @@ public class GoogleDohResponse {
     private boolean CD = false;
 
     @JsonProperty("Question")
-    private List<Question> Questions = new ArrayList<>(); // should be name in lowercase but jakson is stupid. fix it
-    // TODO: should be a list of questions
+    private List<Question> questions = new ArrayList<>();
 
     @JsonProperty("Answer")
-    private List<Answer> Answers = new ArrayList<>();
+    private List<Answer> answers = new ArrayList<>();
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GoogleDohResponse {");
-        sb.append("Question=").append(Questions);
-        sb.append(", Answers=").append(Answers);
+        sb.append("Question=").append(questions);
+        sb.append(", Answers=").append(answers);
         sb.append('}');
         return sb.toString();
     }
 
     public List<Answer> getAnswers() {
-        return Answers;
+        return answers;
     }
 
     public  List<Question> getQuestions() {
-        return Questions;
+        return questions;
     }
 }
