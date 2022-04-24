@@ -18,7 +18,7 @@ public class PacketFactory {
             }
             return new Packet(ip4Header, udpHeader, buffer);
         } else {
-            throw new UnsupportedOperationException("The packet should be UDP or TCP");
+           return new Packet(ip4Header, buffer);
         }
     }
 }

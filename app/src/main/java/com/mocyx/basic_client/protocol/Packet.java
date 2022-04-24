@@ -33,6 +33,14 @@ public class Packet {
         this.setPackId();
     }
 
+    public Packet(IP4Header ip4Header, ByteBuffer backingBuffer) {
+        this.ip4Header = ip4Header;
+        this.backingBuffer = backingBuffer;
+        this.isTCP = false;
+        this.isUDP = false;
+        this.setPackId();
+    }
+
     private void setPackId() {
         AtomicInteger globalPackId = new AtomicInteger();
         this.packId = globalPackId.addAndGet(1);
