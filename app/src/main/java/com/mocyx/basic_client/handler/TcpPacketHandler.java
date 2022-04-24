@@ -417,7 +417,7 @@ public class TcpPacketHandler implements Runnable {
 
     }
 
-    static class TcpPipe {
+    private static class TcpPipe {
         static Integer tunnelIds = 0;
         public final int tunnelId = tunnelIds++;
         public long mySequenceNum = 0;

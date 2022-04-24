@@ -21,7 +21,7 @@ public class DnsHeader {
         this.nAdditionalRRs = BitUtils.getUnsignedShort(buffer.getShort());
     }
 
-    public int getNQuestions () {
+    public int getNQuestions() {
         return nQuestions;
     }
 
