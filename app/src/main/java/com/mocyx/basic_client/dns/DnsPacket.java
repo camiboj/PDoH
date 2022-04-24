@@ -10,7 +10,7 @@ public class DnsPacket {
 
     public DnsPacket(ByteBuffer buffer) {
         this.header = new DnsHeader(buffer);
-        this.questions = new ArrayList<DnsQuestion>();
+        this.questions = new ArrayList<>();
         for (int i = 0; i < header.getNQuestions(); i++) {
             questions.add(new DnsQuestion(buffer));
         }

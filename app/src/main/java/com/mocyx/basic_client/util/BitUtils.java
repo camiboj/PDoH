@@ -1,4 +1,4 @@
-package com.mocyx.basic_client;
+package com.mocyx.basic_client.util;
 
 public class BitUtils {
     public static short getUnsignedByte(byte value) {

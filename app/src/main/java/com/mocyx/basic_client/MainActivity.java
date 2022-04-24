@@ -3,26 +3,22 @@ package com.mocyx.basic_client;
 import android.content.Intent;
 import android.net.VpnService;
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.mocyx.basic_client.bio.BioTcpHandler;
-import com.mocyx.basic_client.htttps.util.GoogleDoH;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.TextView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.mocyx.basic_client.doh.GoogleDoH;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    private static final int VPN_REQUEST_CODE = 0x0F;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
 
@@ -36,19 +32,11 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show());
 
-        TextView textView = findViewById(R.id.textView1);
+        findViewById(R.id.textView1);
     }
-
-
-    private static final String TAG = BioTcpHandler.class.getSimpleName();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private static final int VPN_REQUEST_CODE = 0x0F;
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -85,21 +71,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startVpn() {
-
         Intent vpnIntent = VpnService.prepare(this);
 
-        if (vpnIntent != null)
+        if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
-        else
+        } else {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
+        }
     }
 
 
     public void clickSwitch(View view) {
-        System.out.println("hello");
         this.startVpn();
-
-
     }
 
     @Override
@@ -108,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void clickGoogleDoH(View view) throws IOException {
+    public void clickGoogleDoH(View view) {
         Thread t = new Thread(new GoogleDoH("www.baeldung.com"));
         t.start();
     }

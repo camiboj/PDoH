@@ -7,11 +7,10 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
-import com.mocyx.basic_client.bio.BioUdpHandler;
-import com.mocyx.basic_client.bio.NioSingleThreadTcpHandler;
 import com.mocyx.basic_client.config.Config;
-import com.mocyx.basic_client.dns.DnsPacket;
-import com.mocyx.basic_client.protocol.tcpip.Packet;
+import com.mocyx.basic_client.handler.TcpPacketHandler;
+import com.mocyx.basic_client.handler.UdpPacketHandler;
+import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.Closeable;
@@ -40,18 +39,27 @@ public class LocalVPNService extends VpnService {
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService executorService;
 
+    private static void closeResources(Closeable... resources) {
+        for (Closeable resource : resources) {
+            try {
+                resource.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         setupVPN();
-        deviceToNetworkUDPQueue = new ArrayBlockingQueue<Packet>(1000);
-        deviceToNetworkTCPQueue = new ArrayBlockingQueue<Packet>(1000);
+        deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(1000);
+        deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(1000);
         networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
         executorService = Executors.newFixedThreadPool(10);
-        executorService.submit(new BioUdpHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
-        //executorService.submit(new BioTcpHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
-        executorService.submit(new NioSingleThreadTcpHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
+        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
+        executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
                 deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
@@ -82,7 +90,6 @@ public class LocalVPNService extends VpnService {
         return START_STICKY;
     }
 
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -96,17 +103,6 @@ public class LocalVPNService extends VpnService {
         deviceToNetworkUDPQueue = null;
         networkToDeviceQueue = null;
         closeResources(vpnInterface);
-    }
-
-    // TODO: Move this to a "utils" class for reuse
-    private static void closeResources(Closeable... resources) {
-        for (Closeable resource : resources) {
-            try {
-                resource.close();
-            } catch (IOException e) {
-                // Ignore
-            }
-        }
     }
 
     private static class VPNRunnable implements Runnable {
@@ -128,6 +124,64 @@ public class LocalVPNService extends VpnService {
             this.networkToDeviceQueue = networkToDeviceQueue;
         }
 
+        @Override
+        public void run() {
+            Log.i(TAG, "Started");
+            FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+            FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
+            Thread t = new Thread(new WriteVpnThread(vpnOutput, networkToDeviceQueue));
+            t.start();
+            try {
+                ByteBuffer bufferToNetwork;
+                while (!Thread.interrupted()) {
+                    bufferToNetwork = ByteBufferPool.acquire();
+                    int readBytes = vpnInput.read(bufferToNetwork);
+
+                    MainActivity.upByte.addAndGet(readBytes);
+
+                    if (readBytes > 0) {
+                        bufferToNetwork.flip();
+
+                        Packet packet = new Packet(bufferToNetwork);
+                        if (packet.isUDP()) {
+                            Log.i(TAG, "read udp" + readBytes);
+                            if (packet.isDNS()) {
+                                Log.i(TAG, "[dns] this is a dns message");
+                                // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
+                                ByteBuffer copyBackingBuffer = packet.getBackingBuffer().duplicate();
+
+                                DnsToNetworkController.process(copyBackingBuffer);
+
+                                Log.i(TAG, "procese");
+
+                                // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
+                                deviceToNetworkUDPQueue.offer(packet);
+                            } else {
+                                deviceToNetworkUDPQueue.offer(packet);
+                            }
+                        } else if (packet.isTCP()) {
+                            Log.i(TAG, "read tcp " + readBytes);
+                            deviceToNetworkTCPQueue.offer(packet);
+                        } else {
+                            Log.w(TAG, String.format("Unknown packet protocol type %d",
+                                    packet.getIp4Header().getProtocol().getNumber()));
+                        }
+                    } else {
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                Log.w(TAG, e.toString(), e);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                closeResources(vpnInput, vpnOutput);
+            }
+        }
 
         static class WriteVpnThread implements Runnable {
             FileChannel vpnOutput;
@@ -149,71 +203,12 @@ public class LocalVPNService extends VpnService {
                             if (w > 0) {
                                 MainActivity.downByte.addAndGet(w);
                             }
-                            if (Config.logRW) {
-                                Log.d(TAG, "vpn write " + w);
-                            }
                         }
                     } catch (Exception e) {
                         Log.i(TAG, "WriteVpnThread fail", e);
                     }
                 }
 
-            }
-        }
-
-        @Override
-        public void run() {
-            Log.i(TAG, "Started");
-            FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
-            FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
-            Thread t = new Thread(new WriteVpnThread(vpnOutput, networkToDeviceQueue));
-            t.start();
-            try {
-                ByteBuffer bufferToNetwork = null;
-                while (!Thread.interrupted()) {
-                    bufferToNetwork = ByteBufferPool.acquire();
-                    int readBytes = vpnInput.read(bufferToNetwork);
-
-                    MainActivity.upByte.addAndGet(readBytes);
-
-                    if (readBytes > 0) {
-                        bufferToNetwork.flip();
-
-                        Packet packet = new Packet(bufferToNetwork);
-                        if (packet.isUDP()) {
-                            Log.i(TAG, "read udp" + readBytes);
-                            if (packet.isDNS()) {
-                                Log.i(TAG, "[dns] this is a dns message");
-                                // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
-                                ByteBuffer copyBackingBuffer = packet.backingBuffer.duplicate();
-
-                                DnsToNetworkController.process(copyBackingBuffer);
-
-                                // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
-                                deviceToNetworkUDPQueue.offer(packet);
-                            } else {
-                                deviceToNetworkUDPQueue.offer(packet);
-                            }
-                        } else if (packet.isTCP()) {
-                            Log.i(TAG, "read tcp " + readBytes);
-                            deviceToNetworkTCPQueue.offer(packet);
-                        } else {
-                            Log.w(TAG, String.format("Unknown packet protocol type %d", packet.ip4Header.protocolNum));
-                        }
-                    } else {
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                Log.w(TAG, e.toString(), e);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                closeResources(vpnInput, vpnOutput);
             }
         }
     }
