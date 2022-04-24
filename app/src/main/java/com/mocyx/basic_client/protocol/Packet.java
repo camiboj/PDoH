@@ -62,11 +62,11 @@ public class Packet {
     }
 
     public boolean isTCP() {
-        return header.isTCP();
+        return header != null && header.isTCP();
     }
 
     public boolean isUDP() {
-        return header.isUDP();
+        return header != null && header.isUDP();
     }
 
     public void updateTCPBuffer(ByteBuffer buffer, byte flags, long sequenceNum, long ackNum, int payloadSize) {

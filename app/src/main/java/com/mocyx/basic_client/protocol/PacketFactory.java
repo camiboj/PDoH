@@ -17,8 +17,7 @@ public class PacketFactory {
                 return new DnsPacket(ip4Header, udpHeader, buffer);
             }
             return new Packet(ip4Header, udpHeader, buffer);
-        } else {
-           return new Packet(ip4Header, buffer);
         }
+        return new Packet(ip4Header, buffer);
     }
 }
