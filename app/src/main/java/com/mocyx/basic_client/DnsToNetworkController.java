@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DnsToNetworkController {
     private static final String TAG = "DnsToNetworkController";
-    // create queue?
+    // TODO: create queue to avoid synchronic communication
 
     public static void process(ByteBuffer buffer) { // should it receive a DNS Packet? or a Packet?
         DnsPacket dnsPacket = new DnsPacket(buffer);
@@ -19,15 +19,15 @@ public class DnsToNetworkController {
         Log.i(TAG, String.format("DNS header: %s", dnsPacket.getHeader()));
         Log.i(TAG, String.format("DNS questions: %s", dnsPacket.getQuestions()));
 
-        for (int i = 0; i < questions.size(); i++) {
-            DnsQuestion question = questions.get(i);
-            GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester(question.getName());
-            googleDoHRequester.setType(question.getType());
-            // TODO: save `t` in queue (?
-            Thread t = new Thread(googleDoHRequester);
-            t.start();
-        }
-        // TODO: join threads and convert the answer from doh to dns packets
+        questions.forEach(DnsToNetworkController::processQuestion);
 
+        // TODO: join threads and convert the answer from doh to dns packets
+    }
+
+    private static void processQuestion(DnsQuestion question) {
+        GoogleDoHRequester googleDoH = new GoogleDoHRequester(question.getName());
+        googleDoH.setType(question.getType());
+        Thread t = new Thread(googleDoH);
+        t.start();
     }
 }

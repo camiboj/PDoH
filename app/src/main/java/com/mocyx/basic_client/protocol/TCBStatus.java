@@ -1,11 +1,8 @@
-package com.mocyx.basic_client.protocol.tcpip;
+package com.mocyx.basic_client.protocol;
 
 public enum  TCBStatus {
     SYN_SENT,
     SYN_RECEIVED,
     ESTABLISHED,
     CLOSE_WAIT,
-    LAST_ACK,
-    //new
-    CLOSED,
 }

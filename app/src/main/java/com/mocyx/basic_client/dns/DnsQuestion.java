@@ -1,15 +1,13 @@
 package com.mocyx.basic_client.dns;
 
-import com.mocyx.basic_client.BitUtils;
+import com.mocyx.basic_client.util.BitUtils;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DnsQuestion {
-    private String name;
     private final int type;
     private final int dnsQuestionClass;
+    private String name;
 
     public DnsQuestion(ByteBuffer buffer) {
         // name, type, cd, ct, do, edns_client_subnet, random_padding
@@ -19,16 +17,13 @@ public class DnsQuestion {
     }
 
     private String buildName(ByteBuffer buffer) {
-        // List<String> name = new ArrayList<>();
         final StringBuilder sb = new StringBuilder();
         short labelLength = BitUtils.getUnsignedByte(buffer.get());
         while (labelLength > 0) {
-            // final StringBuilder sb = new StringBuilder();
             for (int i = 0; i < labelLength; i++) { // TODO: investigate if its possible to get many chars at the same time
                 char label = (char) buffer.get();
                 sb.append(label);
             }
-            // name.add(sb.toString());
             sb.append(".");
             labelLength = BitUtils.getUnsignedByte(buffer.get());
         }
