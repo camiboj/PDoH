@@ -7,7 +7,7 @@ import com.mocyx.basic_client.doh.GoogleDohResponse;
 
 import java.nio.ByteBuffer;
 
-public class NetworkToDnsController {
+public class DoHToDnsController {
     private static final String TAG = "NetworkToDnsController";
     // create queue?
 

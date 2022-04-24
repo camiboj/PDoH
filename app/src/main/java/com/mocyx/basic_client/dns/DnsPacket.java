@@ -6,8 +6,8 @@ import java.util.List;
 
 public class DnsPacket {
     private DnsHeader header;
-    private List<DnsQuestion> questions = new ArrayList<DnsQuestion>();
-    private List<DnsAnswer> answers = new ArrayList<DnsAnswer>();
+    private List<DnsQuestion> questions;
+    private List<DnsAnswer> answers = new ArrayList<>();
 
     public DnsPacket(ByteBuffer buffer) {
         this.header = new DnsHeader(buffer);

@@ -9,7 +9,7 @@ import com.mocyx.basic_client.doh.GoogleDoHRequester;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class DnsToNetworkController {
+public class DnsToDoHController {
     private static final String TAG = "DnsToNetworkController";
     // TODO: create queue to avoid synchronic communication
 
@@ -19,7 +19,7 @@ public class DnsToNetworkController {
         Log.i(TAG, String.format("DNS header: %s", dnsPacket.getHeader()));
         Log.i(TAG, String.format("DNS questions: %s", dnsPacket.getQuestions()));
 
-        questions.forEach(DnsToNetworkController::processQuestion);
+        questions.forEach(DnsToDoHController::processQuestion);
 
         // TODO: join threads and convert the answer from doh to dns packets
     }

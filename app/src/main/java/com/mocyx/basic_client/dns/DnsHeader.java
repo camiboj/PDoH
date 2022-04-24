@@ -38,7 +38,7 @@ public class DnsHeader {
         nQuestions = nQuestions + 1;
     }
 
-    public void AuthorityResource() {
+    public void addAuthorityResourceRecord() {
         nAuthorityResourceRecords = nAuthorityResourceRecords + 1;
     }
 

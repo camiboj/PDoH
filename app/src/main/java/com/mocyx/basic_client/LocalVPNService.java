@@ -150,7 +150,7 @@ public class LocalVPNService extends VpnService {
                                 // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
                                 ByteBuffer copyBackingBuffer = packet.getBackingBuffer().duplicate();
 
-                                DnsToNetworkController.process(copyBackingBuffer);
+                                DnsToDoHController.process(copyBackingBuffer);
 
                                 Log.i(TAG, "procese");
 

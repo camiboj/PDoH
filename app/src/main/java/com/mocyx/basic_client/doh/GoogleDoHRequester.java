@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocyx.basic_client.NetworkToDnsController;
+import com.mocyx.basic_client.DoHToDnsController;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -78,7 +78,7 @@ public class GoogleDoHRequester implements Runnable {
             GoogleDohResponse dohAnswer = mapper.readValue(response.toString(), GoogleDohResponse.class);
             Log.i(TAG, String.format("googleDohAnswer: %s", dohAnswer));
 
-            NetworkToDnsController.process(dohAnswer);
+            DoHToDnsController.process(dohAnswer);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
