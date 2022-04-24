@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocyx.basic_client.NetworkToDnsController;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class GoogleDoHRequester implements Runnable {
     // https://www.baeldung.com/java-http-request
     // https://www.baeldung.com/httpurlconnection-post
+    private final static String ENDPOINT = "https://8.8.8.8/resolve?";
     private final static String TAG = "GoogleDoH";
     Map<String, String> parameters = new HashMap<>();
 
@@ -28,7 +30,6 @@ public class GoogleDoHRequester implements Runnable {
 
     public void setType(int type) {
         // Possible parameters https://developers.google.com/speed/public-dns/docs/doh/json
-        // name, type, cd, ct, do, edns_client_subnet, random_padding
         parameters.put("type", Integer.toString(type));
     }
 
@@ -37,7 +38,7 @@ public class GoogleDoHRequester implements Runnable {
     }
 
     private String getFinalEndpoint() throws UnsupportedEncodingException {
-        String dohUrl = String.format("https://8.8.8.8/resolve?%s", getParameters());
+        String dohUrl = String.format("%s%s", ENDPOINT, getParameters());
         Log.i(TAG, String.format("dohUrl: %s", dohUrl));
         return dohUrl;
     }
@@ -74,8 +75,10 @@ public class GoogleDoHRequester implements Runnable {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            GoogleDohAnswer o = mapper.readValue(response.toString(), GoogleDohAnswer.class);
-            Log.i(TAG, String.format("googleDohAnswer: %s", o));
+            GoogleDohResponse dohAnswer = mapper.readValue(response.toString(), GoogleDohResponse.class);
+            Log.i(TAG, String.format("googleDohAnswer: %s", dohAnswer));
+
+            NetworkToDnsController.process(dohAnswer);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
