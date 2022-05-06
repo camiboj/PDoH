@@ -5,13 +5,11 @@ import android.util.Log;
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.doh.GoogleDohResponse;
 
-import java.nio.ByteBuffer;
-
 public class DoHToDnsController {
     private static final String TAG = "NetworkToDnsController";
     // create queue?
 
-    public static void process(GoogleDohResponse dohResponse) {
+    public static DnsPacket process(GoogleDohResponse dohResponse) {
         Log.i(TAG, String.format("dohResponse: %s", dohResponse));
         DnsPacket dnsPacket = new DnsPacket();
 
@@ -22,10 +20,10 @@ public class DoHToDnsController {
                 x -> dnsPacket.addQuestion(x.getName(), x.getType())
         );
 
-        // TODO: return dnsPacket
+        return dnsPacket;
 
-        Log.i(TAG, String.format("dns packet: %s", dnsPacket));
-        ByteBuffer b = ByteBuffer.allocate(1000);
-        dnsPacket.putOn(b);
+        // Log.i(TAG, String.format("dns packet: %s", dnsPacket));
+        // ByteBuffer b = ByteBuffer.allocate(1000);
+        // dnsPacket.putOn(b);
     }
 }

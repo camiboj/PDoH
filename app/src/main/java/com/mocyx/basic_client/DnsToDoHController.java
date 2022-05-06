@@ -1,33 +1,51 @@
 package com.mocyx.basic_client;
 
-import android.util.Log;
-
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.dns.DnsQuestion;
 import com.mocyx.basic_client.doh.GoogleDoHRequester;
+import com.mocyx.basic_client.doh.GoogleDohResponse;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DnsToDoHController {
     private static final String TAG = "DnsToNetworkController";
-    // TODO: create queue to avoid synchronic communication
+    // TODO: add logs
 
-    public static void process(DnsPacket dnsPacket) {
+
+    public static List<GoogleDohResponse> process(DnsPacket dnsPacket) {
         List<DnsQuestion> questions = dnsPacket.getQuestions();
-        Log.i(TAG, String.format("DNS header: %s", dnsPacket.getHeader()));
-        Log.i(TAG, String.format("DNS questions: %s", dnsPacket.getQuestions()));
-
         questions.forEach(DnsToDoHController::processQuestion);
 
-        // TODO: join threads and convert the answer from doh to dns packets
+        List<GoogleDoHRequester> requesters = questions.stream().map(
+                DnsToDoHController::processQuestion
+        ).collect(Collectors.toList());
+
+        List<Thread> threads = requesters.stream().map(
+                DnsToDoHController::startThreads
+        ).collect(Collectors.toList());
+
+        threads.forEach(DnsToDoHController::joinThreads);
+        return requesters.stream().map(GoogleDoHRequester::getGoogleDohResponse).collect(Collectors.toList());
     }
 
+    private static Thread startThreads(GoogleDoHRequester requester) {
+        Thread t = new Thread(requester);
+        t.start();
+        return t;
+    }
+
+    private static void joinThreads(Thread thread) {
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
     // private static GoogleDohResponse
-    private static void processQuestion(DnsQuestion question) {
+    private static GoogleDoHRequester processQuestion(DnsQuestion question) {
         GoogleDoHRequester googleDoH = new GoogleDoHRequester(question.getName());
         googleDoH.setType(question.getType());
-        Thread t = new Thread(googleDoH);
-        t.start();
-        //return t.join
+        return googleDoH;
     }
 }

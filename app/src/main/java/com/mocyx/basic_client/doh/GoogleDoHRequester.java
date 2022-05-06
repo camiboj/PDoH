@@ -23,9 +23,14 @@ public class GoogleDoHRequester implements Runnable {
     private final static String ENDPOINT = "https://8.8.8.8/resolve?";
     private final static String TAG = "GoogleDoH";
     Map<String, String> parameters = new HashMap<>();
+    private GoogleDohResponse googleDohResponse;
 
     public GoogleDoHRequester(String name) {
         parameters.put("name", name);
+    }
+
+    public GoogleDohResponse getGoogleDohResponse() {
+        return googleDohResponse;
     }
 
     public void setType(int type) {
@@ -75,11 +80,8 @@ public class GoogleDoHRequester implements Runnable {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            GoogleDohResponse googleDohResponse = mapper.readValue(response.toString(), GoogleDohResponse.class);
+            googleDohResponse = mapper.readValue(response.toString(), GoogleDohResponse.class);
             Log.i(TAG, String.format("googleDohAnswer: %s", googleDohResponse));
-
-            // TODO: return googleDohResponse
-            DoHToDnsController.process(googleDohResponse);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

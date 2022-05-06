@@ -150,9 +150,9 @@ public class LocalVPNService extends VpnService {
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
                                 // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
-                                ByteBuffer copyBackingBuffer = packet.getBackingBuffer().duplicate();
-                                DnsToDoHController.process((DnsPacket) packet);
 
+                                Thread thread = new Thread(new DnsController((DnsPacket) packet));
+                                thread.start();
                                 // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
                                 deviceToNetworkUDPQueue.offer(packet);
                             } else {
