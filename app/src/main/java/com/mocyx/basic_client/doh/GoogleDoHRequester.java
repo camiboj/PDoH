@@ -75,10 +75,11 @@ public class GoogleDoHRequester implements Runnable {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            GoogleDohResponse dohAnswer = mapper.readValue(response.toString(), GoogleDohResponse.class);
-            Log.i(TAG, String.format("googleDohAnswer: %s", dohAnswer));
+            GoogleDohResponse googleDohResponse = mapper.readValue(response.toString(), GoogleDohResponse.class);
+            Log.i(TAG, String.format("googleDohAnswer: %s", googleDohResponse));
 
-            DoHToDnsController.process(dohAnswer);
+            // TODO: return googleDohResponse
+            DoHToDnsController.process(googleDohResponse);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

@@ -22,10 +22,12 @@ public class DnsToDoHController {
         // TODO: join threads and convert the answer from doh to dns packets
     }
 
+    // private static GoogleDohResponse
     private static void processQuestion(DnsQuestion question) {
         GoogleDoHRequester googleDoH = new GoogleDoHRequester(question.getName());
         googleDoH.setType(question.getType());
         Thread t = new Thread(googleDoH);
         t.start();
+        //return t.join
     }
 }
