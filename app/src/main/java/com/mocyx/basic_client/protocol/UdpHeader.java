@@ -23,6 +23,12 @@ public class UdpHeader implements Header {
         this.length = 0;
     }
 
+    public UdpHeader(UdpHeader other) {
+        this.sourcePort = other.sourcePort;
+        this.destinationPort = other.destinationPort;
+        this.length = 0;
+    }
+
     @Override
     public void fillBuffer(ByteBuffer buffer) {
         buffer.putShort((short) this.sourcePort);

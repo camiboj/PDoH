@@ -29,6 +29,10 @@ public class DnsPacket extends Packet {
         this.questions = new ArrayList<>();
     }
 
+    public void copyHeaderFrom(DnsPacket other) {
+        super.copyFrom(other);
+    }
+
     public void addAnswer(String name, int type, int ttl, String data) {
         this.header.addAnswer();
         this.answers.add(new DnsAnswer(name, type, ttl, data));
@@ -44,6 +48,7 @@ public class DnsPacket extends Packet {
     }
 
     public void putOn(ByteBuffer buff) {
+        super.putOn(buff);
         header.putOn(buff);
         questions.forEach(
                 x -> x.putOn(buff)
@@ -55,12 +60,11 @@ public class DnsPacket extends Packet {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("DnsPacket{");
-        sb.append("header=").append(header);
-        sb.append(", questions=").append(questions);
-        sb.append(", answers=").append(answers);
-        sb.append('}');
-        return sb.toString();
+        String superString = super.getHeader().toString() + super.getHeader().toString();
+        return superString + "DnsPacket{" + "header=" + header +
+                ", questions=" + questions +
+                ", answers=" + answers +
+                '}';
     }
 }
 

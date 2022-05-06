@@ -1,6 +1,7 @@
 package com.mocyx.basic_client.protocol;
 
 
+import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.util.BitUtils;
 
 import java.nio.ByteBuffer;
@@ -39,6 +40,11 @@ public class Packet {
         this.isTCP = false;
         this.isUDP = false;
         this.setPackId();
+    }
+
+    public void putOn(ByteBuffer buff) {
+        ip4Header.fillBuffer(buff);
+        header.fillBuffer(buff);
     }
 
     private void setPackId() {
@@ -196,6 +202,11 @@ public class Packet {
 
     public int getPackId() {
         return packId;
+    }
+
+    protected void copyFrom(DnsPacket other) {
+        this.ip4Header = new IP4Header(other.getIp4Header());
+        this.header = new UdpHeader((UdpHeader) other.getHeader());
     }
 }
 

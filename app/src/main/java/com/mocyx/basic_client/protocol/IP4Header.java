@@ -42,6 +42,22 @@ public class IP4Header {
         this.optionsAndPadding = optionsAndPadding;
     }
 
+    public IP4Header(IP4Header other) {
+        this.version = other.version;
+        this.IHL = other.IHL;
+        this.headerLength = other.headerLength;
+        this.typeOfService = other.typeOfService;
+        this.totalLength = other.totalLength;
+        this.identificationAndFlagsAndFragmentOffset = other.identificationAndFlagsAndFragmentOffset;
+        this.TTL = other.TTL;
+        this.protocolNum = other.protocolNum;
+        this.protocol = other.protocol;
+        this.headerChecksum = other.headerChecksum;
+        this.sourceAddress = other.sourceAddress;
+        this.destinationAddress = other.destinationAddress;
+        this.optionsAndPadding = other.optionsAndPadding;
+    }
+
     public IP4Header(ByteBuffer buffer) throws UnknownHostException {
         byte versionAndIHL = buffer.get();
         this.version = (byte) (versionAndIHL >> 4);
