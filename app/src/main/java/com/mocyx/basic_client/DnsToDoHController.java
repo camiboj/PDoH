@@ -3,7 +3,7 @@ package com.mocyx.basic_client;
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.dns.DnsQuestion;
 import com.mocyx.basic_client.doh.GoogleDoHRequester;
-import com.mocyx.basic_client.doh.GoogleDohResponse;
+import com.mocyx.basic_client.doh.DohResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +13,7 @@ public class DnsToDoHController {
     // TODO: add logs
 
 
-    public static List<GoogleDohResponse> process(DnsPacket dnsPacket) {
+    public static List<DohResponse> process(DnsPacket dnsPacket) {
         List<DnsQuestion> questions = dnsPacket.getQuestions();
         questions.forEach(DnsToDoHController::processQuestion);
 

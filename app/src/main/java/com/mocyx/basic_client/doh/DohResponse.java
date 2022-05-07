@@ -5,11 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: delete lombok
-import lombok.Value;
-
-@Value
-public class GoogleDohResponse {
+public class DohResponse {
 
     private boolean TC = false;
     private boolean RD = false;
@@ -20,7 +16,7 @@ public class GoogleDohResponse {
     private List<Question> questions = new ArrayList<>();
     @JsonProperty("Answer")
     private List<Answer> answers = new ArrayList<>();
-    public GoogleDohResponse() {
+    public DohResponse() {
     } // needed by Jackson
 
     @Override

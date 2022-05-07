@@ -27,14 +27,14 @@ public abstract class DoHRequester implements Runnable {
     protected Map<String, List<String>> HEADERS;
 
     Map<String, String> parameters = new HashMap<>();
-    private GoogleDohResponse googleDohResponse;
+    private DohResponse dohResponse;
 
     public DoHRequester(String name) {
         parameters.put("name", name);
     }
 
-    public GoogleDohResponse getGoogleDohResponse() {
-        return googleDohResponse;
+    public DohResponse getGoogleDohResponse() {
+        return dohResponse;
     }
 
     public void setType(int type) {
@@ -79,8 +79,8 @@ public abstract class DoHRequester implements Runnable {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-            googleDohResponse = mapper.readValue(response.toString(), GoogleDohResponse.class);
-            Log.i(TAG, String.format("googleDohAnswer: %s", googleDohResponse));
+            dohResponse = mapper.readValue(response.toString(), DohResponse.class);
+            Log.i(TAG, String.format("googleDohAnswer: %s", dohResponse));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

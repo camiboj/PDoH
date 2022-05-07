@@ -3,12 +3,12 @@ package com.mocyx.basic_client;
 import android.util.Log;
 
 import com.mocyx.basic_client.dns.DnsPacket;
-import com.mocyx.basic_client.doh.GoogleDohResponse;
+import com.mocyx.basic_client.doh.DohResponse;
 
 public class DoHToDnsController {
     private static final String TAG = "NetworkToDnsController";
 
-    public static DnsPacket process(GoogleDohResponse dohResponse) {
+    public static DnsPacket process(DohResponse dohResponse) {
         Log.i(TAG, String.format("dohResponse: %s", dohResponse));
         DnsPacket dnsPacket = new DnsPacket();
 
