@@ -23,7 +23,7 @@ public class UdpDownWorker implements Runnable {
     private final BlockingQueue<UdpTunnel> tunnelQueue;
     private final Selector selector;
     private final int headerSize;
-    private final String TAG = this.getClass().getSimpleName();
+    protected final static String TAG = "UdpDownWorker";
 
     public UdpDownWorker(Selector selector, BlockingQueue<ByteBuffer> networkToDeviceQueue,
                          BlockingQueue<UdpTunnel> tunnelQueue) {
@@ -82,9 +82,7 @@ public class UdpDownWorker implements Runnable {
                     keyIterator.remove();
                     if (key.isValid() && key.isReadable()) {
                         try {
-                            DatagramChannel inputChannel = (DatagramChannel) key.channel();
-                            ByteBuffer receiveBuffer = ByteBufferPool.acquire();
-                            inputChannel.read(receiveBuffer);
+                            ByteBuffer receiveBuffer = getData(key);
                             receiveBuffer.flip();
                             byte[] data = new byte[receiveBuffer.remaining()];
                             receiveBuffer.get(data);
@@ -100,6 +98,13 @@ public class UdpDownWorker implements Runnable {
         } finally {
             Log.d(TAG, "UdpDownWorker quit");
         }
+    }
+
+    protected ByteBuffer getData(SelectionKey key) throws IOException, InterruptedException {
+        DatagramChannel inputChannel = (DatagramChannel) key.channel();
+        ByteBuffer receiveBuffer = ByteBufferPool.acquire();
+        inputChannel.read(receiveBuffer);
+        return receiveBuffer;
     }
 }
 
