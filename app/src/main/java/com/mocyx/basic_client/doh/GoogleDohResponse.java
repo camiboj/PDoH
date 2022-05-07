@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: delete lombok
 import lombok.Value;
 
 @Value
@@ -64,8 +65,8 @@ public class GoogleDohResponse {
     static public class Answer {
         private String name = "";
         private int type = 1;
-        private int ttl = 1; // define as time type object(?
-        private String data = "1.1.1.1"; // difine as IP class? create ip class?
+        private int ttl = 1;
+        private String data = "1.1.1.1";
 
         public Answer() {
         } // needed by Jackson

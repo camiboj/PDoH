@@ -7,7 +7,6 @@ import com.mocyx.basic_client.doh.GoogleDohResponse;
 
 public class DoHToDnsController {
     private static final String TAG = "NetworkToDnsController";
-    // create queue?
 
     public static DnsPacket process(GoogleDohResponse dohResponse) {
         Log.i(TAG, String.format("dohResponse: %s", dohResponse));
@@ -21,9 +20,5 @@ public class DoHToDnsController {
         );
 
         return dnsPacket;
-
-        // Log.i(TAG, String.format("dns packet: %s", dnsPacket));
-        // ByteBuffer b = ByteBuffer.allocate(1000);
-        // dnsPacket.putOn(b);
     }
 }

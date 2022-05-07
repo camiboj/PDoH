@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
+// TODO: add logs
 public class DnsController implements Runnable {
     private static final String TAG = "DnsController";
     private final DnsPacket dnsQuestionPacket;
@@ -27,10 +28,6 @@ public class DnsController implements Runnable {
         List<DnsPacket> dnsResponsePackets = googleDohResponses.stream().map(
                 DoHToDnsController::process
         ).collect(Collectors.toList());
-
-        // TODO: check UdpDownWorker. maybe it is doing something similar
-        // dnsResponsePackets.forEach(dnsPacket -> dnsPacket.setResponseTo(dnsQuestionPacket));
-
 
         dnsResponsePackets.forEach(this::offerPacket);
     }

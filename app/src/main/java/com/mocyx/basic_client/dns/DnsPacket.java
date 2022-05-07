@@ -51,6 +51,7 @@ public class DnsPacket extends Packet {
     }
 
     public void putOn(ByteBuffer buff) {
+        // TODO: rename maybe?
         header.putOn(buff);
         questions.forEach(
                 x -> x.putOn(buff)

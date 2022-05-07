@@ -45,7 +45,7 @@ public class DnsDownWorker implements Runnable {
         byteBuffer.position(this.headerSize);
 
         if (data != null) {
-            if (byteBuffer.remaining() < data.length) { // TODO: maybe this could be dataLen? why ask for length again?
+            if (byteBuffer.remaining() < data.length) {
                 System.currentTimeMillis();
             }
             byteBuffer.put(data);
