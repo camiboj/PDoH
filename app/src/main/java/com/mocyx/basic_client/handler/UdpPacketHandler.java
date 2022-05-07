@@ -26,12 +26,14 @@ public class UdpPacketHandler implements Runnable {
     private static final Integer TUNNEL_CAPACITY = 100;
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
+    private final BlockingQueue<ByteBuffer> dnsResponsesQueue;
     private final VpnService vpnService;
     private final Map<String, DatagramChannel> udpSockets;
 
-    public UdpPacketHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService) {
+    public UdpPacketHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService, BlockingQueue<ByteBuffer> dnsResponsesQueue) {
         this.queue = queue;
         this.networkToDeviceQueue = networkToDeviceQueue;
+        this.dnsResponsesQueue = dnsResponsesQueue;
         this.vpnService = vpnService;
         this.udpSockets = new HashMap<>();
     }
@@ -43,6 +45,8 @@ public class UdpPacketHandler implements Runnable {
             Selector selector = Selector.open();
             Thread t = new Thread(new UdpDownWorker(selector, networkToDeviceQueue, tunnelQueue));
             t.start();
+            Thread tDns = new Thread(new DnsDownWorker(selector, networkToDeviceQueue, tunnelQueue, dnsResponsesQueue));
+            tDns.start();
 
             while (true) {
                 Packet packet = queue.take();

@@ -4,10 +4,8 @@ import android.util.Log;
 
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.doh.GoogleDohResponse;
-import com.mocyx.basic_client.protocol.Packet;
-import com.mocyx.basic_client.protocol.PacketFactory;
+import com.mocyx.basic_client.util.ByteBufferPool;
 
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -16,11 +14,11 @@ import java.util.stream.Collectors;
 public class DnsController implements Runnable {
     private static final String TAG = "DnsController";
     private final DnsPacket dnsQuestionPacket;
-    private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
+    private final BlockingQueue<ByteBuffer> dnsResponsesQueue;
 
-    public DnsController(DnsPacket packet, BlockingQueue<ByteBuffer> networkToDeviceQueue) {
+    public DnsController(DnsPacket packet, BlockingQueue<ByteBuffer> dnsResponsesQueue) {
         this.dnsQuestionPacket = packet;
-        this.networkToDeviceQueue = networkToDeviceQueue;
+        this.dnsResponsesQueue = dnsResponsesQueue;
     }
 
     @Override
@@ -31,7 +29,7 @@ public class DnsController implements Runnable {
         ).collect(Collectors.toList());
 
         // TODO: check UdpDownWorker. maybe it is doing something similar
-        dnsResponsePackets.forEach(dnsPacket -> dnsPacket.setResponseTo(dnsQuestionPacket));
+        // dnsResponsePackets.forEach(dnsPacket -> dnsPacket.setResponseTo(dnsQuestionPacket));
 
 
         dnsResponsePackets.forEach(this::offerPacket);
@@ -39,17 +37,8 @@ public class DnsController implements Runnable {
 
 
     private void offerPacket(DnsPacket packet) {
-        // TEST TO SEE IF THE BYTE BUFFER (BACKING BUFFER) IS CORRECT
-        Log.i(TAG, String.format("originalPacket: %s", packet));
-        ByteBuffer b = packet.getBackingBuffer().duplicate();
-        b.position(0);
-        try {
-            Packet newPacket = PacketFactory.createPacket(b);
-            Log.i(TAG, String.format("newPacket: %s", newPacket));
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-
-        // networkToDeviceQueue.offer(packet.getBackingBuffer());
+        ByteBuffer buffer = ByteBufferPool.acquire();
+        packet.putOn(buffer);
+        dnsResponsesQueue.offer(buffer);
     }
 }

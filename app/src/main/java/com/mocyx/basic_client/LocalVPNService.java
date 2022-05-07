@@ -39,6 +39,7 @@ public class LocalVPNService extends VpnService {
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
+    private BlockingQueue<ByteBuffer> dnsResponsesQueue;
     private ExecutorService executorService;
 
     private static void closeResources(Closeable... resources) {
@@ -58,13 +59,14 @@ public class LocalVPNService extends VpnService {
         deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(1000);
         deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(1000);
         networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
+        dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
 
         executorService = Executors.newFixedThreadPool(10);
-        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
+        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this, dnsResponsesQueue));
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
+                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue, dnsResponsesQueue));
 
         Log.i(TAG, "Started");
     }
@@ -115,15 +117,18 @@ public class LocalVPNService extends VpnService {
         private BlockingQueue<Packet> deviceToNetworkUDPQueue;
         private BlockingQueue<Packet> deviceToNetworkTCPQueue;
         private BlockingQueue<ByteBuffer> networkToDeviceQueue;
+        private BlockingQueue<ByteBuffer> dnsResponsesQueue;
 
         public VPNRunnable(FileDescriptor vpnFileDescriptor,
                            BlockingQueue<Packet> deviceToNetworkUDPQueue,
                            BlockingQueue<Packet> deviceToNetworkTCPQueue,
-                           BlockingQueue<ByteBuffer> networkToDeviceQueue) {
+                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                           BlockingQueue<ByteBuffer> dnsResponsesQueue) {
             this.vpnFileDescriptor = vpnFileDescriptor;
             this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
             this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;
             this.networkToDeviceQueue = networkToDeviceQueue;
+            this.dnsResponsesQueue = dnsResponsesQueue;
         }
 
         @Override
@@ -149,12 +154,12 @@ public class LocalVPNService extends VpnService {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
-                                // TODO: when the mvp is ready, this won't be needed because the packet must not be offered to deviceToNetworkUDPQueue
-
-                                Thread thread = new Thread(new DnsController((DnsPacket) packet, networkToDeviceQueue));
+                                // TODO: maybe push packet into dnsRequestsQueue and have a worker processing them
+                                Thread thread = new Thread(new DnsController((DnsPacket) packet, dnsResponsesQueue));
                                 thread.start();
+
                                 // TODO: when the mvp is ready the packet must not be offered to deviceToNetworkUDPQueue
-                                deviceToNetworkUDPQueue.offer(packet);
+                                // deviceToNetworkUDPQueue.offer(packet);
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }
