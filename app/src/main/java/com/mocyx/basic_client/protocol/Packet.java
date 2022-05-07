@@ -42,10 +42,6 @@ public class Packet {
         this.setPackId();
     }
 
-    public void putOn(ByteBuffer buff) {
-        ip4Header.fillBuffer(buff);
-        header.fillBuffer(buff);
-    }
 
     private void setPackId() {
         AtomicInteger globalPackId = new AtomicInteger();
@@ -183,9 +179,17 @@ public class Packet {
         backingBuffer.putShort(IP4_HEADER_SIZE + 16, (short) sum);
     }
 
-    private void fillHeader(ByteBuffer buffer) {
+    protected void fillHeader(ByteBuffer buffer) {
         ip4Header.fillBuffer(buffer);
         header.fillBuffer(buffer);
+    }
+
+    public void setIp4Header(IP4Header ip4Header) {
+        this.ip4Header = ip4Header;
+    }
+
+    public void setHeader(Header header) {
+        this.header = header;
     }
 
     public IP4Header getIp4Header() {
@@ -202,11 +206,6 @@ public class Packet {
 
     public int getPackId() {
         return packId;
-    }
-
-    protected void copyFrom(DnsPacket other) {
-        this.ip4Header = new IP4Header(other.getIp4Header());
-        this.header = new UdpHeader((UdpHeader) other.getHeader());
     }
 }
 

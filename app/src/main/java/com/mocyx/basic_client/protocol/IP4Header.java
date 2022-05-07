@@ -42,22 +42,6 @@ public class IP4Header {
         this.optionsAndPadding = optionsAndPadding;
     }
 
-    public IP4Header(IP4Header other) {
-        this.version = other.version;
-        this.IHL = other.IHL;
-        this.headerLength = other.headerLength;
-        this.typeOfService = other.typeOfService;
-        this.totalLength = other.totalLength;
-        this.identificationAndFlagsAndFragmentOffset = other.identificationAndFlagsAndFragmentOffset;
-        this.TTL = other.TTL;
-        this.protocolNum = other.protocolNum;
-        this.protocol = other.protocol;
-        this.headerChecksum = other.headerChecksum;
-        this.sourceAddress = other.sourceAddress;
-        this.destinationAddress = other.destinationAddress;
-        this.optionsAndPadding = other.optionsAndPadding;
-    }
-
     public IP4Header(ByteBuffer buffer) throws UnknownHostException {
         byte versionAndIHL = buffer.get();
         this.version = (byte) (versionAndIHL >> 4);
@@ -138,5 +122,21 @@ public class IP4Header {
 
     public InetAddress getSourceAddress() {
         return sourceAddress;
+    }
+
+    public IP4Header createResponse() {
+        // copied from IpUtil.buildUdpPacket
+        InetAddress sourceAddress = this.destinationAddress;
+        InetAddress destinationAddress = this.sourceAddress;
+        int identificationAndFlagsAndFragmentOffset = 0;
+        int headerLength = 20;
+        int totalLength = 60;
+        int headerChecksum = 0;
+        short typeOfService = -96;
+        short TTL = 64;
+
+        return new IP4Header(version, IHL, headerLength, typeOfService, totalLength,
+                identificationAndFlagsAndFragmentOffset, TTL, protocolNum, protocol,
+                headerChecksum, sourceAddress, destinationAddress, optionsAndPadding);
     }
 }

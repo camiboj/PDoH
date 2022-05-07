@@ -1,7 +1,9 @@
 package com.mocyx.basic_client.protocol;
 
+import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 

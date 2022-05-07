@@ -3,6 +3,7 @@ package com.mocyx.basic_client.dns;
 import com.mocyx.basic_client.protocol.IP4Header;
 import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.protocol.UdpHeader;
+import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -29,8 +30,10 @@ public class DnsPacket extends Packet {
         this.questions = new ArrayList<>();
     }
 
-    public void copyHeaderFrom(DnsPacket other) {
-        super.copyFrom(other);
+    @Override
+    protected void fillHeader(ByteBuffer buffer) {
+        super.fillHeader(buffer);
+        putOn(buffer);
     }
 
     public void addAnswer(String name, int type, int ttl, String data) {
@@ -48,7 +51,6 @@ public class DnsPacket extends Packet {
     }
 
     public void putOn(ByteBuffer buff) {
-        super.putOn(buff);
         header.putOn(buff);
         questions.forEach(
                 x -> x.putOn(buff)
@@ -60,11 +62,25 @@ public class DnsPacket extends Packet {
 
     @Override
     public String toString() {
-        String superString = super.getHeader().toString() + super.getHeader().toString();
+        String superString = super.getIp4Header().toString() + super.getHeader().toString();
         return superString + "DnsPacket{" + "header=" + header +
                 ", questions=" + questions +
                 ", answers=" + answers +
                 '}';
+    }
+
+    public void setResponseTo(DnsPacket other) {
+        // THIS IS HORRIBLE I KNOW
+        super.setIp4Header(other.getIp4Header().createResponse());
+        super.setHeader(((UdpHeader) other.getHeader()).createResponse());
+
+        int headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
+        ByteBuffer byteBuffer = ByteBufferPool.acquire();
+        byteBuffer.position(headerSize);
+        putOn(byteBuffer);
+        int dataLen = byteBuffer.position() - headerSize;
+        this.updateUDPBuffer(byteBuffer, dataLen);
+        byteBuffer.position(headerSize + dataLen);
     }
 }
 
