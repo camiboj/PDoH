@@ -42,7 +42,7 @@ public class DnsToDoHController {
             e.printStackTrace();
         }
     }
-    // private static GoogleDohResponse
+
     private static GoogleDoHRequester processQuestion(DnsQuestion question) {
         GoogleDoHRequester googleDoH = new GoogleDoHRequester(question.getName());
         googleDoH.setType(question.getType());
