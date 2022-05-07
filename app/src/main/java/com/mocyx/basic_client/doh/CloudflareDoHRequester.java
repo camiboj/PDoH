@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocyx.basic_client.DoHToDnsController;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,21 +12,21 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-public class GoogleDoHRequester extends DoHRequester {
-
-    public GoogleDoHRequester(String name) {
+public class CloudflareDoHRequester extends DoHRequester {
+    public CloudflareDoHRequester(String name) {
         super(name);
-        ENDPOINT = "https://8.8.8.8/resolve?";
-        TAG = "GoogleDoH";
+        ENDPOINT = "https://1.1.1.1/dns-query?";
+        TAG = "CloudflareDoHRequester";
         HEADERS = new HashMap<String, List<String>>() {
             {
-                put("Accept", Collections.singletonList("application/json"));
+                put("Accept", Collections.singletonList("application/dns-json"));
             }};
     }
 }

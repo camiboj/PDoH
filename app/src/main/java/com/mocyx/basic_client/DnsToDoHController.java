@@ -45,6 +45,7 @@ public class DnsToDoHController {
 
     private static GoogleDoHRequester processQuestion(DnsQuestion question) {
         GoogleDoHRequester googleDoH = new GoogleDoHRequester(question.getName());
+        // GoogleDoHRequester googleDoH = new CloudflareDoHRequester(question.getName());
         googleDoH.setType(question.getType());
         return googleDoH;
     }
