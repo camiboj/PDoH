@@ -49,6 +49,13 @@ public class DohResponse {
             return sb.toString();
         }
 
+
+        public void setName(String name) { this.name = name; }
+
+        public void setType(int type) {
+            this.type = type;
+        }
+
         public String getName() {
             return name;
         }
