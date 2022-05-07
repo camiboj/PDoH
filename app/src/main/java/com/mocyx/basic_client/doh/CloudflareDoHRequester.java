@@ -9,7 +9,7 @@ public class CloudflareDoHRequester extends DoHRequester {
     public CloudflareDoHRequester(String name) {
         super(name);
         ENDPOINT = "https://1.1.1.1/dns-query?";
-        TAG = "CloudflareDoHRequester";
+
         HEADERS = new HashMap<String, List<String>>() {
             {
                 put("Accept", Collections.singletonList("application/dns-json"));

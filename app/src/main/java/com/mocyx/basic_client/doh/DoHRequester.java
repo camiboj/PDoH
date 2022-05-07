@@ -30,6 +30,7 @@ public abstract class DoHRequester implements Runnable {
     private DohResponse dohResponse;
 
     public DoHRequester(String name) {
+        TAG = this.getClass().getSimpleName();
         parameters.put("name", name);
     }
 

@@ -14,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.mocyx.basic_client.doh.CloudflareDoHRequester;
 import com.mocyx.basic_client.doh.GoogleDoHRequester;
+import com.mocyx.basic_client.doh.Quad9DoHRequester;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -97,5 +98,9 @@ public class MainActivity extends AppCompatActivity {
         t.start();
         Thread tg = new Thread(new GoogleDoHRequester("www.baeldung.com"));
         tg.start();
+
+        Thread tq = new Thread(new Quad9DoHRequester("www.baeldung.com"));
+        tq.start();
+
     }
 }
