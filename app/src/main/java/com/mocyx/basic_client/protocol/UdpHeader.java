@@ -72,10 +72,4 @@ public class UdpHeader implements Header {
         return sourcePort;
     }
 
-    public UdpHeader createResponse() {
-        // TODO:
-        // int length = ;
-        // int checksum = ;
-        return new UdpHeader(destinationPort, sourcePort);
-    }
 }

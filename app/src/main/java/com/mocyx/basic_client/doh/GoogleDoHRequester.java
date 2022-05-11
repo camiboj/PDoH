@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocyx.basic_client.DoHToDnsController;
 
 import java.io.BufferedReader;
 import java.io.IOException;

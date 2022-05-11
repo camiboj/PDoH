@@ -1,7 +1,5 @@
 package com.mocyx.basic_client;
 
-import android.util.Log;
-
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.doh.GoogleDohResponse;
 import com.mocyx.basic_client.util.ByteBufferPool;
@@ -26,7 +24,7 @@ public class DnsController implements Runnable {
     public void run() {
         List<GoogleDohResponse> googleDohResponses = DnsToDoHController.process(dnsQuestionPacket);
         List<DnsPacket> dnsResponsePackets = googleDohResponses.stream().map(
-                DoHToDnsController::process
+                DoHToDnsMapper::map
         ).collect(Collectors.toList());
 
         dnsResponsePackets.forEach(this::offerPacket);

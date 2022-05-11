@@ -70,18 +70,5 @@ public class DnsPacket extends Packet {
                 '}';
     }
 
-    public void setResponseTo(DnsPacket other) {
-        // THIS IS HORRIBLE I KNOW
-        super.setIp4Header(other.getIp4Header().createResponse());
-        super.setHeader(((UdpHeader) other.getHeader()).createResponse());
-
-        int headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
-        ByteBuffer byteBuffer = ByteBufferPool.acquire();
-        byteBuffer.position(headerSize);
-        putOn(byteBuffer);
-        int dataLen = byteBuffer.position() - headerSize;
-        this.updateUDPBuffer(byteBuffer, dataLen);
-        byteBuffer.position(headerSize + dataLen);
-    }
 }
 
