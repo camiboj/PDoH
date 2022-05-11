@@ -118,6 +118,7 @@ public class LocalVPNService extends VpnService {
         private BlockingQueue<Packet> deviceToNetworkTCPQueue;
         private BlockingQueue<ByteBuffer> networkToDeviceQueue;
         private BlockingQueue<ByteBuffer> dnsResponsesQueue;
+        private ExecutorService dnsWorkers;
 
         public VPNRunnable(FileDescriptor vpnFileDescriptor,
                            BlockingQueue<Packet> deviceToNetworkUDPQueue,
@@ -129,6 +130,7 @@ public class LocalVPNService extends VpnService {
             this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;
             this.networkToDeviceQueue = networkToDeviceQueue;
             this.dnsResponsesQueue = dnsResponsesQueue;
+            dnsWorkers = Executors.newFixedThreadPool(20); // TODO: fix this harcoded number. Some people use the number of cores of the machine
         }
 
         @Override
@@ -155,8 +157,7 @@ public class LocalVPNService extends VpnService {
                             if (packet.isDNS()) {
                                 Log.i(TAG, "[dns] this is a dns message");
                                 // TODO 1: maybe push packet into dnsRequestsQueue and have a worker processing them
-                                Thread thread = new Thread(new DnsController((DnsPacket) packet, dnsResponsesQueue));
-                                thread.start();
+                                dnsWorkers.submit(new DnsController((DnsPacket) packet, dnsResponsesQueue));
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }
@@ -181,6 +182,7 @@ public class LocalVPNService extends VpnService {
                 e.printStackTrace();
             } finally {
                 closeResources(vpnInput, vpnOutput);
+                dnsWorkers.shutdown();
             }
         }
 
