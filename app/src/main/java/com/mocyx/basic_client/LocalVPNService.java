@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.util.Pair;
 
 import com.mocyx.basic_client.config.Config;
 import com.mocyx.basic_client.dns.DnsPacket;
+import com.mocyx.basic_client.dns.DnsQuestion;
 import com.mocyx.basic_client.handler.TcpPacketHandler;
 import com.mocyx.basic_client.handler.UdpPacketHandler;
 import com.mocyx.basic_client.protocol.Packet;
@@ -26,6 +28,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class LocalVPNService extends VpnService {
     private static final String TAG = LocalVPNService.class.getSimpleName();
@@ -39,7 +42,7 @@ public class LocalVPNService extends VpnService {
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    private BlockingQueue<ByteBuffer> dnsResponsesQueue;
+    private BlockingQueue<Pair<DnsPacket, DnsPacket>> dnsResponsesQueue;
     private ExecutorService executorService;
 
     private static void closeResources(Closeable... resources) {
@@ -62,11 +65,11 @@ public class LocalVPNService extends VpnService {
         dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
 
         executorService = Executors.newFixedThreadPool(10);
-        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this, dnsResponsesQueue));
+        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue, dnsResponsesQueue));
+                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
 
         Log.i(TAG, "Started");
     }
@@ -111,26 +114,24 @@ public class LocalVPNService extends VpnService {
 
     private static class VPNRunnable implements Runnable {
         private static final String TAG = VPNRunnable.class.getSimpleName();
+        private static final int N_DNS_WORKERS = 50;
 
         private FileDescriptor vpnFileDescriptor;
 
         private BlockingQueue<Packet> deviceToNetworkUDPQueue;
         private BlockingQueue<Packet> deviceToNetworkTCPQueue;
         private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-        private BlockingQueue<ByteBuffer> dnsResponsesQueue;
         private ExecutorService dnsWorkers;
 
         public VPNRunnable(FileDescriptor vpnFileDescriptor,
                            BlockingQueue<Packet> deviceToNetworkUDPQueue,
                            BlockingQueue<Packet> deviceToNetworkTCPQueue,
-                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                           BlockingQueue<ByteBuffer> dnsResponsesQueue) {
+                           BlockingQueue<ByteBuffer> networkToDeviceQueue) {
             this.vpnFileDescriptor = vpnFileDescriptor;
             this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
             this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;
             this.networkToDeviceQueue = networkToDeviceQueue;
-            this.dnsResponsesQueue = dnsResponsesQueue;
-            dnsWorkers = Executors.newFixedThreadPool(20); // TODO: fix this harcoded number. Some people use the number of cores of the machine
+            dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         }
 
         @Override
@@ -155,9 +156,17 @@ public class LocalVPNService extends VpnService {
                         if (packet.isUDP()) {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
-                                Log.i(TAG, "[dns] this is a dns message");
-                                // TODO 1: maybe push packet into dnsRequestsQueue and have a worker processing them
-                                dnsWorkers.submit(new DnsController((DnsPacket) packet, dnsResponsesQueue));
+                                Boolean real = false;
+                                if (real) {
+                                    Log.i(TAG, "[dns] this is a dns message");
+                                    Log.i(TAG, "[dns] name: " + ((DnsPacket) packet).getQuestions().stream().map(DnsQuestion::getName).collect(Collectors.toList()));
+                                    deviceToNetworkUDPQueue.offer(packet);
+                                    Log.i(TAG, "Dns request: " + packet);
+                                } else {
+                                    Log.i(TAG, "[dns] this is a dns message");
+                                    // TODO 1: maybe push packet into dnsRequestsQueue and have a worker processing them
+                                    dnsWorkers.submit(new DnsController((DnsPacket) packet, deviceToNetworkUDPQueue));
+                                }
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }

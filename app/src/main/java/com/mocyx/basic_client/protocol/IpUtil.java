@@ -23,6 +23,23 @@ public class IpUtil {
     private static int WINDOW = 65535;
     private static int URGENT_POINTER = 0;
 
+    public static DnsPacket buildDnsPacketFrom(DnsPacket other) {
+        //InetAddress destinationAddress = other.getIp4Header().getSourceAddress();
+        InetAddress sourceAddress = other.getIp4Header().getDestinationAddress();
+        IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
+                TYPE_OF_SERVICE, TOTAL_LENGTH,
+                0,
+                TTL, TransportProtocol.UDP.getNumber(), TransportProtocol.UDP, HEADER_CHECKSUM,
+                sourceAddress, sourceAddress,
+                OPTIONS_AND_PADDING);
+
+
+        int destinationPort = ((UdpHeader) other.getHeader()).getSourcePort();
+        int sourcePort = ((UdpHeader) other.getHeader()).getDestinationPort();
+        UdpHeader udpHeader = new UdpHeader(sourcePort, destinationPort);
+        return new DnsPacket(ip4Header, udpHeader);
+    }
+
     public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId) {
         IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
                 TYPE_OF_SERVICE, TOTAL_LENGTH,
@@ -54,5 +71,9 @@ public class IpUtil {
         byteBuffer.flip();
 
         return new Packet(ip4Header, tcpHeader, byteBuffer);
+    }
+
+    public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest) {
+        return buildUdpPacket(source, dest, 0);
     }
 }

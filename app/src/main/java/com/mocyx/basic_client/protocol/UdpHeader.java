@@ -5,8 +5,8 @@ import com.mocyx.basic_client.util.BitUtils;
 import java.nio.ByteBuffer;
 
 public class UdpHeader implements Header {
-    private final int sourcePort;
-    private final int destinationPort;
+    private int sourcePort;
+    private int destinationPort;
     private int length;
     private int checksum;
 
@@ -22,6 +22,8 @@ public class UdpHeader implements Header {
         this.destinationPort = destinationPort;
         this.length = 0;
     }
+
+    public UdpHeader(){}
 
     @Override
     public void fillBuffer(ByteBuffer buffer) {
@@ -60,6 +62,10 @@ public class UdpHeader implements Header {
         this.checksum = checksum;
     }
 
+    public void setSourcePort(int sourcePort) { this.sourcePort = sourcePort; }
+
+    public void setDestinationPort(int destinationPort) { this.destinationPort = destinationPort; }
+
     public boolean isDNS() {
         return destinationPort == 53 || sourcePort == 53;
     }
@@ -71,5 +77,4 @@ public class UdpHeader implements Header {
     public int getSourcePort() {
         return sourcePort;
     }
-
 }

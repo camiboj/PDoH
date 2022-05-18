@@ -18,9 +18,8 @@ abstract class DnsName {
     private final List<String> name;
 
     public DnsName(String name) {
-        this.name = new ArrayList<String>(Arrays.asList(name.split("\\."))); // TODO: split
+        this.name = new ArrayList<>(Arrays.asList(name.split("\\."))); // TODO: split
         Log.i(TAG, String.format("name: %s", name));
-        Log.i(TAG, String.format("this.name: %s", this.name));
     }
 
     public DnsName(ByteBuffer buffer) {
@@ -35,7 +34,6 @@ abstract class DnsName {
             name.add(sb.toString());
             labelLength = BitUtils.getUnsignedByte(buffer.get());
         }
-        Log.i(TAG, String.format("dns packet: %s", name));
     }
 
     public void putOn(ByteBuffer buf) { // is there a superclass method to override?
@@ -53,7 +51,6 @@ abstract class DnsName {
 
     static class StringToBufferHelper {
         private static void putOn(ByteBuffer buffer, String str) {
-            Log.i(TAG, String.format("str: %s", str));
             buffer.put((byte) str.length());
             for (byte b : str.getBytes(StandardCharsets.UTF_8)) {
                 buffer.put(b);
