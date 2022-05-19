@@ -4,8 +4,10 @@ import android.net.VpnService;
 import android.util.Log;
 
 import com.mocyx.basic_client.protocol.IP4Header;
+import com.mocyx.basic_client.protocol.IpUtil;
 import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.protocol.UdpHeader;
+import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -15,6 +17,7 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.Selector;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,25 +40,51 @@ public class UdpPacketHandler implements Runnable {
         this.udpSockets = new HashMap<>();
     }
 
+    private void hack (UdpTunnel tunnel, ByteBuffer byteBuffer, AtomicInteger ipId) {
+        int headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
+        byte[] data = new byte[byteBuffer.remaining()];
+        int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
+
+        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
+
+        /*ByteBuffer byteBuffer = ByteBufferPool.acquire();
+        byteBuffer.position(headerSize);
+
+        if (data != null) {
+            if (byteBuffer.remaining() < data.length) { // TODO: maybe this could be dataLen? why ask for length again?
+                System.currentTimeMillis();
+            }
+            byteBuffer.put(data);
+        }*/
+
+        packet.updateUDPBuffer(byteBuffer, dataLen);
+        byteBuffer.position(headerSize + dataLen);
+        ByteBuffer bufferDuplicated = byteBuffer.duplicate();
+        bufferDuplicated.flip();
+        this.networkToDeviceQueue.offer(byteBuffer);
+    }
     @Override
     public void run() {
         try {
             BlockingQueue<UdpTunnel> tunnelQueue = new ArrayBlockingQueue<>(TUNNEL_CAPACITY);
             Selector selector = Selector.open();
-            Thread t = new Thread(new UdpDownWorker(selector, networkToDeviceQueue, tunnelQueue));
+            UdpDownWorker udpdw = new UdpDownWorker(selector, networkToDeviceQueue, tunnelQueue);
+            Thread t = new Thread(udpdw);
             t.start();
 
             while (true) {
                 Packet packet = queue.take();
                 InetAddress destinationAddress = packet.getIp4Header().getDestinationAddress();
+                InetAddress sourceAddress = packet.getIp4Header().getSourceAddress();
                 UdpHeader header = (UdpHeader) packet.getHeader();
                 int destinationPort = header.getDestinationPort();
                 int sourcePort = header.getSourcePort();
                 String ipAndPort = destinationAddress.getHostAddress() + ":" + destinationPort + ":" + sourcePort;
-
+                UdpTunnel tunnel;
                 if (!udpSockets.containsKey(ipAndPort)) {
                     DatagramChannel outputChannel = DatagramChannel.open();
                     vpnService.protect(outputChannel.socket());
+                    // InetSocketAddress addr = sourcePort == 53? new InetSocketAddress(sourceAddress) : null;
                     outputChannel.socket().bind(null);
                     outputChannel.connect(new InetSocketAddress(destinationAddress, destinationPort));
                     outputChannel.configureBlocking(false);
@@ -65,12 +94,17 @@ public class UdpPacketHandler implements Runnable {
                             header.getSourcePort());
                     InetSocketAddress remote = new InetSocketAddress(ip4Header.getDestinationAddress(),
                             header.getDestinationPort());
-                    UdpTunnel tunnel = new UdpTunnel(local, remote, outputChannel);
-                    tunnelQueue.offer(tunnel);
+                    tunnel = new UdpTunnel(local, remote, outputChannel);
+                    if (!packet.isDNS() || packet.isDNS()) {
+                        tunnelQueue.offer(tunnel);
 
-                    selector.wakeup();
+                        selector.wakeup();
 
-                    udpSockets.put(ipAndPort, outputChannel);
+                        udpSockets.put(ipAndPort, outputChannel);
+                    } else {
+                        hack(tunnel, packet.getBackingBuffer(), udpdw.ipId);
+                        continue;
+                    }
                 }
 
                 DatagramChannel outputChannel = udpSockets.get(ipAndPort);

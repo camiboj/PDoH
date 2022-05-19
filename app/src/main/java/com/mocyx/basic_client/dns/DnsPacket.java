@@ -30,6 +30,9 @@ public class DnsPacket extends Packet {
         this.dnsHeader = new DnsHeader();
         this.questions = new ArrayList<>();
     }
+    public boolean isDNS() {
+        return true;
+    }
 
     public void addAnswer(String name, int type, int ttl, String data) {
         this.dnsHeader.addAnswer();

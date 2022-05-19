@@ -42,7 +42,6 @@ public class LocalVPNService extends VpnService {
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    private BlockingQueue<Pair<DnsPacket, DnsPacket>> dnsResponsesQueue;
     private ExecutorService executorService;
 
     private static void closeResources(Closeable... resources) {
@@ -62,7 +61,6 @@ public class LocalVPNService extends VpnService {
         deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(1000);
         deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(1000);
         networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
-        dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
 
         executorService = Executors.newFixedThreadPool(10);
         executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));

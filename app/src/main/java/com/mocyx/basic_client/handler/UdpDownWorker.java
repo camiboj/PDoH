@@ -19,7 +19,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class UdpDownWorker implements Runnable {
-    private final AtomicInteger ipId;
+    public final AtomicInteger ipId;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final BlockingQueue<UdpTunnel> tunnelQueue;
     private final Selector selector;

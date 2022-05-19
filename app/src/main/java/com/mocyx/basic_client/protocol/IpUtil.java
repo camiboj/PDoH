@@ -25,18 +25,21 @@ public class IpUtil {
 
     public static DnsPacket buildDnsPacketFrom(DnsPacket other) {
         //InetAddress destinationAddress = other.getIp4Header().getSourceAddress();
-        InetAddress sourceAddress = other.getIp4Header().getDestinationAddress();
+
+        int otherDestinationPort = ((UdpHeader) other.getHeader()).getDestinationPort();
+        int otherSourcePort = ((UdpHeader) other.getHeader()).getSourcePort();
+
+        InetAddress otherSourceAddress = other.getIp4Header().getSourceAddress();
+        // otherSourceAddress = new InetSocketAddress("127.0.0.1", otherSourcePort).getAddress();
         IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
                 TYPE_OF_SERVICE, TOTAL_LENGTH,
                 0,
                 TTL, TransportProtocol.UDP.getNumber(), TransportProtocol.UDP, HEADER_CHECKSUM,
-                sourceAddress, sourceAddress,
+                otherSourceAddress, new InetSocketAddress("127.0.0.1", otherSourcePort).getAddress(),
                 OPTIONS_AND_PADDING);
 
 
-        int destinationPort = ((UdpHeader) other.getHeader()).getSourcePort();
-        int sourcePort = ((UdpHeader) other.getHeader()).getDestinationPort();
-        UdpHeader udpHeader = new UdpHeader(sourcePort, destinationPort);
+        UdpHeader udpHeader = new UdpHeader(otherSourcePort, otherSourcePort);
         return new DnsPacket(ip4Header, udpHeader);
     }
 
