@@ -30,17 +30,22 @@ public class IpUtil {
         int otherSourcePort = ((UdpHeader) other.getHeader()).getSourcePort();
 
         InetAddress otherSourceAddress = other.getIp4Header().getSourceAddress();
+        InetAddress otherDestinationAddress = other.getIp4Header().getDestinationAddress();
         // otherSourceAddress = new InetSocketAddress("127.0.0.1", otherSourcePort).getAddress();
         IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
                 TYPE_OF_SERVICE, TOTAL_LENGTH,
                 0,
                 TTL, TransportProtocol.UDP.getNumber(), TransportProtocol.UDP, HEADER_CHECKSUM,
-                otherSourceAddress, new InetSocketAddress("127.0.0.1", otherSourcePort).getAddress(),
+                otherDestinationAddress, otherSourceAddress,
                 OPTIONS_AND_PADDING);
 
 
-        UdpHeader udpHeader = new UdpHeader(otherSourcePort, otherSourcePort);
+        UdpHeader udpHeader = new UdpHeader(otherDestinationPort, otherSourcePort);
         return new DnsPacket(ip4Header, udpHeader);
+    }
+
+    public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
+        dnsResponse.getIp4Header().setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
     }
 
     public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId) {

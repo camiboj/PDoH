@@ -11,6 +11,7 @@ import android.util.Pair;
 import com.mocyx.basic_client.config.Config;
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.dns.DnsQuestion;
+import com.mocyx.basic_client.handler.DnsDownWorker;
 import com.mocyx.basic_client.handler.TcpPacketHandler;
 import com.mocyx.basic_client.handler.UdpPacketHandler;
 import com.mocyx.basic_client.protocol.Packet;
@@ -41,6 +42,7 @@ public class LocalVPNService extends VpnService {
 
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
+    private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService executorService;
 
@@ -60,14 +62,16 @@ public class LocalVPNService extends VpnService {
         setupVPN();
         deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(1000);
         deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(1000);
+        dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
         networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
         executorService = Executors.newFixedThreadPool(10);
         executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
+        executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
+                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue,  networkToDeviceQueue));
 
         Log.i(TAG, "Started");
     }
@@ -118,17 +122,21 @@ public class LocalVPNService extends VpnService {
 
         private BlockingQueue<Packet> deviceToNetworkUDPQueue;
         private BlockingQueue<Packet> deviceToNetworkTCPQueue;
+        private BlockingQueue<DnsPacket> dnsResponsesQueue;
         private BlockingQueue<ByteBuffer> networkToDeviceQueue;
         private ExecutorService dnsWorkers;
 
         public VPNRunnable(FileDescriptor vpnFileDescriptor,
                            BlockingQueue<Packet> deviceToNetworkUDPQueue,
                            BlockingQueue<Packet> deviceToNetworkTCPQueue,
+                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                            BlockingQueue<ByteBuffer> networkToDeviceQueue) {
             this.vpnFileDescriptor = vpnFileDescriptor;
             this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
             this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;
             this.networkToDeviceQueue = networkToDeviceQueue;
+            this.dnsResponsesQueue = dnsResponsesQueue;
+
             dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         }
 
@@ -163,7 +171,7 @@ public class LocalVPNService extends VpnService {
                                 } else {
                                     Log.i(TAG, "[dns] this is a dns message");
                                     // TODO 1: maybe push packet into dnsRequestsQueue and have a worker processing them
-                                    dnsWorkers.submit(new DnsController((DnsPacket) packet, deviceToNetworkUDPQueue));
+                                    dnsWorkers.submit(new DnsController((DnsPacket) packet, dnsResponsesQueue));
                                 }
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
@@ -208,6 +216,16 @@ public class LocalVPNService extends VpnService {
                     try {
                         ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
                         bufferFromNetwork.flip();
+
+                        ByteBuffer packetBackingBuffer = bufferFromNetwork.duplicate();
+                        Packet packet = PacketFactory.createPacket(packetBackingBuffer);
+                        if (packet.isUDP()) {
+                            if (packet.isDNS()) {
+                                Log.i(TAG, "[input dns] this is a dns message");
+                                Log.i(TAG, "[input dns] dns packet: " + packet);
+                            }
+                        }
+                        bufferFromNetwork.position(0);
                         while (bufferFromNetwork.hasRemaining()) {
                             int w = vpnOutput.write(bufferFromNetwork);
                             if (w > 0) {

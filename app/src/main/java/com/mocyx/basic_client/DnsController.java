@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 public class DnsController implements Runnable {
     private static final String TAG = "DnsController";
     private final DnsPacket dnsRequestPacket;
-    private final BlockingQueue<Packet> dnsResponsesQueue;
+    private final BlockingQueue<DnsPacket> dnsResponsesQueue;
 
-    public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<Packet> dnsResponsesQueue) {
+    public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue) {
         this.dnsRequestPacket = dnsRequestPacket;
         this.dnsResponsesQueue = dnsResponsesQueue;
     }
