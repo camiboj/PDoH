@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DnsToDoHController {
-    private static final String TAG = "DnsToNetworkController";
+    private static final String TAG = DnsToDoHController.class.getSimpleName();;
     // TODO: add logs
 
 

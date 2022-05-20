@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DnsDownWorker implements Runnable {
     private final BlockingQueue<DnsPacket> dnsResponsesQueue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    protected final static String TAG = "DnsDownWorker";
+    protected final static String TAG = DnsDownWorker.class.getSimpleName();;
     public final AtomicInteger ipId;
     private final int headerSize;
 
@@ -34,8 +34,6 @@ public class DnsDownWorker implements Runnable {
         int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
 
         IpUtil.updateIdentificationAndFlagsAndFragmentOffset(dnsResponse, ipId.addAndGet(1));
-        // DnsPacket packet = IpUtil.buildUdpPacket(sourceAddress, destinationAddress, ipId.addAndGet(1));
-
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         byteBuffer.position(this.headerSize);
 

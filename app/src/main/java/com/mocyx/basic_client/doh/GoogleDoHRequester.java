@@ -20,7 +20,7 @@ public class GoogleDoHRequester implements Runnable {
     // https://www.baeldung.com/java-http-request
     // https://www.baeldung.com/httpurlconnection-post
     private final static String ENDPOINT = "https://8.8.8.8/resolve?";
-    private final static String TAG = "GoogleDoH";
+    private final static String TAG = GoogleDoHRequester.class.getSimpleName();;
     Map<String, String> parameters = new HashMap<>();
     private GoogleDohResponse googleDohResponse;
 

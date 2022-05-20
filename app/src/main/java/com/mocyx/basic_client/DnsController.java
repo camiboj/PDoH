@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 // TODO: add logs
 public class DnsController implements Runnable {
-    private static final String TAG = "DnsController";
+    private static final String TAG = DnsController.class.getSimpleName();;
     private final DnsPacket dnsRequestPacket;
     private final BlockingQueue<DnsPacket> dnsResponsesQueue;
 

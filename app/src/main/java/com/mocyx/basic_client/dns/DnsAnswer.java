@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 public class DnsAnswer {
     // https://www.firewall.cx/networking-topics/protocols/domain-name-system-dns/161-protocols-dns-response.html
-    private final static String TAG = "DnsAnswer";
+    private final static String TAG = DnsAnswer.class.getSimpleName();;
 
     private final DnsAnswerName name;
     private final int type;
@@ -15,8 +15,8 @@ public class DnsAnswer {
     // define a constant value that make sense. There is no class attr on Google DoH response
     private final int answClass = 1;
 
-    private final int ttl; // define as time type object(?
-    private final String data; // Address/CNAME
+    private final int ttl;
+    private final String data;
 
     public DnsAnswer(String name, int type, int ttl, String data) {
         this.name = new DnsAnswerName(name);
@@ -25,7 +25,7 @@ public class DnsAnswer {
         this.data = data;
     }
 
-    public void putOn(ByteBuffer buffer) { // is there a superclass method to override?
+    public void putOn(ByteBuffer buffer) {
         name.putOn(buffer);
         buffer.putShort(BitUtils.intToShort(type));
         buffer.putShort(BitUtils.intToShort(answClass));
@@ -34,12 +34,10 @@ public class DnsAnswer {
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GoogleDohAnswer {");
-        sb.append("name=").append(name);
-        sb.append(", type=").append(type);
-        sb.append(", ttl=").append(ttl);
-        sb.append(", data=").append(data);
-        sb.append('}');
-        return sb.toString();
+        return "GoogleDohAnswer {" + "name=" + name +
+                ", type=" + type +
+                ", ttl=" + ttl +
+                ", data=" + data +
+                '}';
     }
 }

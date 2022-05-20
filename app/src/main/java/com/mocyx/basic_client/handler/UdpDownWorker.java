@@ -24,7 +24,7 @@ public class UdpDownWorker implements Runnable {
     private final BlockingQueue<UdpTunnel> tunnelQueue;
     private final Selector selector;
     private final int headerSize;
-    protected final static String TAG = "UdpDownWorker";
+    protected final static String TAG = UdpDownWorker.class.getSimpleName();;
 
     public UdpDownWorker(Selector selector, BlockingQueue<ByteBuffer> networkToDeviceQueue,
                          BlockingQueue<UdpTunnel> tunnelQueue) {
@@ -106,11 +106,6 @@ public class UdpDownWorker implements Runnable {
         DatagramChannel inputChannel = (DatagramChannel) key.channel();
         ByteBuffer receiveBuffer = ByteBufferPool.acquire();
         inputChannel.read(receiveBuffer);
-        // Packet packet = PacketFactory.createPacket(bufferDuplicated);
-        // Log.i(TAG, "Dns response?: " + packet);
-        // if (packet.isDNS()) {
-        //     Log.i(TAG, "Dns response: " + packet);
-        // }
         return receiveBuffer;
     }
 }

@@ -24,14 +24,12 @@ public class IpUtil {
     private static int URGENT_POINTER = 0;
 
     public static DnsPacket buildDnsPacketFrom(DnsPacket other) {
-        //InetAddress destinationAddress = other.getIp4Header().getSourceAddress();
+        InetAddress otherSourceAddress = other.getIp4Header().getSourceAddress();
+        InetAddress otherDestinationAddress = other.getIp4Header().getDestinationAddress();
 
         int otherDestinationPort = ((UdpHeader) other.getHeader()).getDestinationPort();
         int otherSourcePort = ((UdpHeader) other.getHeader()).getSourcePort();
 
-        InetAddress otherSourceAddress = other.getIp4Header().getSourceAddress();
-        InetAddress otherDestinationAddress = other.getIp4Header().getDestinationAddress();
-        // otherSourceAddress = new InetSocketAddress("127.0.0.1", otherSourcePort).getAddress();
         IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
                 TYPE_OF_SERVICE, TOTAL_LENGTH,
                 0,
@@ -79,9 +77,5 @@ public class IpUtil {
         byteBuffer.flip();
 
         return new Packet(ip4Header, tcpHeader, byteBuffer);
-    }
-
-    public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest) {
-        return buildUdpPacket(source, dest, 0);
     }
 }

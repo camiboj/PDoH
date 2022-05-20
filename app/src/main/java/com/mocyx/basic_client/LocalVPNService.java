@@ -162,17 +162,8 @@ public class LocalVPNService extends VpnService {
                         if (packet.isUDP()) {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
-                                Boolean real = false;
-                                if (real) {
-                                    Log.i(TAG, "[dns] this is a dns message");
-                                    Log.i(TAG, "[dns] name: " + ((DnsPacket) packet).getQuestions().stream().map(DnsQuestion::getName).collect(Collectors.toList()));
-                                    deviceToNetworkUDPQueue.offer(packet);
-                                    Log.i(TAG, "Dns request: " + packet);
-                                } else {
-                                    Log.i(TAG, "[dns] this is a dns message");
-                                    // TODO 1: maybe push packet into dnsRequestsQueue and have a worker processing them
-                                    dnsWorkers.submit(new DnsController((DnsPacket) packet, dnsResponsesQueue));
-                                }
+                                Log.i(TAG, "[dns] this is a dns message");
+                                dnsWorkers.submit(new DnsController((DnsPacket) packet, dnsResponsesQueue));
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }
@@ -219,12 +210,6 @@ public class LocalVPNService extends VpnService {
 
                         ByteBuffer packetBackingBuffer = bufferFromNetwork.duplicate();
                         Packet packet = PacketFactory.createPacket(packetBackingBuffer);
-                        if (packet.isUDP()) {
-                            if (packet.isDNS()) {
-                                Log.i(TAG, "[input dns] this is a dns message");
-                                Log.i(TAG, "[input dns] dns packet: " + packet);
-                            }
-                        }
                         bufferFromNetwork.position(0);
                         while (bufferFromNetwork.hasRemaining()) {
                             int w = vpnOutput.write(bufferFromNetwork);
