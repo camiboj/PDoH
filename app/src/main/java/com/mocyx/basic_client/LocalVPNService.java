@@ -65,7 +65,7 @@ public class LocalVPNService extends VpnService {
         dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
         networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
-        executorService = Executors.newFixedThreadPool(10);
+        executorService = Executors.newFixedThreadPool(4); // TODO: fix this, only for debugging
         executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
         executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
@@ -162,8 +162,10 @@ public class LocalVPNService extends VpnService {
                         if (packet.isUDP()) {
                             Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
-                                Log.i(TAG, "[dns] this is a dns message");
-                                dnsWorkers.submit(new DnsController((DnsPacket) packet, dnsResponsesQueue));
+                                DnsPacket dnsPacket = (DnsPacket) packet;
+                                Log.i(TAG, String.format("[dns] this is a dns message: %s", dnsPacket));
+                                //deviceToNetworkUDPQueue.offer(packet);
+                                dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue));
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }
@@ -206,11 +208,19 @@ public class LocalVPNService extends VpnService {
                 while (true) {
                     try {
                         ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
+
                         bufferFromNetwork.flip();
 
+                        // TODO: remove debugging tool
                         ByteBuffer packetBackingBuffer = bufferFromNetwork.duplicate();
                         Packet packet = PacketFactory.createPacket(packetBackingBuffer);
-                        bufferFromNetwork.position(0);
+                        if (packet.isUDP()) {
+                            if (packet.isDNS()) {
+                                Log.i(TAG, "[input dns] this is a dns message");
+                                Log.i(TAG, "[input dns] dns packet: " + packet);
+                            }
+                        }
+
                         while (bufferFromNetwork.hasRemaining()) {
                             int w = vpnOutput.write(bufferFromNetwork);
                             if (w > 0) {

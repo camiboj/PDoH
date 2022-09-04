@@ -1,5 +1,6 @@
 package com.mocyx.basic_client;
 
+import android.util.Log;
 import android.util.Pair;
 
 import com.mocyx.basic_client.dns.DnsPacket;
@@ -30,9 +31,7 @@ public class DnsController implements Runnable {
         ).collect(Collectors.toList());
 
         dnsResponsePackets.forEach(this::offerPacket);
-
     }
-
 
     private DnsPacket createResponsePacket(GoogleDohResponse dohResponse) {
         DnsPacket dnsResponsePacket = IpUtil.buildDnsPacketFrom(dnsRequestPacket);

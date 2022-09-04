@@ -124,6 +124,10 @@ public class IP4Header {
         return sourceAddress;
     }
 
+    public int getIdentificationAndFlagsAndFragmentOffset() {
+        return identificationAndFlagsAndFragmentOffset;
+    }
+
     public void setIdentificationAndFlagsAndFragmentOffset(int i) {
         identificationAndFlagsAndFragmentOffset = i;
     }

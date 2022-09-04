@@ -23,11 +23,19 @@ public class DnsPacket extends Packet {
         for (int i = 0; i < dnsHeader.getNQuestions(); i++) {
             questions.add(new DnsQuestion(bufferDuplicated));
         }
+        // For now we wont map answers because we will do that programmatically
     }
 
-    public DnsPacket(IP4Header ip4Header, UdpHeader udpHeader) {
+    public DnsPacket(IP4Header ip4Header, UdpHeader udpHeader, int id, int flags) {
         super(ip4Header, udpHeader, ByteBufferPool.acquire());
-        this.dnsHeader = new DnsHeader();
+        this.dnsHeader = new DnsHeader(id, flags, 0, 0, 0, 0);
+        this.questions = new ArrayList<>();
+    }
+
+    public DnsPacket(IP4Header ip4Header, UdpHeader udpHeader, DnsHeader dnsHeader) {
+        super(ip4Header, udpHeader, ByteBufferPool.acquire());
+        //this.dnsHeader = new DnsHeader();
+        this.dnsHeader = dnsHeader;
         this.questions = new ArrayList<>();
     }
     public boolean isDNS() {
@@ -37,6 +45,10 @@ public class DnsPacket extends Packet {
     public void addAnswer(String name, int type, int ttl, String data) {
         this.dnsHeader.addAnswer();
         this.answers.add(new DnsAnswer(name, type, ttl, data));
+    }
+
+    public DnsHeader getDnsHeader() {
+        return this.dnsHeader;
     }
 
     public void addQuestion(String name, int type) {
@@ -54,12 +66,18 @@ public class DnsPacket extends Packet {
         int packetHeaderSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
         buff.position(packetHeaderSize);
         dnsHeader.putOn(buff);
+
+        int firstAnswerNamePos = buff.position() - packetHeaderSize;
+
         questions.forEach(
                 x -> x.putOn(buff)
         );
-        answers.forEach(
-                x -> x.putOn(buff)
-        );
+
+        for (int i = 0; i < answers.size(); i++) {
+            DnsAnswer dnsAnswer = answers.get(i);
+            firstAnswerNamePos = dnsAnswer.putOn(buff, firstAnswerNamePos) - packetHeaderSize;
+        }
+
         buff.flip();
         buff.position(packetHeaderSize);
     }

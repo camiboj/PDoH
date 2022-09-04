@@ -11,6 +11,7 @@ public class DoHToDnsMapper {
     public static void map(GoogleDohResponse dohResponse, DnsPacket dnsPacket) {
         Log.i(TAG, String.format("dohResponse: %s", dohResponse));
 
+        // TODO: change this
         dohResponse.getAnswers().forEach(
                 x -> dnsPacket.addAnswer(x.getName(), x.getType(), x.getTtl(), x.getData())
         );

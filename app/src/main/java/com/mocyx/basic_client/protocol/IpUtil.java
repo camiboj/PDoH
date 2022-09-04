@@ -1,5 +1,6 @@
 package com.mocyx.basic_client.protocol;
 
+import com.mocyx.basic_client.dns.DnsHeader;
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
@@ -22,26 +23,34 @@ public class IpUtil {
     private static int TCP_HEADER_LENGTH = 40;
     private static int WINDOW = 65535;
     private static int URGENT_POINTER = 0;
+    private static int FLAGS = 33152; // It was checked against a DNS packet
 
     public static DnsPacket buildDnsPacketFrom(DnsPacket other) {
-        InetAddress otherSourceAddress = other.getIp4Header().getSourceAddress();
-        InetAddress otherDestinationAddress = other.getIp4Header().getDestinationAddress();
+        IP4Header sourceIp4Header = other.getIp4Header();
+        UdpHeader sourceUdpHeader = (UdpHeader) other.getHeader();
+        DnsHeader sourceDnsHeader = other.getDnsHeader();
 
-        int otherDestinationPort = ((UdpHeader) other.getHeader()).getDestinationPort();
-        int otherSourcePort = ((UdpHeader) other.getHeader()).getSourcePort();
+        InetAddress otherSourceAddress = sourceIp4Header.getSourceAddress();
+        InetAddress otherDestinationAddress = sourceIp4Header.getDestinationAddress();
+        int idAndFlagsAndFragmentOffset = sourceIp4Header.getIdentificationAndFlagsAndFragmentOffset();
+
+        int otherDestinationPort = sourceUdpHeader.getDestinationPort();
+        int otherSourcePort = sourceUdpHeader.getSourcePort();
 
         IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
                 TYPE_OF_SERVICE, TOTAL_LENGTH,
-                0,
+                idAndFlagsAndFragmentOffset,
                 TTL, TransportProtocol.UDP.getNumber(), TransportProtocol.UDP, HEADER_CHECKSUM,
                 otherDestinationAddress, otherSourceAddress,
                 OPTIONS_AND_PADDING);
 
-
         UdpHeader udpHeader = new UdpHeader(otherDestinationPort, otherSourcePort);
-        return new DnsPacket(ip4Header, udpHeader);
+
+        int dnsId = sourceDnsHeader.getIdentification();
+        return new DnsPacket(ip4Header, udpHeader, dnsId, FLAGS);
     }
 
+    // TODO: check this
     public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
         dnsResponse.getIp4Header().setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
     }

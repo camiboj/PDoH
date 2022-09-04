@@ -1,5 +1,7 @@
 package com.mocyx.basic_client.handler;
 
+import android.util.Log;
+
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.protocol.IpUtil;
 import com.mocyx.basic_client.protocol.Packet;
@@ -27,24 +29,23 @@ public class DnsDownWorker implements Runnable {
 
 
     private void updateUdpHeader(DnsPacket dnsResponse) {
+        // TODO: response is bad mapped here. We should do something to
+
+        // Get the len of the data
         ByteBuffer backingBuffer = dnsResponse.getBackingBuffer();
         byte[] data = new byte[dnsResponse.getBackingBuffer().remaining()];
         backingBuffer.get(data);
-
         int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
 
         IpUtil.updateIdentificationAndFlagsAndFragmentOffset(dnsResponse, ipId.addAndGet(1));
-        ByteBuffer byteBuffer = ByteBufferPool.acquire();
-        byteBuffer.position(this.headerSize);
 
-        if (data != null) {
-            if (byteBuffer.remaining() < data.length) { // TODO: maybe this could be dataLen? why ask for length again?
-                System.currentTimeMillis();
-            }
-            byteBuffer.put(data);
-        }
-        dnsResponse.updateUDPBuffer(byteBuffer, dataLen);
+        ByteBuffer byteBuffer = ByteBufferPool.acquire();
+        dnsResponse.updateUDPBuffer(byteBuffer, dataLen); // Fill udp and ip header
+        byteBuffer.position(this.headerSize);
+        byteBuffer.put(data); // Fill DNS data
         byteBuffer.position(this.headerSize + dataLen);
+
+        Log.i(TAG, "[dns] about to send dns packet");
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 

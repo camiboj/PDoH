@@ -21,13 +21,14 @@ public class DnsHeader {
         this.nAdditionalRRs = BitUtils.getUnsignedShort(buffer.getShort());
     }
 
-    public DnsHeader() {
-        this.identification = 0;
-        this.flags = 0;
-        this.nQuestions = 0;
-        this.nAnswers = 0;
-        this.nAuthorityResourceRecords = 0;
-        this.nAdditionalRRs = 0;
+    public DnsHeader(int identification, int flags, int nQuestions, int nAnswers,
+                     int nAuthorityResourceRecords, int nAdditionalRRs) {
+        this.identification = identification;
+        this.flags = flags;
+        this.nQuestions = nQuestions;
+        this.nAnswers = nAnswers;
+        this.nAuthorityResourceRecords = nAuthorityResourceRecords;
+        this.nAdditionalRRs = nAdditionalRRs;
     }
 
     public void addAnswer() {
@@ -70,5 +71,21 @@ public class DnsHeader {
         buff.putShort(BitUtils.intToShort(nAnswers));
         buff.putShort(BitUtils.intToShort(nAuthorityResourceRecords));
         buff.putShort(BitUtils.intToShort(nAdditionalRRs));
+    }
+
+    public int getIdentification() {
+        return identification;
+    }
+
+    public int getFlags() {
+        return flags;
+    }
+
+    public int getNAuthorityResourceRecords() {
+        return nAuthorityResourceRecords;
+    }
+
+    public int getNAdditionalRRs() {
+        return nAdditionalRRs;
     }
 }
