@@ -23,9 +23,6 @@ public class Packet {
     private Header header;
     private ByteBuffer backingBuffer;
 
-    public Packet() {
-    }
-
     public Packet(IP4Header ip4Header, Header header, ByteBuffer backingBuffer) {
         this.ip4Header = ip4Header;
         this.header = header;
@@ -50,7 +47,6 @@ public class Packet {
         this.backingBuffer = backingBuffer;
         this.setPackId();
     }
-
 
     private void setPackId() {
         AtomicInteger globalPackId = new AtomicInteger();
@@ -193,14 +189,6 @@ public class Packet {
         header.fillBuffer(buffer);
     }
 
-    public void setIp4Header(IP4Header ip4Header) {
-        this.ip4Header = ip4Header;
-    }
-
-    public void setHeader(Header header) {
-        this.header = header;
-    }
-
     public IP4Header getIp4Header() {
         return ip4Header;
     }
@@ -211,10 +199,6 @@ public class Packet {
 
     public ByteBuffer getBackingBuffer() {
         return backingBuffer;
-    }
-
-    public int getPackId() {
-        return packId;
     }
 }
 
