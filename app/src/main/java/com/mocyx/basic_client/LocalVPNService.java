@@ -143,7 +143,7 @@ public class LocalVPNService extends VpnService {
             Log.i(TAG, "Started");
             FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
             FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
-            Thread t = new Thread(new WriteVpnThread(vpnOutput, networkToDeviceQueue));
+            Thread t = new Thread(new NetworkToDeviceManager(vpnOutput, networkToDeviceQueue));
             t.start();
             try {
                 ByteBuffer bufferToNetwork;
@@ -186,36 +186,6 @@ public class LocalVPNService extends VpnService {
             } finally {
                 closeResources(vpnInput, vpnOutput);
                 dnsWorkers.shutdown();
-            }
-        }
-
-        static class WriteVpnThread implements Runnable {
-            FileChannel vpnOutput;
-            private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-
-            WriteVpnThread(FileChannel vpnOutput, BlockingQueue<ByteBuffer> networkToDeviceQueue) {
-                this.vpnOutput = vpnOutput;
-                this.networkToDeviceQueue = networkToDeviceQueue;
-            }
-
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
-                        bufferFromNetwork.flip();
-
-                        while (bufferFromNetwork.hasRemaining()) {
-                            int w = vpnOutput.write(bufferFromNetwork);
-                            if (w > 0) {
-                                MainActivity.downByte.addAndGet(w);
-                            }
-                        }
-                    } catch (Exception e) {
-                        Log.i(TAG, "WriteVpnThread fail", e);
-                    }
-                }
-
             }
         }
     }
