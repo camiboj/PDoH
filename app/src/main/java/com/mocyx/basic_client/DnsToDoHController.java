@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 public class DnsToDoHController {
     private static final String TAG = DnsToDoHController.class.getSimpleName();;
-    // TODO: add logs
-
 
     public static List<GoogleDohResponse> process(DnsPacket dnsPacket) {
         List<DnsQuestion> questions = dnsPacket.getQuestions();

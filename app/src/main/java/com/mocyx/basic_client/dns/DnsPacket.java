@@ -1,6 +1,5 @@
 package com.mocyx.basic_client.dns;
 
-import com.mocyx.basic_client.protocol.Header;
 import com.mocyx.basic_client.protocol.IP4Header;
 import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.protocol.UdpHeader;
@@ -32,12 +31,6 @@ public class DnsPacket extends Packet {
         this.questions = new ArrayList<>();
     }
 
-    public DnsPacket(IP4Header ip4Header, UdpHeader udpHeader, DnsHeader dnsHeader) {
-        super(ip4Header, udpHeader, ByteBufferPool.acquire());
-        //this.dnsHeader = new DnsHeader();
-        this.dnsHeader = dnsHeader;
-        this.questions = new ArrayList<>();
-    }
     public boolean isDNS() {
         return true;
     }
@@ -60,8 +53,7 @@ public class DnsPacket extends Packet {
         return questions;
     }
 
-    public void updateBackingBuffer() {
-        // TODO: rename maybe?
+    public void fillBackingBuffer() {
         ByteBuffer buff = getBackingBuffer();
         int packetHeaderSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
         buff.position(packetHeaderSize);

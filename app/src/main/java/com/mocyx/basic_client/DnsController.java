@@ -1,12 +1,8 @@
 package com.mocyx.basic_client;
 
-import android.util.Log;
-import android.util.Pair;
-
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.doh.GoogleDohResponse;
 import com.mocyx.basic_client.protocol.IpUtil;
-import com.mocyx.basic_client.protocol.Packet;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -36,7 +32,7 @@ public class DnsController implements Runnable {
     private DnsPacket createResponsePacket(GoogleDohResponse dohResponse) {
         DnsPacket dnsResponsePacket = IpUtil.buildDnsPacketFrom(dnsRequestPacket);
         DoHToDnsMapper.map(dohResponse, dnsResponsePacket);
-        dnsResponsePacket.updateBackingBuffer();
+        dnsResponsePacket.fillBackingBuffer();
         return dnsResponsePacket;
     }
 

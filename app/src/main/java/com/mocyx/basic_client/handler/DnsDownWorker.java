@@ -29,9 +29,6 @@ public class DnsDownWorker implements Runnable {
 
 
     private void updateUdpHeader(DnsPacket dnsResponse) {
-        // TODO: response is bad mapped here. We should do something to
-
-        // Get the len of the data
         ByteBuffer backingBuffer = dnsResponse.getBackingBuffer();
         byte[] data = new byte[dnsResponse.getBackingBuffer().remaining()];
         backingBuffer.get(data);
@@ -45,7 +42,7 @@ public class DnsDownWorker implements Runnable {
         byteBuffer.put(data); // Fill DNS data
         byteBuffer.position(this.headerSize + dataLen);
 
-        Log.i(TAG, "[dns] about to send dns packet");
+        Log.i(TAG, "[dns] About to send dns packet");
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 

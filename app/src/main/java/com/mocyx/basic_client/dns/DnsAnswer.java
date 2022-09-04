@@ -37,7 +37,7 @@ public class DnsAnswer {
 
         // Type 1 -> IP Address
         // Type 5 -> CNAMEs
-        // TODO: all types and refactor
+        // TODO: map all types
         if (type == 1) {
             try {
                 InetAddress ip = InetAddress.getByName(data);
@@ -50,7 +50,7 @@ public class DnsAnswer {
         }
         if (type == 5) {
             buffer.putShort(BitUtils.intToShort(data.length() + 1));
-            DnsQuestionName answerName = new DnsQuestionName(data); // TODO: change this classname
+            DnsQuestionName answerName = new DnsQuestionName(data);
             this.firstAnswerNamePos = buffer.position();
             answerName.putOn(buffer);
         }

@@ -18,8 +18,8 @@ abstract class DnsName {
     private final List<String> name;
 
     public DnsName(String name) {
-        this.name = new ArrayList<>(Arrays.asList(name.split("\\."))); // TODO: split
-        Log.i(TAG, String.format("name: %s", name));
+        this.name = Arrays.asList(name.split("\\."));
+        Log.i(TAG, String.format("Name: %s", name));
     }
 
     public DnsName(ByteBuffer buffer) {

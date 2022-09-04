@@ -72,8 +72,6 @@ public class LocalVPNService extends VpnService {
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
                 deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue,  networkToDeviceQueue));
-
-        Log.i(TAG, "Started");
     }
 
     private void setupVPN() {
@@ -89,7 +87,7 @@ public class LocalVPNService extends VpnService {
                 vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
             }
         } catch (Exception e) {
-            Log.e(TAG, "error", e);
+            Log.e(TAG, "Fail to setup VPN", e);
             System.exit(0);
         }
     }
@@ -160,17 +158,14 @@ public class LocalVPNService extends VpnService {
 
                         Packet packet = PacketFactory.createPacket(bufferToNetwork);
                         if (packet.isUDP()) {
-                            Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
                                 DnsPacket dnsPacket = (DnsPacket) packet;
-                                Log.i(TAG, String.format("[dns] this is a dns message: %s", dnsPacket));
-                                //deviceToNetworkUDPQueue.offer(packet);
+                                Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
                                 dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue));
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }
                         } else if (packet.isTCP()) {
-                            Log.i(TAG, "read tcp " + readBytes);
                             deviceToNetworkTCPQueue.offer(packet);
                         } else {
                             Log.w(TAG, String.format("Unknown packet protocol type %d",
@@ -208,18 +203,7 @@ public class LocalVPNService extends VpnService {
                 while (true) {
                     try {
                         ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
-
                         bufferFromNetwork.flip();
-
-                        // TODO: remove debugging tool
-                        ByteBuffer packetBackingBuffer = bufferFromNetwork.duplicate();
-                        Packet packet = PacketFactory.createPacket(packetBackingBuffer);
-                        if (packet.isUDP()) {
-                            if (packet.isDNS()) {
-                                Log.i(TAG, "[input dns] this is a dns message");
-                                Log.i(TAG, "[input dns] dns packet: " + packet);
-                            }
-                        }
 
                         while (bufferFromNetwork.hasRemaining()) {
                             int w = vpnOutput.write(bufferFromNetwork);

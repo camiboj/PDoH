@@ -50,7 +50,6 @@ public class IpUtil {
         return new DnsPacket(ip4Header, udpHeader, dnsId, FLAGS);
     }
 
-    // TODO: check this
     public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
         dnsResponse.getIp4Header().setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
     }
