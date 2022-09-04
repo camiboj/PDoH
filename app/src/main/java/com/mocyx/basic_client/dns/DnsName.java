@@ -14,13 +14,12 @@ import java.util.List;
 abstract class DnsName {
 
     // https://cabulous.medium.com/dns-message-how-to-read-query-and-response-message-cfebcb4fe817
-    private final static String TAG = "DnsName";
+    private final static String TAG = DnsName.class.getSimpleName();;
     private final List<String> name;
 
     public DnsName(String name) {
-        this.name = new ArrayList<String>(Arrays.asList(name.split("\\."))); // TODO: split
-        Log.i(TAG, String.format("name: %s", name));
-        Log.i(TAG, String.format("this.name: %s", this.name));
+        this.name = Arrays.asList(name.split("\\."));
+        Log.i(TAG, String.format("Name: %s", name));
     }
 
     public DnsName(ByteBuffer buffer) {
@@ -35,7 +34,6 @@ abstract class DnsName {
             name.add(sb.toString());
             labelLength = BitUtils.getUnsignedByte(buffer.get());
         }
-        Log.i(TAG, String.format("dns packet: %s", name));
     }
 
     public void putOn(ByteBuffer buf) { // is there a superclass method to override?
@@ -53,7 +51,6 @@ abstract class DnsName {
 
     static class StringToBufferHelper {
         private static void putOn(ByteBuffer buffer, String str) {
-            Log.i(TAG, String.format("str: %s", str));
             buffer.put((byte) str.length());
             for (byte b : str.getBytes(StandardCharsets.UTF_8)) {
                 buffer.put(b);

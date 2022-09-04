@@ -16,7 +16,7 @@ public class DnsQuestion {
     }
 
     public DnsQuestion(String name, int type) {
-        // name, type, cd, ct, do, edns_client_subnet, random_padding
+        // name, type, cd, ct, do, dns_client_subnet, random_padding
         this.name = new DnsQuestionName(name);
         this.type = type;
         this.dnsQuestionClass = 1; // TODO: check default

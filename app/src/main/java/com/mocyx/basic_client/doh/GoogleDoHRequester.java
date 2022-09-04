@@ -20,7 +20,7 @@ public class GoogleDoHRequester implements Runnable {
     // https://www.baeldung.com/java-http-request
     // https://www.baeldung.com/httpurlconnection-post
     private final static String ENDPOINT = "https://8.8.8.8/resolve?";
-    private final static String TAG = "GoogleDoH";
+    private final static String TAG = GoogleDoHRequester.class.getSimpleName();;
     Map<String, String> parameters = new HashMap<>();
     private GoogleDohResponse googleDohResponse;
 
@@ -43,7 +43,6 @@ public class GoogleDoHRequester implements Runnable {
 
     private String getFinalEndpoint() throws UnsupportedEncodingException {
         String dohUrl = String.format("%s%s", ENDPOINT, getParameters());
-        Log.i(TAG, String.format("dohUrl: %s", dohUrl));
         return dohUrl;
     }
 
@@ -56,18 +55,13 @@ public class GoogleDoHRequester implements Runnable {
             con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
-            // HEADERS
-            //   Set the Request Content-Type Header Parameter
             con.setRequestProperty("Content-Type", "application/json; utf-8");
-            //   Set Response Format Type
             con.setRequestProperty("Accept", "application/json");
 
-            // Ensure the Connection Will Be Used to Send Content
+            // Ensure the connection will be used and send content
             con.setDoOutput(true);
 
-            Log.i(TAG, String.format("status: %s", con.getResponseCode()));
-
-            // RESPONSE
+            // Response
             in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -75,12 +69,12 @@ public class GoogleDoHRequester implements Runnable {
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
-            Log.i(TAG, String.format("response: %s", response));
+            Log.i(TAG, String.format("Response from GoogleDoH: %s", response));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             googleDohResponse = mapper.readValue(response.toString(), GoogleDohResponse.class);
-            Log.i(TAG, String.format("googleDohAnswer: %s", googleDohResponse));
+            Log.i(TAG, String.format("GoogleDohAnswer: %s", googleDohResponse));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -91,7 +85,6 @@ public class GoogleDoHRequester implements Runnable {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    Log.i("tag", "Fallo1");
                     e.printStackTrace();
                 }
             }

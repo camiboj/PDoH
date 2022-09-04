@@ -14,13 +14,9 @@ public class DnsAnswerName extends DnsName {
         super(buffer);
     }
 
-    @Override
-    public void putOn(ByteBuffer buf) {
-        int offset = buf.position();
-        super.putOn(buf);
-        buf.put(END_QUESTION_NAME_MARK);
+    public void putOn(ByteBuffer buf, int firstAnswerNamePos) {
         buf.put(BEGINNING_MARK);
-        buf.put((byte) (offset +1));
+        buf.put((byte) firstAnswerNamePos);
     }
 }
 

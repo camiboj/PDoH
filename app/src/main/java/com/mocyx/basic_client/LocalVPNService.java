@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.util.Pair;
 
 import com.mocyx.basic_client.config.Config;
 import com.mocyx.basic_client.dns.DnsPacket;
+import com.mocyx.basic_client.dns.DnsQuestion;
+import com.mocyx.basic_client.handler.DnsDownWorker;
 import com.mocyx.basic_client.handler.TcpPacketHandler;
 import com.mocyx.basic_client.handler.UdpPacketHandler;
 import com.mocyx.basic_client.protocol.Packet;
@@ -26,6 +29,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class LocalVPNService extends VpnService {
     private static final String TAG = LocalVPNService.class.getSimpleName();
@@ -38,8 +42,8 @@ public class LocalVPNService extends VpnService {
 
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
+    private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    private BlockingQueue<ByteBuffer> dnsResponsesQueue;
     private ExecutorService executorService;
 
     private static void closeResources(Closeable... resources) {
@@ -58,17 +62,16 @@ public class LocalVPNService extends VpnService {
         setupVPN();
         deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(1000);
         deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(1000);
-        networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
         dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
+        networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
-        executorService = Executors.newFixedThreadPool(10);
-        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this, dnsResponsesQueue));
+        executorService = Executors.newFixedThreadPool(4); // TODO: fix this, only for debugging
+        executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
+        executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
 
         executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue, dnsResponsesQueue));
-
-        Log.i(TAG, "Started");
+                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue,  networkToDeviceQueue));
     }
 
     private void setupVPN() {
@@ -84,7 +87,7 @@ public class LocalVPNService extends VpnService {
                 vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
             }
         } catch (Exception e) {
-            Log.e(TAG, "error", e);
+            Log.e(TAG, "Fail to setup VPN", e);
             System.exit(0);
         }
     }
@@ -111,24 +114,28 @@ public class LocalVPNService extends VpnService {
 
     private static class VPNRunnable implements Runnable {
         private static final String TAG = VPNRunnable.class.getSimpleName();
+        private static final int N_DNS_WORKERS = 50;
 
         private FileDescriptor vpnFileDescriptor;
 
         private BlockingQueue<Packet> deviceToNetworkUDPQueue;
         private BlockingQueue<Packet> deviceToNetworkTCPQueue;
+        private BlockingQueue<DnsPacket> dnsResponsesQueue;
         private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-        private BlockingQueue<ByteBuffer> dnsResponsesQueue;
+        private ExecutorService dnsWorkers;
 
         public VPNRunnable(FileDescriptor vpnFileDescriptor,
                            BlockingQueue<Packet> deviceToNetworkUDPQueue,
                            BlockingQueue<Packet> deviceToNetworkTCPQueue,
-                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                           BlockingQueue<ByteBuffer> dnsResponsesQueue) {
+                           BlockingQueue<DnsPacket> dnsResponsesQueue,
+                           BlockingQueue<ByteBuffer> networkToDeviceQueue) {
             this.vpnFileDescriptor = vpnFileDescriptor;
             this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
             this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;
             this.networkToDeviceQueue = networkToDeviceQueue;
             this.dnsResponsesQueue = dnsResponsesQueue;
+
+            dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         }
 
         @Override
@@ -151,17 +158,14 @@ public class LocalVPNService extends VpnService {
 
                         Packet packet = PacketFactory.createPacket(bufferToNetwork);
                         if (packet.isUDP()) {
-                            Log.i(TAG, "read udp" + readBytes);
                             if (packet.isDNS()) {
-                                Log.i(TAG, "[dns] this is a dns message");
-                                // TODO 1: maybe push packet into dnsRequestsQueue and have a worker processing them
-                                Thread thread = new Thread(new DnsController((DnsPacket) packet, dnsResponsesQueue));
-                                thread.start();
+                                DnsPacket dnsPacket = (DnsPacket) packet;
+                                Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
+                                dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue));
                             } else {
                                 deviceToNetworkUDPQueue.offer(packet);
                             }
                         } else if (packet.isTCP()) {
-                            Log.i(TAG, "read tcp " + readBytes);
                             deviceToNetworkTCPQueue.offer(packet);
                         } else {
                             Log.w(TAG, String.format("Unknown packet protocol type %d",
@@ -181,6 +185,7 @@ public class LocalVPNService extends VpnService {
                 e.printStackTrace();
             } finally {
                 closeResources(vpnInput, vpnOutput);
+                dnsWorkers.shutdown();
             }
         }
 
@@ -199,6 +204,7 @@ public class LocalVPNService extends VpnService {
                     try {
                         ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
                         bufferFromNetwork.flip();
+
                         while (bufferFromNetwork.hasRemaining()) {
                             int w = vpnOutput.write(bufferFromNetwork);
                             if (w > 0) {

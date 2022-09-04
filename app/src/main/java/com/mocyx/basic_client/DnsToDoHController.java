@@ -9,9 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DnsToDoHController {
-    private static final String TAG = "DnsToNetworkController";
-    // TODO: add logs
-
+    private static final String TAG = DnsToDoHController.class.getSimpleName();;
 
     public static List<GoogleDohResponse> process(DnsPacket dnsPacket) {
         List<DnsQuestion> questions = dnsPacket.getQuestions();

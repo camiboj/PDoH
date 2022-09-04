@@ -4,8 +4,10 @@ import android.net.VpnService;
 import android.util.Log;
 
 import com.mocyx.basic_client.protocol.IP4Header;
+import com.mocyx.basic_client.protocol.IpUtil;
 import com.mocyx.basic_client.protocol.Packet;
 import com.mocyx.basic_client.protocol.UdpHeader;
+import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -15,8 +17,10 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.Selector;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class in charge of UDP packet handling
@@ -26,27 +30,37 @@ public class UdpPacketHandler implements Runnable {
     private static final Integer TUNNEL_CAPACITY = 100;
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    private final BlockingQueue<ByteBuffer> dnsResponsesQueue;
     private final VpnService vpnService;
     private final Map<String, DatagramChannel> udpSockets;
 
-    public UdpPacketHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService, BlockingQueue<ByteBuffer> dnsResponsesQueue) {
+    public UdpPacketHandler(BlockingQueue<Packet> queue, BlockingQueue<ByteBuffer> networkToDeviceQueue, VpnService vpnService) {
         this.queue = queue;
         this.networkToDeviceQueue = networkToDeviceQueue;
-        this.dnsResponsesQueue = dnsResponsesQueue;
         this.vpnService = vpnService;
         this.udpSockets = new HashMap<>();
     }
 
+    private void hack (UdpTunnel tunnel, ByteBuffer byteBuffer, AtomicInteger ipId) {
+        int headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
+        byte[] data = new byte[byteBuffer.remaining()];
+        int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
+
+        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
+
+        packet.updateUDPBuffer(byteBuffer, dataLen);
+        byteBuffer.position(headerSize + dataLen);
+        ByteBuffer bufferDuplicated = byteBuffer.duplicate();
+        bufferDuplicated.flip();
+        this.networkToDeviceQueue.offer(byteBuffer);
+    }
     @Override
     public void run() {
         try {
             BlockingQueue<UdpTunnel> tunnelQueue = new ArrayBlockingQueue<>(TUNNEL_CAPACITY);
             Selector selector = Selector.open();
-            Thread t = new Thread(new UdpDownWorker(selector, networkToDeviceQueue, tunnelQueue));
+            UdpDownWorker udpdw = new UdpDownWorker(selector, networkToDeviceQueue, tunnelQueue);
+            Thread t = new Thread(udpdw);
             t.start();
-            Thread tDns = new Thread(new DnsDownWorker(selector, networkToDeviceQueue, tunnelQueue, dnsResponsesQueue));
-            tDns.start();
 
             while (true) {
                 Packet packet = queue.take();
@@ -54,11 +68,14 @@ public class UdpPacketHandler implements Runnable {
                 UdpHeader header = (UdpHeader) packet.getHeader();
                 int destinationPort = header.getDestinationPort();
                 int sourcePort = header.getSourcePort();
+
                 String ipAndPort = destinationAddress.getHostAddress() + ":" + destinationPort + ":" + sourcePort;
+                UdpTunnel tunnel;
 
                 if (!udpSockets.containsKey(ipAndPort)) {
                     DatagramChannel outputChannel = DatagramChannel.open();
                     vpnService.protect(outputChannel.socket());
+
                     outputChannel.socket().bind(null);
                     outputChannel.connect(new InetSocketAddress(destinationAddress, destinationPort));
                     outputChannel.configureBlocking(false);
@@ -68,7 +85,7 @@ public class UdpPacketHandler implements Runnable {
                             header.getSourcePort());
                     InetSocketAddress remote = new InetSocketAddress(ip4Header.getDestinationAddress(),
                             header.getDestinationPort());
-                    UdpTunnel tunnel = new UdpTunnel(local, remote, outputChannel);
+                    tunnel = new UdpTunnel(local, remote, outputChannel);
                     tunnelQueue.offer(tunnel);
 
                     selector.wakeup();

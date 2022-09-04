@@ -1,9 +1,10 @@
 package com.mocyx.basic_client.protocol;
 
 
-import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.util.BitUtils;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,6 +40,14 @@ public class Packet {
         this.backingBuffer = backingBuffer;
         this.isTCP = false;
         this.isUDP = false;
+        this.setPackId();
+    }
+
+    public Packet(UdpHeader udpHeader, ByteBuffer backingBuffer) {
+        this.header = udpHeader;
+        this.isTCP = false;
+        this.isUDP = true;
+        this.backingBuffer = backingBuffer;
         this.setPackId();
     }
 

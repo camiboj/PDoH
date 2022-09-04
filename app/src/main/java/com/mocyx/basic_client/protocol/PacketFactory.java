@@ -20,4 +20,12 @@ public class PacketFactory {
         }
         return new Packet(ip4Header, buffer);
     }
+
+    public static Packet createDnsPacket(ByteBuffer buffer) throws UnknownHostException {
+        IP4Header ip4Header = new IP4Header(buffer);
+        UdpHeader udpHeader = new UdpHeader(buffer);
+        return new DnsPacket(ip4Header, udpHeader, buffer);
+    }
 }
+
+

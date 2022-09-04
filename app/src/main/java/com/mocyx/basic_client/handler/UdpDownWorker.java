@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.mocyx.basic_client.protocol.IpUtil;
 import com.mocyx.basic_client.protocol.Packet;
+import com.mocyx.basic_client.protocol.PacketFactory;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
 import java.io.IOException;
@@ -18,12 +19,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class UdpDownWorker implements Runnable {
-    private final AtomicInteger ipId;
+    public final AtomicInteger ipId;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final BlockingQueue<UdpTunnel> tunnelQueue;
     private final Selector selector;
     private final int headerSize;
-    protected final static String TAG = "UdpDownWorker";
+    protected final static String TAG = UdpDownWorker.class.getSimpleName();;
 
     public UdpDownWorker(Selector selector, BlockingQueue<ByteBuffer> networkToDeviceQueue,
                          BlockingQueue<UdpTunnel> tunnelQueue) {
@@ -48,6 +49,7 @@ public class UdpDownWorker implements Runnable {
             }
             byteBuffer.put(data);
         }
+
         packet.updateUDPBuffer(byteBuffer, dataLen);
         byteBuffer.position(this.headerSize + dataLen);
         this.networkToDeviceQueue.offer(byteBuffer);
@@ -100,7 +102,7 @@ public class UdpDownWorker implements Runnable {
         }
     }
 
-    protected ByteBuffer getData(SelectionKey key) throws IOException, InterruptedException {
+    private ByteBuffer getData(SelectionKey key) throws IOException{
         DatagramChannel inputChannel = (DatagramChannel) key.channel();
         ByteBuffer receiveBuffer = ByteBufferPool.acquire();
         inputChannel.read(receiveBuffer);

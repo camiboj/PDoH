@@ -1,5 +1,6 @@
 package com.mocyx.basic_client.protocol;
 
+import com.mocyx.basic_client.dns.DnsHeader;
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.util.ByteBufferPool;
 
@@ -22,6 +23,36 @@ public class IpUtil {
     private static int TCP_HEADER_LENGTH = 40;
     private static int WINDOW = 65535;
     private static int URGENT_POINTER = 0;
+    private static int FLAGS = 33152; // It was checked against a DNS packet
+
+    public static DnsPacket buildDnsPacketFrom(DnsPacket other) {
+        IP4Header sourceIp4Header = other.getIp4Header();
+        UdpHeader sourceUdpHeader = (UdpHeader) other.getHeader();
+        DnsHeader sourceDnsHeader = other.getDnsHeader();
+
+        InetAddress otherSourceAddress = sourceIp4Header.getSourceAddress();
+        InetAddress otherDestinationAddress = sourceIp4Header.getDestinationAddress();
+        int idAndFlagsAndFragmentOffset = sourceIp4Header.getIdentificationAndFlagsAndFragmentOffset();
+
+        int otherDestinationPort = sourceUdpHeader.getDestinationPort();
+        int otherSourcePort = sourceUdpHeader.getSourcePort();
+
+        IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
+                TYPE_OF_SERVICE, TOTAL_LENGTH,
+                idAndFlagsAndFragmentOffset,
+                TTL, TransportProtocol.UDP.getNumber(), TransportProtocol.UDP, HEADER_CHECKSUM,
+                otherDestinationAddress, otherSourceAddress,
+                OPTIONS_AND_PADDING);
+
+        UdpHeader udpHeader = new UdpHeader(otherDestinationPort, otherSourcePort);
+
+        int dnsId = sourceDnsHeader.getIdentification();
+        return new DnsPacket(ip4Header, udpHeader, dnsId, FLAGS);
+    }
+
+    public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
+        dnsResponse.getIp4Header().setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
+    }
 
     public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId) {
         IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
