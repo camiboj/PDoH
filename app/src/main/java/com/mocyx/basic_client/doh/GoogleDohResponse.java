@@ -5,10 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: delete lombok
-import lombok.Value;
-
-@Value
 public class GoogleDohResponse {
 
     private boolean TC = false;
