@@ -22,23 +22,6 @@ public class DnsQuestion {
         this.dnsQuestionClass = 1; // TODO: check default
     }
 
-    private String buildName(ByteBuffer buffer) {
-        final StringBuilder sb = new StringBuilder();
-        short labelLength = BitUtils.getUnsignedByte(buffer.get());
-        while (labelLength > 0) {
-            for (int i = 0; i < labelLength; i++) { // TODO: investigate if its possible to get many chars at the same time
-                char label = (char) buffer.get();
-                sb.append(label);
-            }
-            sb.append(".");
-            labelLength = BitUtils.getUnsignedByte(buffer.get());
-        }
-        if (sb.length() > 0) {
-            sb.setLength(sb.length() - 1);
-        }
-        return sb.toString();
-    }
-
     public String getName() {
         return name.join(".");
     }
@@ -47,17 +30,17 @@ public class DnsQuestion {
         return type;
     }
 
+    public void putOn(ByteBuffer buff) {
+        name.putOn(buff);
+        buff.putShort(BitUtils.intToShort(type));
+        buff.putShort(BitUtils.intToShort(dnsQuestionClass));
+    }
+
     @Override
     public String toString() {
         return "DnsQuestion{name=" + String.join(".", getName()) +
                 ", type=" + type +
                 ", dnsQuestionClass=" + dnsQuestionClass +
                 '}';
-    }
-
-    public void putOn(ByteBuffer buff) {
-        name.putOn(buff);
-        buff.putShort(BitUtils.intToShort(type));
-        buff.putShort(BitUtils.intToShort(dnsQuestionClass));
     }
 }

@@ -25,9 +25,9 @@ public class DnsPacket extends Packet {
         // For now we wont map answers because we will do that programmatically
     }
 
-    public DnsPacket(IP4Header ip4Header, UdpHeader udpHeader, int id, int flags) {
+    public DnsPacket(IP4Header ip4Header, UdpHeader udpHeader, DnsHeader dnsHeader) {
         super(ip4Header, udpHeader, ByteBufferPool.acquire());
-        this.dnsHeader = new DnsHeader(id, flags, 0, 0, 0, 0);
+        this.dnsHeader = dnsHeader;
         this.questions = new ArrayList<>();
     }
 

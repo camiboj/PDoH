@@ -39,29 +39,8 @@ public class DnsHeader {
         nQuestions = nQuestions + 1;
     }
 
-    public void addAuthorityResourceRecord() {
-        nAuthorityResourceRecords = nAuthorityResourceRecords + 1;
-    }
-
     public int getNQuestions() {
         return nQuestions;
-    }
-
-    public int getNAnswers() {
-        return nAnswers;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("DnsHeader{");
-        sb.append("identification=").append(identification);
-        sb.append(", flags=").append(flags);
-        sb.append(", nQuestions=").append(nQuestions);
-        sb.append(", nAnswers=").append(nAnswers);
-        sb.append(", nAuthorityResourceRecords=").append(nAuthorityResourceRecords);
-        sb.append(", nAdditionalRRs=").append(nAdditionalRRs);
-        sb.append('}');
-        return sb.toString();
     }
 
     public void putOn(ByteBuffer buff) {
@@ -77,15 +56,24 @@ public class DnsHeader {
         return identification;
     }
 
-    public int getFlags() {
-        return flags;
-    }
-
     public int getNAuthorityResourceRecords() {
         return nAuthorityResourceRecords;
     }
 
     public int getNAdditionalRRs() {
         return nAdditionalRRs;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("DnsHeader{");
+        sb.append("identification=").append(identification);
+        sb.append(", flags=").append(flags);
+        sb.append(", nQuestions=").append(nQuestions);
+        sb.append(", nAnswers=").append(nAnswers);
+        sb.append(", nAuthorityResourceRecords=").append(nAuthorityResourceRecords);
+        sb.append(", nAdditionalRRs=").append(nAdditionalRRs);
+        sb.append('}');
+        return sb.toString();
     }
 }

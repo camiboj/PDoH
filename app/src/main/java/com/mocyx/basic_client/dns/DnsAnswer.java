@@ -3,7 +3,6 @@ package com.mocyx.basic_client.dns;
 import com.mocyx.basic_client.util.BitUtils;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 
@@ -14,8 +13,8 @@ public class DnsAnswer {
     private final DnsAnswerName name;
     private final int type;
 
-    // define a constant value that make sense. There is no class attr on Google DoH response
-    private final int answClass = 1;
+    // Class IN (most common)
+    private final int answerClass = 1;
 
     private final int ttl;
     private final String data;
@@ -32,12 +31,12 @@ public class DnsAnswer {
     public int putOn(ByteBuffer buffer, int firstAnswerNamePos) {
         name.putOn(buffer, firstAnswerNamePos);
         buffer.putShort(BitUtils.intToShort(type));
-        buffer.putShort(BitUtils.intToShort(answClass));
+        buffer.putShort(BitUtils.intToShort(answerClass));
         buffer.putInt(ttl);
 
         // Type 1 -> IP Address
         // Type 5 -> CNAMEs
-        // TODO: map all types
+        // TODO: map all types, for now I only saw type 1 and type 5 responses
         if (type == 1) {
             try {
                 InetAddress ip = InetAddress.getByName(data);

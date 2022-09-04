@@ -45,9 +45,11 @@ public class IpUtil {
                 OPTIONS_AND_PADDING);
 
         UdpHeader udpHeader = new UdpHeader(otherDestinationPort, otherSourcePort);
+        DnsHeader dnsHeader = new DnsHeader(sourceDnsHeader.getIdentification(), FLAGS,
+                0, 0, sourceDnsHeader.getNAuthorityResourceRecords(),
+                sourceDnsHeader.getNAdditionalRRs());
 
-        int dnsId = sourceDnsHeader.getIdentification();
-        return new DnsPacket(ip4Header, udpHeader, dnsId, FLAGS);
+        return new DnsPacket(ip4Header, udpHeader, dnsHeader);
     }
 
     public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
