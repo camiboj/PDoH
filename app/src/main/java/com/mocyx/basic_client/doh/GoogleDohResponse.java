@@ -6,12 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GoogleDohResponse {
-
-    private boolean TC = false;
-    private boolean RD = false;
-    private boolean RA = false;
-    private boolean AD = false;
-    private boolean CD = false;
     @JsonProperty("Question")
     private List<Question> questions = new ArrayList<>();
     @JsonProperty("Answer")
@@ -67,18 +61,6 @@ public class GoogleDohResponse {
         public Answer() {
         } // needed by Jackson
 
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("Answer{");
-            sb.append("name=").append(name);
-            sb.append(", type=").append(type);
-            sb.append(", ttl=").append(ttl);
-            sb.append(", data=").append(data);
-            sb.append('}');
-            return sb.toString();
-        }
-
         public String getName() {
             return name;
         }
@@ -91,24 +73,23 @@ public class GoogleDohResponse {
             return type;
         }
 
-        public void setType(int type) {
-            this.type = type;
-        }
-
         public int getTtl() {
             return ttl;
-        }
-
-        public void setTtl(int ttl) {
-            this.ttl = ttl;
         }
 
         public String getData() {
             return data;
         }
 
-        public void setData(String data) {
-            this.data = data;
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Answer{");
+            sb.append("name=").append(name);
+            sb.append(", type=").append(type);
+            sb.append(", ttl=").append(ttl);
+            sb.append(", data=").append(data);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }
