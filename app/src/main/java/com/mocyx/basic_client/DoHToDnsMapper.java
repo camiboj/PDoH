@@ -6,7 +6,7 @@ import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.doh.GoogleDohResponse;
 
 public class DoHToDnsMapper {
-    private static final String TAG = DoHToDnsMapper.class.getSimpleName();;
+    private static final String TAG = DoHToDnsMapper.class.getSimpleName();
 
     public static void map(GoogleDohResponse dohResponse, DnsPacket dnsPacket) {
         Log.i(TAG, String.format("DohResponse: %s", dohResponse));

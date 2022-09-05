@@ -34,6 +34,5 @@ public class NetworkToDeviceManager implements Runnable {
                 Log.i(TAG, "WriteVpnThread fail", e);
             }
         }
-
     }
 }

@@ -48,6 +48,7 @@ public class IpUtil {
         DnsHeader dnsHeader = new DnsHeader(sourceDnsHeader.getIdentification(), FLAGS,
                 0, 0, sourceDnsHeader.getNAuthorityResourceRecords(),
                 sourceDnsHeader.getNAdditionalRRs());
+        // We will add the nQuestions and nAnswers with the DoH response
 
         return new DnsPacket(ip4Header, udpHeader, dnsHeader);
     }

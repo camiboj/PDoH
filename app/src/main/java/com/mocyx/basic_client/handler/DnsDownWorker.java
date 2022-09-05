@@ -13,10 +13,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DnsDownWorker implements Runnable {
-    private final BlockingQueue<DnsPacket> dnsResponsesQueue;
-    private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    protected final static String TAG = DnsDownWorker.class.getSimpleName();;
+    protected final static String TAG = DnsDownWorker.class.getSimpleName();
     public final AtomicInteger ipId;
+    private final BlockingQueue<DnsPacket> dnsResponsesQueue;
+    ;
+    private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final int headerSize;
 
 
@@ -27,6 +28,17 @@ public class DnsDownWorker implements Runnable {
         this.headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
     }
 
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                DnsPacket dnsResponse = dnsResponsesQueue.take();
+                updateUdpHeader(dnsResponse);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void updateUdpHeader(DnsPacket dnsResponse) {
         ByteBuffer backingBuffer = dnsResponse.getBackingBuffer();
@@ -44,19 +56,6 @@ public class DnsDownWorker implements Runnable {
 
         Log.i(TAG, "[dns] About to send dns packet");
         this.networkToDeviceQueue.offer(byteBuffer);
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                DnsPacket dnsResponse = dnsResponsesQueue.take();
-                updateUdpHeader(dnsResponse);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
     }
 }
 
