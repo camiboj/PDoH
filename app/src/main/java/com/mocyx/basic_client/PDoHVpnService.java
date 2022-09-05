@@ -21,8 +21,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PDOHVpnService extends VpnService {
-    private static final String TAG = PDOHVpnService.class.getSimpleName();
+public class PDoHVpnService extends VpnService {
+    private static final String TAG = PDoHVpnService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
 

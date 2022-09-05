@@ -33,7 +33,7 @@
         </activity>
 
         <service
-            android:name="com.mocyx.basic_client.PDOHVpnService"
+            android:name="com.mocyx.basic_client.PDoHVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService" />

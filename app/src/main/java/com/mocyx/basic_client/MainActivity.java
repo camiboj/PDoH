@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             //waitingForVPNStart = true;
-            startService(new Intent(this, PDOHVpnService.class));
+            startService(new Intent(this, PDoHVpnService.class));
             //enableButton(false);
         }
     }
