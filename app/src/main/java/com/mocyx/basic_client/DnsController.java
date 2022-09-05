@@ -1,5 +1,7 @@
 package com.mocyx.basic_client;
 
+import android.util.Log;
+
 import com.mocyx.basic_client.dns.DnsPacket;
 import com.mocyx.basic_client.doh.GoogleDohResponse;
 import com.mocyx.basic_client.protocol.IpUtil;
@@ -8,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
-// TODO: add logs
 public class DnsController implements Runnable {
     private static final String TAG = DnsController.class.getSimpleName();
     ;
@@ -22,6 +23,7 @@ public class DnsController implements Runnable {
 
     @Override
     public void run() {
+        Log.i(TAG, "About to process a DNS Request");
         List<GoogleDohResponse> googleDohResponses = DnsToDoHController.process(dnsRequestPacket);
         List<DnsPacket> dnsResponsePackets = googleDohResponses.stream().map(
                 this::createResponsePacket

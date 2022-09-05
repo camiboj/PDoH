@@ -54,6 +54,7 @@ public class NetworkManager implements Runnable {
         Thread t = new Thread(new NetworkToDeviceManager(vpnOutput, networkToDeviceQueue));
         t.start();
 
+        // Read incoming DNS, UDP and TCP requests and capture them
         try {
             ByteBuffer bufferToNetwork;
             while (!Thread.interrupted()) {
@@ -64,9 +65,7 @@ public class NetworkManager implements Runnable {
 
                 if (readBytes > 0) {
                     bufferToNetwork.flip();
-
                     Packet packet = PacketFactory.createPacket(bufferToNetwork);
-
                     if (packet.isDNS()) {
                         DnsPacket dnsPacket = (DnsPacket) packet;
                         Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));

@@ -33,18 +33,18 @@ public class DnsDownWorker implements Runnable {
         while (true) {
             try {
                 DnsPacket dnsResponse = dnsResponsesQueue.take();
-                updateUdpHeader(dnsResponse);
+                fillDnsResponse(dnsResponse);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void updateUdpHeader(DnsPacket dnsResponse) {
+    private void fillDnsResponse(DnsPacket dnsResponse) {
         ByteBuffer backingBuffer = dnsResponse.getBackingBuffer();
         byte[] data = new byte[dnsResponse.getBackingBuffer().remaining()];
         backingBuffer.get(data);
-        int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
+        int dataLen = Optional.of(data).map(dataAux -> dataAux.length).orElse(0);
 
         IpUtil.updateIdentificationAndFlagsAndFragmentOffset(dnsResponse, ipId.addAndGet(1));
 
