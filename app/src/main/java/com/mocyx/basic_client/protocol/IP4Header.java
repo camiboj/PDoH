@@ -11,7 +11,7 @@ public class IP4Header {
     private final byte IHL;
     private final int headerLength;
     private final short typeOfService;
-    private final int identificationAndFlagsAndFragmentOffset;
+    private int identificationAndFlagsAndFragmentOffset;
     private final short TTL;
     private final int protocolNum;
     private final TransportProtocol protocol;
@@ -122,5 +122,13 @@ public class IP4Header {
 
     public InetAddress getSourceAddress() {
         return sourceAddress;
+    }
+
+    public int getIdentificationAndFlagsAndFragmentOffset() {
+        return identificationAndFlagsAndFragmentOffset;
+    }
+
+    public void setIdentificationAndFlagsAndFragmentOffset(int i) {
+        identificationAndFlagsAndFragmentOffset = i;
     }
 }

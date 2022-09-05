@@ -25,15 +25,12 @@ import java.util.concurrent.BlockingQueue;
 
 public class TcpPacketHandler implements Runnable {
     private static int HEADER_SIZE = Packet.IP4_HEADER_SIZE + Packet.TCP_HEADER_SIZE;
-    private final String TAG = this.getClass().getSimpleName();
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final VpnService vpnService;
     private final ObjAttrUtil objAttrUtil;
     private Selector selector;
     private Map<String, TcpPipe> pipes;
-    private long tick = 0;
-
 
     public TcpPacketHandler(BlockingQueue<Packet> queue,
                             BlockingQueue<ByteBuffer> networkToDeviceQueue,
@@ -48,7 +45,7 @@ public class TcpPacketHandler implements Runnable {
     private TcpPipe initPipe(Packet packet) throws Exception {
         TcpPipe pipe = new TcpPipe();
         IP4Header ip4Header = packet.getIp4Header();
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         pipe.sourceAddress = new InetSocketAddress(ip4Header.getSourceAddress(), tcpHeader.getSourcePort());
         pipe.destinationAddress = new InetSocketAddress(ip4Header.getDestinationAddress(), tcpHeader.getDestinationPort());
         pipe.remote = SocketChannel.open();
@@ -60,7 +57,6 @@ public class TcpPacketHandler implements Runnable {
         vpnService.protect(pipe.remote.socket());
         boolean b1 = pipe.remote.connect(pipe.destinationAddress);
         pipe.timestamp = System.currentTimeMillis();
-        Log.i(TAG, String.format("initPipe %s %s", pipe.destinationAddress, b1));
         return pipe;
     }
 
@@ -97,10 +93,8 @@ public class TcpPacketHandler implements Runnable {
     private void handleSyn(Packet packet, TcpPipe pipe) {
         if (pipe.tcbStatus == TCBStatus.SYN_SENT) {
             pipe.tcbStatus = TCBStatus.SYN_RECEIVED;
-            Log.i(TAG, String.format("handleSyn %s %s", pipe.destinationAddress, pipe.tcbStatus));
         }
-        Log.i(TAG, String.format("handleSyn  %d %d", pipe.tunnelId, packet.getPackId()));
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         if (pipe.synCount == 0) {
             pipe.mySequenceNum = 1;
             pipe.theirSequenceNum = tcpHeader.getSequenceNumber();
@@ -114,7 +108,6 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private void handleRst(TcpPipe pipe) {
-        Log.i(TAG, String.format("handleRst %d", pipe.tunnelId));
         pipe.upActive = false;
         pipe.downActive = false;
         cleanPipe(pipe);
@@ -124,10 +117,9 @@ public class TcpPacketHandler implements Runnable {
     private void handleAck(Packet packet, TcpPipe pipe) throws Exception {
         if (pipe.tcbStatus == TCBStatus.SYN_RECEIVED) {
             pipe.tcbStatus = TCBStatus.ESTABLISHED;
-            Log.i(TAG, String.format("handleAck %s %s", pipe.destinationAddress, pipe.tcbStatus));
         }
 
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         int payloadSize = packet.getBackingBuffer().remaining();
 
         if (payloadSize == 0) {
@@ -163,7 +155,6 @@ public class TcpPacketHandler implements Runnable {
             return false;
         }
         if (!channel.isConnected()) {
-            Log.i(TAG, "not yet connected");
             SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
             int ops = key.interestOps() | SelectionKey.OP_WRITE;
             key.interestOps(ops);
@@ -177,9 +168,7 @@ public class TcpPacketHandler implements Runnable {
             if (n > 4000) {
                 System.currentTimeMillis();
             }
-            Log.i(TAG, String.format("tryFlushWrite write %s", n));
             if (n <= 0) {
-                Log.i(TAG, "write fail");
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
                 key.interestOps(ops);
@@ -196,8 +185,7 @@ public class TcpPacketHandler implements Runnable {
     }
 
 
-    private void closeUpStream(TcpPipe pipe) throws Exception {
-        Log.i(TAG, String.format("closeUpStream %d", pipe.tunnelId));
+    private void closeUpStream(TcpPipe pipe) {
         try {
             if (pipe.remote != null && pipe.remote.isOpen()) {
                 if (pipe.remote.isConnected()) {
@@ -208,7 +196,6 @@ public class TcpPacketHandler implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.i(TAG, String.format("closeUpStream %d", pipe.tunnelId));
         pipe.upActive = false;
 
         if (isClosedTunnel(pipe)) {
@@ -216,20 +203,18 @@ public class TcpPacketHandler implements Runnable {
         }
     }
 
-    private void handleFin(Packet packet, TcpPipe pipe) throws Exception {
-        Log.i(TAG, String.format("handleFin %d", pipe.tunnelId));
-        pipe.myAcknowledgementNum = packet.getTcpHeader().getSequenceNumber() + 1;
-        pipe.theirAcknowledgementNum = packet.getTcpHeader().getAcknowledgementNumber();
+    private void handleFin(Packet packet, TcpPipe pipe) {
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
+        pipe.myAcknowledgementNum = tcpHeader.getSequenceNumber() + 1;
+        pipe.theirAcknowledgementNum = tcpHeader.getAcknowledgementNumber();
         sendTcpPack(pipe, (byte) (TcpHeader.ACK), null);
         closeUpStream(pipe);
         pipe.tcbStatus = TCBStatus.CLOSE_WAIT;
-
-        Log.i(TAG, String.format("handleFin %s %s", pipe.destinationAddress, pipe.tcbStatus));
     }
 
     private void handlePacket(TcpPipe pipe, Packet packet) throws Exception {
         boolean end = false;
-        TcpHeader tcpHeader = packet.getTcpHeader();
+        TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
         if (tcpHeader.isSYN()) {
             handleSyn(packet, pipe);
             end = true;
@@ -255,13 +240,12 @@ public class TcpPacketHandler implements Runnable {
                 return;
             }
             InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
-            TcpHeader tcpHeader = currentPacket.getTcpHeader();
+            TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
             int destinationPort = tcpHeader.getDestinationPort();
             int sourcePort = tcpHeader.getSourcePort();
             String ipAndPort = destinationAddress.getHostAddress() + ":" +
                     destinationPort + ":" + sourcePort;
-
-
+            
             if (!pipes.containsKey(ipAndPort)) {
                 TcpPipe tcpTunnel = initPipe(currentPacket);
                 tcpTunnel.tunnelKey = ipAndPort;
@@ -286,7 +270,6 @@ public class TcpPacketHandler implements Runnable {
         while (true) {
             buffer.clear();
             int n = SocketUtils.read(channel, buffer);
-            Log.i(TAG, String.format("read %s", n));
             if (n == -1) {
                 quitType = "fin";
                 break;
@@ -318,7 +301,6 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private void closeRst(TcpPipe pipe) {
-        Log.i(TAG, String.format("closeRst %d", pipe.tunnelId));
         cleanPipe(pipe);
         sendTcpPack(pipe, (byte) TcpHeader.RST, null);
         pipe.upActive = false;
@@ -326,7 +308,6 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private void closeDownStream(TcpPipe pipe) throws Exception {
-        Log.i(TAG, String.format("closeDownStream %d", pipe.tunnelId));
         if (pipe.remote != null && pipe.remote.isConnected()) {
             pipe.remote.shutdownInput();
             int ops = getKey(pipe.remote).interestOps() & (~SelectionKey.OP_READ);
@@ -345,13 +326,11 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private void doConnect(SocketChannel socketChannel) throws Exception {
-        Log.i(TAG, String.format("tick %s", tick));
         String type = (String) objAttrUtil.getAttr(socketChannel, "type");
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(socketChannel, "pipe");
         SelectionKey key = (SelectionKey) objAttrUtil.getAttr(socketChannel, "key");
         if (type.equals("remote")) {
             boolean b1 = socketChannel.finishConnect();
-            Log.i(TAG, String.format("connect %s %s %s", pipe.destinationAddress, b1, System.currentTimeMillis() - pipe.timestamp));
             pipe.timestamp = System.currentTimeMillis();
             pipe.remoteOutBuffer.flip();
             key.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
@@ -360,7 +339,6 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private void doWrite(SocketChannel socketChannel) throws Exception {
-        Log.i(TAG, String.format("tick %s", tick));
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(socketChannel, "pipe");
         boolean flushed = tryFlushWrite(pipe, socketChannel);
         if (flushed) {
@@ -390,7 +368,6 @@ public class TcpPacketHandler implements Runnable {
                             System.currentTimeMillis();
                         }
                     } catch (Exception e) {
-                        Log.e(TAG, e.getMessage(), e);
                         if (pipe != null) {
                             closeRst(pipe);
                         }
@@ -407,7 +384,6 @@ public class TcpPacketHandler implements Runnable {
             while (true) {
                 handleReadFromVpn();
                 handleSockets();
-                tick += 1;
                 Thread.sleep(1);
             }
         } catch (Exception e) {

@@ -3,7 +3,8 @@ package com.mocyx.basic_client.protocol;
 
 import com.mocyx.basic_client.util.BitUtils;
 
-import java.net.UnknownHostException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,49 +16,35 @@ public class Packet {
     public static final int TCP_HEADER_SIZE = 20;
     public static final int UDP_HEADER_SIZE = 8;
 
-    private final com.mocyx.basic_client.protocol.IP4Header ip4Header;
-
     private int packId;
     private boolean isTCP;
     private boolean isUDP;
-    private TcpHeader tcpHeader;
-    private UdpHeader udpHeader;
+    private IP4Header ip4Header;
+    private Header header;
     private ByteBuffer backingBuffer;
 
-    // TODO: fix this with an interface
-
-    public Packet(com.mocyx.basic_client.protocol.IP4Header ip4Header,
-                  TcpHeader tcpHeader, ByteBuffer backingBuffer) {
+    public Packet(IP4Header ip4Header, Header header, ByteBuffer backingBuffer) {
         this.ip4Header = ip4Header;
-        this.tcpHeader = tcpHeader;
+        this.header = header;
         this.backingBuffer = backingBuffer;
         this.isTCP = true;
         this.isUDP = false;
         this.setPackId();
     }
 
-    public Packet(com.mocyx.basic_client.protocol.IP4Header ip4Header,
-                  UdpHeader udpHeader, ByteBuffer backingBuffer) {
+    public Packet(IP4Header ip4Header, ByteBuffer backingBuffer) {
         this.ip4Header = ip4Header;
-        this.udpHeader = udpHeader;
         this.backingBuffer = backingBuffer;
         this.isTCP = false;
-        this.isUDP = true;
+        this.isUDP = false;
         this.setPackId();
     }
 
-    public Packet(ByteBuffer buffer) throws UnknownHostException {
-        this.ip4Header = new com.mocyx.basic_client.protocol.IP4Header(buffer);
-        if (this.ip4Header.getProtocol() == TransportProtocol.TCP) {
-            this.tcpHeader = new TcpHeader(buffer);
-            this.isTCP = true;
-            this.isUDP = false;
-        } else if (ip4Header.getProtocol() == TransportProtocol.UDP) {
-            this.udpHeader = new UdpHeader(buffer);
-            this.isUDP = true;
-            this.isTCP = false;
-        }
-        this.backingBuffer = buffer;
+    public Packet(UdpHeader udpHeader, ByteBuffer backingBuffer) {
+        this.header = udpHeader;
+        this.isTCP = false;
+        this.isUDP = true;
+        this.backingBuffer = backingBuffer;
         this.setPackId();
     }
 
@@ -70,29 +57,31 @@ public class Packet {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Packet{");
         sb.append("ip4Header=").append(ip4Header);
-        if (isTCP) sb.append(", tcpHeader=").append(tcpHeader);
-        else if (isUDP) sb.append(", udpHeader=").append(udpHeader);
+        if (isTCP) sb.append(", tcpHeader=").append(header);
+        else if (isUDP) sb.append(", udpHeader=").append(header);
         sb.append(", payloadSize=").append(backingBuffer.limit() - backingBuffer.position());
         sb.append('}');
         return sb.toString();
     }
 
     public boolean isDNS() {
-        return this.isUDP() && this.udpHeader.getDestinationPort() == 53;
+        return this.isUDP() && ((UdpHeader) this.header).isDNS();
     }
 
     public boolean isTCP() {
-        return isTCP;
+        return header != null && header.isTCP();
     }
 
     public boolean isUDP() {
-        return isUDP;
+        return header != null && header.isUDP();
     }
 
     public void updateTCPBuffer(ByteBuffer buffer, byte flags, long sequenceNum, long ackNum, int payloadSize) {
         buffer.position(0);
         fillHeader(buffer);
         backingBuffer = buffer;
+
+        TcpHeader tcpHeader = (TcpHeader) header;
 
         tcpHeader.setFlags(flags);
         backingBuffer.put(IP4_HEADER_SIZE + 13, flags);
@@ -124,6 +113,8 @@ public class Packet {
 
         int udpTotalLength = UDP_HEADER_SIZE + payloadSize;
         backingBuffer.putShort(IP4_HEADER_SIZE + 4, (short) udpTotalLength);
+
+        UdpHeader udpHeader = (UdpHeader) header;
         udpHeader.setLength(udpTotalLength);
 
         // Disable UDP checksum validation
@@ -188,37 +179,26 @@ public class Packet {
             sum = (sum & 0xFFFF) + (sum >> 16);
 
         sum = ~sum;
+        TcpHeader tcpHeader = (TcpHeader) header;
         tcpHeader.setChecksum(sum);
         backingBuffer.putShort(IP4_HEADER_SIZE + 16, (short) sum);
     }
 
-    private void fillHeader(ByteBuffer buffer) {
+    protected void fillHeader(ByteBuffer buffer) {
         ip4Header.fillBuffer(buffer);
-        if (isUDP) {
-            udpHeader.fillBuffer(buffer);
-        } else if (isTCP) {
-            tcpHeader.fillBuffer(buffer);
-        }
+        header.fillBuffer(buffer);
     }
 
     public IP4Header getIp4Header() {
         return ip4Header;
     }
 
-    public TcpHeader getTcpHeader() {
-        return tcpHeader;
+    public Header getHeader() {
+        return header;
     }
 
     public ByteBuffer getBackingBuffer() {
         return backingBuffer;
-    }
-
-    public int getPackId() {
-        return packId;
-    }
-
-    public UdpHeader getUdpHeader() {
-        return udpHeader;
     }
 }
 

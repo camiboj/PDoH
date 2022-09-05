@@ -12,7 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.mocyx.basic_client.doh.GoogleDoH;
+import com.mocyx.basic_client.doh.GoogleDoHRequester;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             //waitingForVPNStart = true;
-            startService(new Intent(this, LocalVPNService.class));
+            startService(new Intent(this, PDoHVpnService.class));
             //enableButton(false);
         }
     }
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void clickGoogleDoH(View view) {
-        Thread t = new Thread(new GoogleDoH("www.baeldung.com"));
+        Thread t = new Thread(new GoogleDoHRequester("www.baeldung.com"));
         t.start();
     }
 }
