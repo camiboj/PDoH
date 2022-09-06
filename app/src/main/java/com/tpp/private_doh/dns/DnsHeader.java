@@ -31,6 +31,15 @@ public class DnsHeader {
         this.nAdditionalRRs = nAdditionalRRs;
     }
 
+    public void putOn(ByteBuffer buff) {
+        buff.putShort(BitUtils.intToShort(identification));
+        buff.putShort(BitUtils.intToShort(flags));
+        buff.putShort(BitUtils.intToShort(nQuestions));
+        buff.putShort(BitUtils.intToShort(nAnswers));
+        buff.putShort(BitUtils.intToShort(nAuthorityResourceRecords));
+        buff.putShort(BitUtils.intToShort(nAdditionalRRs));
+    }
+
     public void addAnswer() {
         nAnswers = nAnswers + 1;
     }
@@ -43,13 +52,8 @@ public class DnsHeader {
         return nQuestions;
     }
 
-    public void putOn(ByteBuffer buff) {
-        buff.putShort(BitUtils.intToShort(identification));
-        buff.putShort(BitUtils.intToShort(flags));
-        buff.putShort(BitUtils.intToShort(nQuestions));
-        buff.putShort(BitUtils.intToShort(nAnswers));
-        buff.putShort(BitUtils.intToShort(nAuthorityResourceRecords));
-        buff.putShort(BitUtils.intToShort(nAdditionalRRs));
+    public int getNAnswers() {
+        return nAnswers;
     }
 
     public int getIdentification() {
@@ -62,6 +66,10 @@ public class DnsHeader {
 
     public int getNAdditionalRRs() {
         return nAdditionalRRs;
+    }
+
+    public int getFlags() {
+        return flags;
     }
 
     @Override
