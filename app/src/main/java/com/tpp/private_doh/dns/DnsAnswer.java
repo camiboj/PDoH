@@ -40,7 +40,7 @@ public class DnsAnswer {
         if (type == 1) {
             try {
                 InetAddress ip = InetAddress.getByName(data);
-                buffer.putShort(BitUtils.intToShort(4));
+                buffer.putShort(BitUtils.intToShort(4)); // IPV4
                 this.firstAnswerNamePos = buffer.position();
                 buffer.put(ip.getAddress());
             } catch (Exception e) {
