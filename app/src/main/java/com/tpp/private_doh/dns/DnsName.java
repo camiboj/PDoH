@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-abstract class DnsName {
+public class DnsName {
 
     // https://cabulous.medium.com/dns-message-how-to-read-query-and-response-message-cfebcb4fe817
     private final static String TAG = DnsName.class.getSimpleName();;

@@ -5,19 +5,19 @@ import com.tpp.private_doh.util.BitUtils;
 import java.nio.ByteBuffer;
 
 public class DnsQuestion {
-    private final DnsQuestionName name;
+    private final DnsName name;
     private final int type;
     private final int dnsQuestionClass;
 
     public DnsQuestion(ByteBuffer buffer) {
-        this.name = new DnsQuestionName(buffer);
+        this.name = new DnsName(buffer);
         this.type = BitUtils.getUnsignedShort(buffer.getShort());
         this.dnsQuestionClass = BitUtils.getUnsignedShort(buffer.getShort());
     }
 
     public DnsQuestion(String name, int type) {
         // name, type, cd, ct, do, dns_client_subnet, random_padding
-        this.name = new DnsQuestionName(name);
+        this.name = new DnsName(name);
         this.type = type;
         this.dnsQuestionClass = 1; // TODO: check default
     }
