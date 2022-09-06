@@ -1,5 +1,9 @@
 package android.util;
 
+/*
+This is weirdly required by Android. Apparently, the logcat library that we are using doesn't work in
+test environments unless we create this class.
+ */
 public class Log {
     public static int d(String tag, String msg) {
         System.out.println("DEBUG: " + tag + ": " + msg);
