@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DnsAnswerTest {
-    private DnsAnswer dnsAnswer;
-
     @Test
     public void testDnsAnswerType1BuiltOk() {
         String name = "dnsAnswerName";
@@ -20,13 +18,13 @@ public class DnsAnswerTest {
         int ttl = 1;
         String data = "121.122.123.124";
 
-        this.dnsAnswer = new DnsAnswer(name, type, ttl, data);
+        DnsAnswer dnsAnswer = new DnsAnswer(name, type, ttl, data);
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         int firstAnswerPos = 12;
         for (int i = 0; i < firstAnswerPos; i++) {
             byteBuffer.put((byte) 0); // Simulate header DNS
         }
-        int otherAnswerPos = this.dnsAnswer.putOn(byteBuffer, firstAnswerPos);
+        int otherAnswerPos = dnsAnswer.putOn(byteBuffer, firstAnswerPos);
         assertEquals(24, otherAnswerPos);
         assertEquals(28, byteBuffer.position());
 
@@ -67,13 +65,13 @@ public class DnsAnswerTest {
         dataInList.add("other");
         dataInList.add("cname");
 
-        this.dnsAnswer = new DnsAnswer(name, type, ttl, data);
+        DnsAnswer dnsAnswer = new DnsAnswer(name, type, ttl, data);
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         int firstAnswerPos = 12;
         for (int i = 0; i < firstAnswerPos; i++) {
             byteBuffer.put((byte) 0); // Simulate header DNS
         }
-        int otherAnswerPos = this.dnsAnswer.putOn(byteBuffer, firstAnswerPos);
+        int otherAnswerPos = dnsAnswer.putOn(byteBuffer, firstAnswerPos);
         assertEquals(24, otherAnswerPos);
 
         assertEquals(41, byteBuffer.position());
@@ -114,19 +112,19 @@ public class DnsAnswerTest {
         dataInList.add("other");
         dataInList.add("cname");
 
-        this.dnsAnswer = new DnsAnswer(name, type, ttl, data);
+        DnsAnswer dnsAnswer = new DnsAnswer(name, type, ttl, data);
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         int firstAnswerPos = 12;
         for (int i = 0; i < firstAnswerPos; i++) {
             byteBuffer.put((byte) 0); // Simulate header DNS
         }
-        int otherAnswerPos = this.dnsAnswer.putOn(byteBuffer, firstAnswerPos);
+        int otherAnswerPos = dnsAnswer.putOn(byteBuffer, firstAnswerPos);
         assertEquals(24, otherAnswerPos);
         assertEquals(41, byteBuffer.position());
 
         String type1Data = "121.122.123.124";
-        this.dnsAnswer = new DnsAnswer(name, 1, ttl, type1Data);
-        int type1AnswerPos = this.dnsAnswer.putOn(byteBuffer, firstAnswerPos);
+        dnsAnswer = new DnsAnswer(name, 1, ttl, type1Data);
+        int type1AnswerPos = dnsAnswer.putOn(byteBuffer, firstAnswerPos);
         assertEquals(41 + 12, type1AnswerPos);
         assertEquals(41 + 16, byteBuffer.position());
     }
