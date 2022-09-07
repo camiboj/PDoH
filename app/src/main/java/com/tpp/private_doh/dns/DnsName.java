@@ -2,6 +2,8 @@ package com.tpp.private_doh.dns;
 
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.tpp.private_doh.util.BitUtils;
 
 import java.nio.ByteBuffer;
@@ -39,6 +41,11 @@ public class DnsName {
     public void putOn(ByteBuffer buf) { // is there a superclass method to override?
         name.forEach(x -> StringToBufferHelper.putOn(buf, x));
         buf.put((byte) 0);
+    }
+
+    @VisibleForTesting
+    public List<String> getName() {
+        return this.name;
     }
 
     public String toString() {
