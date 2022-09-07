@@ -7,15 +7,14 @@ import java.nio.ByteBuffer;
 
 
 public class DnsAnswer {
+    // Class IN (most common)
+    public static final int ANSWER_CLASS = 1;
+
     // https://www.firewall.cx/networking-topics/protocols/domain-name-system-dns/161-protocols-dns-response.html
-    private final static String TAG = DnsAnswer.class.getSimpleName();;
+    private final static String TAG = DnsAnswer.class.getSimpleName();
 
     private final DnsAnswerName name;
     private final int type;
-
-    // Class IN (most common)
-    private final int answerClass = 1;
-
     private final int ttl;
     private final String data;
     private int firstAnswerNamePos;
@@ -31,7 +30,7 @@ public class DnsAnswer {
     public int putOn(ByteBuffer buffer, int firstAnswerNamePos) {
         name.putOn(buffer, firstAnswerNamePos);
         buffer.putShort(BitUtils.intToShort(type));
-        buffer.putShort(BitUtils.intToShort(answerClass));
+        buffer.putShort(BitUtils.intToShort(ANSWER_CLASS));
         buffer.putInt(ttl);
 
         // Type 1 -> IP Address

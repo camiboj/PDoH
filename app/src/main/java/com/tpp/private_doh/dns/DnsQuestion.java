@@ -5,6 +5,8 @@ import com.tpp.private_doh.util.BitUtils;
 import java.nio.ByteBuffer;
 
 public class DnsQuestion {
+    public static final int QUESTION_CLASS = 1;
+
     private final DnsName name;
     private final int type;
     private final int dnsQuestionClass;
@@ -19,7 +21,7 @@ public class DnsQuestion {
         // name, type, cd, ct, do, dns_client_subnet, random_padding
         this.name = new DnsName(name);
         this.type = type;
-        this.dnsQuestionClass = 1; // TODO: check default
+        this.dnsQuestionClass = QUESTION_CLASS;
     }
 
     public String getName() {

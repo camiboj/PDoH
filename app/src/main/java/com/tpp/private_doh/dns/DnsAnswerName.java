@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DnsAnswerName {
-    private final byte BEGINNING_MARK = (byte) 0xc0;
+    public static final byte BEGINNING_MARK = (byte) 0xc0;
     private final List<String> name;
 
     public DnsAnswerName(String name) {

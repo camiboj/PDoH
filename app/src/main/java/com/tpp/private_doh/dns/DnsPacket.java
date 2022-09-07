@@ -74,6 +74,10 @@ public class DnsPacket extends Packet {
         buff.position(packetHeaderSize);
     }
 
+    public List<DnsAnswer> getAnswers() {
+        return this.answers;
+    }
+
     @Override
     public String toString() {
         IP4Header ip4Header = super.getIp4Header();
