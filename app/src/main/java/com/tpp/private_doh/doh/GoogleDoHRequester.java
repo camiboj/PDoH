@@ -2,6 +2,8 @@ package com.tpp.private_doh.doh;
 
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -10,26 +12,39 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class GoogleDoHRequester implements Runnable {
     // https://www.baeldung.com/java-http-request
     // https://www.baeldung.com/httpurlconnection-post
     private final static String ENDPOINT = "https://8.8.8.8/resolve?";
-    private final static String TAG = GoogleDoHRequester.class.getSimpleName();;
-    Map<String, String> parameters = new HashMap<>();
+    private final static String TAG = GoogleDoHRequester.class.getSimpleName();
+    private final URL url;
+    private Map<String, String> parameters = new HashMap<>();
     private GoogleDohResponse googleDohResponse;
 
     public GoogleDoHRequester(String name) {
         parameters.put("name", name);
+        this.url = buildUrl();
+    }
+
+    @VisibleForTesting
+    public GoogleDoHRequester(String name, URL url) {
+        parameters.put("name", name);
+        this.url = url;
     }
 
     public GoogleDohResponse getGoogleDohResponse() {
         return googleDohResponse;
+    }
+
+    @VisibleForTesting
+    public URL getUrl() {
+        return this.url;
     }
 
     public void setType(int type) {
@@ -37,24 +52,14 @@ public class GoogleDoHRequester implements Runnable {
         parameters.put("type", Integer.toString(type));
     }
 
-    private String getParameters() throws UnsupportedEncodingException {
-        return ParameterStringBuilder.getParamsString(parameters);
-    }
-
-    private String getFinalEndpoint() throws UnsupportedEncodingException {
-        String dohUrl = String.format("%s%s", ENDPOINT, getParameters());
-        return dohUrl;
-    }
-
     @Override
     public void run() {
         HttpURLConnection con = null;
         BufferedReader in = null;
         try {
-            URL url = new URL(getFinalEndpoint());
             con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
 
+            con.setRequestMethod("GET");
             con.setRequestProperty("Content-Type", "application/json; utf-8");
             con.setRequestProperty("Accept", "application/json");
 
@@ -62,8 +67,7 @@ public class GoogleDoHRequester implements Runnable {
             con.setDoOutput(true);
 
             // Response
-            in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
+            in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             String inputLine;
             StringBuilder response = new StringBuilder();
             while ((inputLine = in.readLine()) != null) {
@@ -76,7 +80,7 @@ public class GoogleDoHRequester implements Runnable {
             googleDohResponse = mapper.readValue(response.toString(), GoogleDohResponse.class);
             Log.i(TAG, String.format("GoogleDohAnswer: %s", googleDohResponse));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Something went wrong while executing Google DOH Request");
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -88,6 +92,23 @@ public class GoogleDoHRequester implements Runnable {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private String getFinalEndpoint() {
+        try {
+            String parameters = ParameterStringBuilder.getParamsString(this.parameters);
+            return String.format("%s%s", ENDPOINT, parameters);
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("There was a problem building the endpoint");
+        }
+    }
+
+    private URL buildUrl() {
+        try {
+            return new URL(getFinalEndpoint());
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException("There was a problem building the URL");
         }
     }
 
