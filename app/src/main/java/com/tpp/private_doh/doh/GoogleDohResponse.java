@@ -34,6 +34,14 @@ public class GoogleDohResponse {
         private String name;
         private int type;
 
+        public String getName() {
+            return name;
+        }
+
+        public int getType() {
+            return type;
+        }
+
         @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder("Question{");
@@ -42,21 +50,14 @@ public class GoogleDohResponse {
             sb.append('}');
             return sb.toString();
         }
-
-        public String getName() {
-            return name;
-        }
-
-        public int getType() {
-            return type;
-        }
     }
 
     static public class Answer {
-        private String name = "";
-        private int type = 1;
-        private int ttl = 1;
-        private String data = "1.1.1.1";
+        private String name;
+        private int type;
+        @JsonProperty("TTL")
+        private int ttl;
+        private String data;
 
         public Answer() {
         } // needed by Jackson
