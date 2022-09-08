@@ -1,7 +1,9 @@
-package com.tpp.private_doh;
+package com.tpp.private_doh.network;
 
 import android.util.Log;
 
+import com.tpp.private_doh.app.MainActivity;
+import com.tpp.private_doh.controller.DnsController;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.PacketFactory;

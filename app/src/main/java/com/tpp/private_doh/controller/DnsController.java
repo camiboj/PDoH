@@ -1,7 +1,8 @@
-package com.tpp.private_doh;
+package com.tpp.private_doh.controller;
 
 import android.util.Log;
 
+import com.tpp.private_doh.util.DoHToDnsMapper;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.doh.GoogleDohResponse;
 import com.tpp.private_doh.protocol.IpUtil;

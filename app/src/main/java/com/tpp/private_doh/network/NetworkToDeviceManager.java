@@ -1,6 +1,8 @@
-package com.tpp.private_doh;
+package com.tpp.private_doh.network;
 
 import android.util.Log;
+
+import com.tpp.private_doh.app.MainActivity;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;

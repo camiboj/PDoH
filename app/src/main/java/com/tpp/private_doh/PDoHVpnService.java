@@ -12,6 +12,7 @@ import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.handler.DnsDownWorker;
 import com.tpp.private_doh.handler.TcpPacketHandler;
 import com.tpp.private_doh.handler.UdpPacketHandler;
+import com.tpp.private_doh.network.NetworkManager;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.util.ResourceUtils;
 

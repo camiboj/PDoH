@@ -1,4 +1,4 @@
-package com.tpp.private_doh;
+package com.tpp.private_doh.controller;
 
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;

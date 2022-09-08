@@ -1,4 +1,4 @@
-package com.tpp.private_doh;
+package com.tpp.private_doh.app;
 
 import android.content.Intent;
 import android.net.VpnService;
@@ -12,6 +12,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.tpp.private_doh.PDoHVpnService;
+import com.tpp.private_doh.R;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
 
 import java.util.concurrent.atomic.AtomicLong;
