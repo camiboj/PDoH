@@ -1,5 +1,7 @@
 package com.tpp.private_doh.dns;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.tpp.private_doh.util.BitUtils;
 
 import java.net.InetAddress;
@@ -54,6 +56,21 @@ public class DnsAnswer {
         }
 
         return this.firstAnswerNamePos;
+    }
+
+    @VisibleForTesting
+    public int getType() {
+        return type;
+    }
+
+    @VisibleForTesting
+    public int getTtl() {
+        return ttl;
+    }
+
+    @VisibleForTesting
+    public String getData() {
+        return data;
     }
 
     public String toString() {

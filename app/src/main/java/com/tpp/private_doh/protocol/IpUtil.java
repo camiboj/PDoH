@@ -23,7 +23,7 @@ public class IpUtil {
     private static int TCP_HEADER_LENGTH = 40;
     private static int WINDOW = 65535;
     private static int URGENT_POINTER = 0;
-    private static int FLAGS = 33152; // It was checked against a DNS packet
+    public static int FLAGS = 33152; // It was checked against a DNS packet
 
     public static DnsPacket buildDnsPacketFrom(DnsPacket other) {
         IP4Header sourceIp4Header = other.getIp4Header();

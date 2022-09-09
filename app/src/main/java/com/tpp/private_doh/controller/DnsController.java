@@ -2,10 +2,12 @@ package com.tpp.private_doh.controller;
 
 import android.util.Log;
 
-import com.tpp.private_doh.util.DoHToDnsMapper;
+import androidx.annotation.VisibleForTesting;
+
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.doh.GoogleDohResponse;
 import com.tpp.private_doh.protocol.IpUtil;
+import com.tpp.private_doh.util.DoHToDnsMapper;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -16,16 +18,24 @@ public class DnsController implements Runnable {
     ;
     private final DnsPacket dnsRequestPacket;
     private final BlockingQueue<DnsPacket> dnsResponsesQueue;
+    private final DnsToDoHController dnsToDoHController;
 
     public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue) {
+        this(dnsRequestPacket, dnsResponsesQueue, new DnsToDoHController());
+    }
+
+    @VisibleForTesting
+    public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
+                         DnsToDoHController dnsToDoHController) {
         this.dnsRequestPacket = dnsRequestPacket;
         this.dnsResponsesQueue = dnsResponsesQueue;
+        this.dnsToDoHController = dnsToDoHController;
     }
 
     @Override
     public void run() {
         Log.i(TAG, "About to process a DNS Request");
-        List<GoogleDohResponse> googleDohResponses = DnsToDoHController.process(dnsRequestPacket);
+        List<GoogleDohResponse> googleDohResponses = this.dnsToDoHController.process(dnsRequestPacket);
         List<DnsPacket> dnsResponsePackets = googleDohResponses.stream().map(
                 this::createResponsePacket
         ).collect(Collectors.toList());

@@ -26,6 +26,7 @@ public class PDoHVpnService extends VpnService {
     private static final String TAG = PDoHVpnService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
+    private static final Integer CAPACITY = 1000;
 
     private ParcelFileDescriptor vpnInterface = null;
 
@@ -41,10 +42,10 @@ public class PDoHVpnService extends VpnService {
     public void onCreate() {
         super.onCreate();
         setupVPN();
-        deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(1000);
-        deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(1000);
-        dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
-        networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
+        deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(CAPACITY);
+        deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(CAPACITY);
+        dnsResponsesQueue = new ArrayBlockingQueue<>(CAPACITY);
+        networkToDeviceQueue = new ArrayBlockingQueue<>(CAPACITY);
 
         executorService = Executors.newFixedThreadPool(4);
         executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
