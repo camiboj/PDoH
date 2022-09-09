@@ -2,6 +2,8 @@ package com.tpp.private_doh.handler;
 
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.protocol.Packet;
@@ -16,14 +18,13 @@ public class DnsDownWorker implements Runnable {
     protected final static String TAG = DnsDownWorker.class.getSimpleName();
     public final AtomicInteger ipId;
     private final BlockingQueue<DnsPacket> dnsResponsesQueue;
-    ;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final int headerSize;
 
-
-    public DnsDownWorker(BlockingQueue<ByteBuffer> networkToDeviceQueue, BlockingQueue<DnsPacket> dnsResponsesQueue) {
-        this.dnsResponsesQueue = dnsResponsesQueue;
+    public DnsDownWorker(BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                         BlockingQueue<DnsPacket> dnsResponsesQueue) {
         this.networkToDeviceQueue = networkToDeviceQueue;
+        this.dnsResponsesQueue = dnsResponsesQueue;
         ipId = new AtomicInteger();
         this.headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
     }
@@ -32,12 +33,17 @@ public class DnsDownWorker implements Runnable {
     public void run() {
         while (true) {
             try {
-                DnsPacket dnsResponse = dnsResponsesQueue.take();
-                fillDnsResponse(dnsResponse);
-            } catch (InterruptedException e) {
+                processPacket();
+            } catch (InterruptedException e) { // We should stop this manually when creating a button to stop
                 e.printStackTrace();
             }
         }
+    }
+
+    @VisibleForTesting
+    public void processPacket() throws InterruptedException {
+        DnsPacket dnsResponse = dnsResponsesQueue.take();
+        fillDnsResponse(dnsResponse);
     }
 
     private void fillDnsResponse(DnsPacket dnsResponse) {

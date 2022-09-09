@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.util.Helper;
+
 import com.tpp.private_doh.dns.DnsAnswer;
 import com.tpp.private_doh.dns.DnsHeader;
 import com.tpp.private_doh.dns.DnsPacket;
@@ -27,7 +29,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DnsControllerTest {
+public class DnsControllerTest extends Helper {
 
     @Mock
     private DnsToDoHController dnsToDoHController;
@@ -142,14 +144,4 @@ public class DnsControllerTest {
         assertEquals(answerData, dnsAnswer.getData());
         assertEquals(ttl, dnsAnswer.getTtl());
     }
-
-    private InetAddress buildAddress(String name) {
-        try {
-            return InetAddress.getByName(name);
-        } catch (UnknownHostException e) {
-            throw new RuntimeException("Failed test");
-        }
-    }
-
-
 }
