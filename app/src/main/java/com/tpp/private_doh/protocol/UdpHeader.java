@@ -23,8 +23,6 @@ public class UdpHeader implements Header {
         this.length = 0;
     }
 
-    public UdpHeader(){}
-
     @Override
     public void fillBuffer(ByteBuffer buffer) {
         buffer.putShort((short) this.sourcePort);
@@ -61,10 +59,6 @@ public class UdpHeader implements Header {
     public void setChecksum(int checksum) {
         this.checksum = checksum;
     }
-
-    public void setSourcePort(int sourcePort) { this.sourcePort = sourcePort; }
-
-    public void setDestinationPort(int destinationPort) { this.destinationPort = destinationPort; }
 
     public boolean isDNS() {
         return destinationPort == 53 || sourcePort == 53;
