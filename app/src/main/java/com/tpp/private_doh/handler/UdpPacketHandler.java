@@ -39,19 +39,6 @@ public class UdpPacketHandler implements Runnable {
         this.udpSockets = new HashMap<>();
     }
 
-    private void hack (UdpTunnel tunnel, ByteBuffer byteBuffer, AtomicInteger ipId) {
-        int headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
-        byte[] data = new byte[byteBuffer.remaining()];
-        int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
-
-        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
-
-        packet.updateUDPBuffer(byteBuffer, dataLen);
-        byteBuffer.position(headerSize + dataLen);
-        ByteBuffer bufferDuplicated = byteBuffer.duplicate();
-        bufferDuplicated.flip();
-        this.networkToDeviceQueue.offer(byteBuffer);
-    }
     @Override
     public void run() {
         try {

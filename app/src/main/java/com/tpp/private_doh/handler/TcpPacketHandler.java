@@ -245,7 +245,7 @@ public class TcpPacketHandler implements Runnable {
             int sourcePort = tcpHeader.getSourcePort();
             String ipAndPort = destinationAddress.getHostAddress() + ":" +
                     destinationPort + ":" + sourcePort;
-            
+
             if (!pipes.containsKey(ipAndPort)) {
                 TcpPipe tcpTunnel = initPipe(currentPacket);
                 tcpTunnel.tunnelKey = ipAndPort;
@@ -389,13 +389,9 @@ public class TcpPacketHandler implements Runnable {
         } catch (Exception e) {
             Log.e(e.getMessage(), "", e);
         }
-
-
     }
 
     private static class TcpPipe {
-        static Integer tunnelIds = 0;
-        public final int tunnelId = tunnelIds++;
         public long mySequenceNum = 0;
         public long theirSequenceNum = 0;
         public long myAcknowledgementNum = 0;
