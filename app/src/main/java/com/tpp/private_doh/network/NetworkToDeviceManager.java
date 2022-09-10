@@ -22,19 +22,23 @@ public class NetworkToDeviceManager implements Runnable {
     @Override
     public void run() {
         while (true) {
-            try {
-                ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
-                bufferFromNetwork.flip();
+            handleBytes();
+        }
+    }
 
-                while (bufferFromNetwork.hasRemaining()) {
-                    int w = vpnOutput.write(bufferFromNetwork);
-                    if (w > 0) {
-                        MainActivity.downByte.addAndGet(w);
-                    }
+    public void handleBytes() {
+        try {
+            ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
+            bufferFromNetwork.flip();
+
+            while (bufferFromNetwork.hasRemaining()) {
+                int w = vpnOutput.write(bufferFromNetwork);
+                if (w > 0) {
+                    MainActivity.downByte.addAndGet(w);
                 }
-            } catch (Exception e) {
-                Log.i(TAG, "WriteVpnThread fail", e);
             }
+        } catch (Exception e) {
+            Log.i(TAG, "WriteVpnThread fail", e);
         }
     }
 }
