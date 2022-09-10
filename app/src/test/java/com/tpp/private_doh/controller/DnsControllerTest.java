@@ -1,6 +1,5 @@
 package com.tpp.private_doh.controller;
 
-import static com.tpp.private_doh.protocol.IpUtil.FLAGS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.verify;
@@ -22,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -126,7 +124,7 @@ public class DnsControllerTest extends Helper {
         // DnsHeader
         DnsHeader dnsHeaderResult = dnsPacketResult.getDnsHeader();
         assertEquals(id, dnsHeaderResult.getIdentification());
-        assertEquals(FLAGS, dnsHeaderResult.getFlags());
+        assertEquals(com.tpp.private_doh.protocol.IpUtil.FLAGS, dnsHeaderResult.getFlags());
         assertEquals(1, dnsHeaderResult.getNQuestions());
         assertEquals(1, dnsHeaderResult.getNAnswers());
 

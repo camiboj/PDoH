@@ -2,6 +2,8 @@ package com.tpp.private_doh.network;
 
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsController;
 import com.tpp.private_doh.dns.DnsPacket;
@@ -24,8 +26,8 @@ public class NetworkManager implements Runnable {
     private static final String TAG = NetworkManager.class.getSimpleName();
     private static final int N_DNS_WORKERS = 50;
 
-    private FileDescriptor vpnFileDescriptor;
-
+    private FileChannel vpnInput;
+    private FileChannel vpnOutput;
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
     private BlockingQueue<DnsPacket> dnsResponsesQueue;
@@ -37,56 +39,54 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                           BlockingQueue<ByteBuffer> networkToDeviceQueue) {
-        this.vpnFileDescriptor = vpnFileDescriptor;
+        FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
+        ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
+        buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
+    }
+
+    @VisibleForTesting
+    public NetworkManager(FileChannel vpnInput,
+                          FileChannel vpnOutput,
+                          BlockingQueue<Packet> deviceToNetworkUDPQueue,
+                          BlockingQueue<Packet> deviceToNetworkTCPQueue,
+                          BlockingQueue<DnsPacket> dnsResponsesQueue,
+                          BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                          ExecutorService dnsWorkers) {
+        buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
+    }
+
+    private void buildNetworkManager(FileChannel vpnInput,
+                                     FileChannel vpnOutput,
+                                     BlockingQueue<Packet> deviceToNetworkUDPQueue,
+                                     BlockingQueue<Packet> deviceToNetworkTCPQueue,
+                                     BlockingQueue<DnsPacket> dnsResponsesQueue,
+                                     BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                                     ExecutorService dnsWorkers) {
+        this.vpnInput = vpnInput;
+        this.vpnOutput = vpnOutput;
         this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
         this.deviceToNetworkTCPQueue = deviceToNetworkTCPQueue;
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
-
-        dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
+        this.dnsWorkers = dnsWorkers;
     }
 
     @Override
     public void run() {
         Log.i(TAG, "Started");
-        FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
 
         // Start thread that sends DNS responses back to the network
-        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         Thread t = new Thread(new NetworkToDeviceManager(vpnOutput, networkToDeviceQueue));
         t.start();
 
         // Read incoming DNS, UDP and TCP requests and capture them
         try {
-            ByteBuffer bufferToNetwork;
             while (!Thread.interrupted()) {
-                bufferToNetwork = ByteBufferPool.acquire();
-                int readBytes = vpnInput.read(bufferToNetwork);
-
-                MainActivity.upByte.addAndGet(readBytes);
-
-                if (readBytes > 0) {
-                    bufferToNetwork.flip();
-                    Packet packet = PacketFactory.createPacket(bufferToNetwork);
-                    if (packet.isDNS()) {
-                        DnsPacket dnsPacket = (DnsPacket) packet;
-                        Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
-                        dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue));
-                    } else if (packet.isUDP()) {
-                        deviceToNetworkUDPQueue.offer(packet);
-                    } else if (packet.isTCP()) {
-                        deviceToNetworkTCPQueue.offer(packet);
-                    } else {
-                        Log.w(TAG, String.format("Unknown packet protocol type %d",
-                                packet.getIp4Header().getProtocol().getNumber()));
-                    }
-                } else {
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+                ByteBuffer bufferToNetwork = ByteBufferPool.acquire();
+                processPackets(bufferToNetwork);
             }
         } catch (IOException e) {
             Log.w(TAG, e.toString(), e);
@@ -97,4 +97,34 @@ public class NetworkManager implements Runnable {
             dnsWorkers.shutdown();
         }
     }
+
+    @VisibleForTesting
+    public void processPackets(ByteBuffer bufferToNetwork) throws IOException {
+        int readBytes = vpnInput.read(bufferToNetwork);
+        MainActivity.upByte.addAndGet(readBytes);
+
+        if (readBytes > 0) {
+            bufferToNetwork.flip();
+            Packet packet = PacketFactory.createPacket(bufferToNetwork);
+            if (packet.isDNS()) {
+                DnsPacket dnsPacket = (DnsPacket) packet;
+                Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
+                dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue));
+            } else if (packet.isUDP()) {
+                deviceToNetworkUDPQueue.offer(packet);
+            } else if (packet.isTCP()) {
+                deviceToNetworkTCPQueue.offer(packet);
+            } else {
+                Log.w(TAG, String.format("Unknown packet protocol type %d",
+                        packet.getIp4Header().getProtocol().getNumber()));
+            }
+        } else {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
+
