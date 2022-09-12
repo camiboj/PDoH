@@ -1,5 +1,8 @@
 package com.tpp.private_doh.doh;
 
+import androidx.annotation.VisibleForTesting;
+
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,5 +14,10 @@ public class Quad9DoHRequester extends DoHRequester {
 
     public Quad9DoHRequester(String name) {
         super(name, ENDPOINT, HEADERS);
+    }
+
+    @VisibleForTesting
+    public Quad9DoHRequester(String name, URL url) {
+        super(name, ENDPOINT, HEADERS, url);
     }
 }
