@@ -21,7 +21,7 @@ public class DohResponse {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GoogleDohResponse {");
+        final StringBuilder sb = new StringBuilder("DohResponse {");
         sb.append("Question=").append(questions);
         sb.append(", Answers=").append(answers);
         sb.append('}');

@@ -27,27 +27,29 @@ public abstract class DoHRequester implements Runnable {
     private final URL url;
     // TODO: Make mandatory for subclasses to override this attr
     protected String TAG;
-    protected Map<String, List<String>> HEADERS;
     Map<String, String> parameters = new HashMap<>();
     private DohResponse dohResponse;
     private String endpoint;
+    private Map<String, List<String>> headers;
 
-    public DoHRequester(String name, String endpoint) {
+    public DoHRequester(String name, String endpoint, Map<String, List<String>> headers) {
         TAG = this.getClass().getSimpleName();
         parameters.put("name", name);
         this.endpoint = endpoint;
         this.url = buildUrl();
+        this.headers = headers;
     }
 
     @VisibleForTesting
-    public DoHRequester(String name, String endpoint, URL url) {
+    public DoHRequester(String name, String endpoint, Map<String, List<String>> headers, URL url) {
         TAG = this.getClass().getSimpleName();
         parameters.put("name", name);
         this.endpoint = endpoint;
+        this.headers = headers;
         this.url = url;
     }
 
-    public DohResponse getGoogleDohResponse() {
+    public DohResponse getDohResponse() {
         return dohResponse;
     }
 
@@ -68,14 +70,9 @@ public abstract class DoHRequester implements Runnable {
         try {
             con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
-
-            // HEADERS
-            // TODO: each provider has its own headers as class attr
             setHeaders(con);
-
             Log.i(TAG, String.format("Status: %s", con.getResponseCode()));
-
-            // RESPONSE
+            // Response
             in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -128,14 +125,12 @@ public abstract class DoHRequester implements Runnable {
     }
 
     private void setHeaders(HttpURLConnection con) {
-        for (Map.Entry<String, List<String>> entry : HEADERS.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
             entry.getValue().forEach(
                     value -> con.setRequestProperty(entry.getKey(), value)
             );
         }
     }
-
-    ;
 
     static class ParameterStringBuilder {
         public static String getParamsString(Map<String, String> params)

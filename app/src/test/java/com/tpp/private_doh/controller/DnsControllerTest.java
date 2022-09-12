@@ -42,7 +42,7 @@ public class DnsControllerTest extends Helper {
     private DnsHeader dnsHeader;
 
     @Mock
-    private DohResponse googleDohResponse;
+    private DohResponse dohResponse;
 
     @Mock
     private DohResponse.Answer answer;
@@ -96,15 +96,15 @@ public class DnsControllerTest extends Helper {
         // DohResponse
         List<DohResponse.Answer> answers = new ArrayList<>();
         answers.add(answer);
-        when(googleDohResponse.getAnswers()).thenReturn(answers);
+        when(dohResponse.getAnswers()).thenReturn(answers);
         List<DohResponse.Question> questions = new ArrayList<>();
         questions.add(question);
-        when(googleDohResponse.getQuestions()).thenReturn(questions);
+        when(dohResponse.getQuestions()).thenReturn(questions);
 
         // DnsToDohController
-        List<DohResponse> googleDohResponseList = new ArrayList<>();
-        googleDohResponseList.add(googleDohResponse);
-        when(dnsToDoHController.process(dnsPacket)).thenReturn(googleDohResponseList);
+        List<DohResponse> dohResponseList = new ArrayList<>();
+        dohResponseList.add(dohResponse);
+        when(dnsToDoHController.process(dnsPacket)).thenReturn(dohResponseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);
         DnsController dnsController = new DnsController(dnsPacket, dnsPackets, dnsToDoHController);

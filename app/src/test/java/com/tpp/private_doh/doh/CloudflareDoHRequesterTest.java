@@ -1,7 +1,6 @@
 package com.tpp.private_doh.doh;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GoogleDoHRequesterTest extends DohHelper {
+public class CloudflareDoHRequesterTest extends DohHelper {
     private static String NAME = "someName";
 
     @Mock
@@ -28,21 +27,21 @@ public class GoogleDoHRequesterTest extends DohHelper {
     private HttpURLConnection httpURLConnection;
 
     @Test
-    public void testGoogleDohFlow() throws IOException {
+    public void testCloudflareDohFlow() throws IOException {
         when(url.openConnection()).thenReturn(httpURLConnection);
         String response = buildDohResponse();
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester(NAME, url);
-        googleDoHRequester.run();
+        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester(NAME, url);
+        cloudflareDoHRequester.run();
         verify(httpURLConnection).setRequestMethod(any());
-        verify(httpURLConnection).setRequestProperty("Accept", "application/json");
-        verifyDohResponse(googleDoHRequester.getDohResponse());
+        verify(httpURLConnection).setRequestProperty("Accept", "application/dns-json");
+        verifyDohResponse(cloudflareDoHRequester.getDohResponse());
     }
 
     @Test
-    public void testGoogleDohRequesterBuildsOk() {
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester(NAME);
-        assertEquals("https://8.8.8.8/resolve?name=someName", googleDoHRequester.getUrl().toString());
+    public void testCloudflareDohRequesterBuildsOk() {
+        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester(NAME);
+        assertEquals("https://1.1.1.1/dns-query?name=someName", cloudflareDoHRequester.getUrl().toString());
     }
 }

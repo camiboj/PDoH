@@ -35,8 +35,8 @@ public class DnsController implements Runnable {
     @Override
     public void run() {
         Log.i(TAG, "About to process a DNS Request");
-        List<DohResponse> googleDohResponses = this.dnsToDoHController.process(dnsRequestPacket);
-        List<DnsPacket> dnsResponsePackets = googleDohResponses.stream().map(
+        List<DohResponse> dohResponses = this.dnsToDoHController.process(dnsRequestPacket);
+        List<DnsPacket> dnsResponsePackets = dohResponses.stream().map(
                 this::createResponsePacket
         ).collect(Collectors.toList());
 
