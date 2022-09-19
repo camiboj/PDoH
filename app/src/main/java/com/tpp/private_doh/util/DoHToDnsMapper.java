@@ -3,12 +3,12 @@ package com.tpp.private_doh.util;
 import android.util.Log;
 
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.doh.GoogleDohResponse;
+import com.tpp.private_doh.doh.DohResponse;
 
 public class DoHToDnsMapper {
     private static final String TAG = DoHToDnsMapper.class.getSimpleName();
 
-    public static void map(GoogleDohResponse dohResponse, DnsPacket dnsPacket) {
+    public static void map(DohResponse dohResponse, DnsPacket dnsPacket) {
         Log.i(TAG, String.format("DohResponse: %s", dohResponse));
 
         dohResponse.getAnswers().forEach(

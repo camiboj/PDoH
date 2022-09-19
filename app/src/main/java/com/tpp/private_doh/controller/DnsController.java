@@ -5,7 +5,7 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.doh.GoogleDohResponse;
+import com.tpp.private_doh.doh.DohResponse;
 import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.util.DoHToDnsMapper;
 
@@ -35,15 +35,15 @@ public class DnsController implements Runnable {
     @Override
     public void run() {
         Log.i(TAG, "About to process a DNS Request");
-        List<GoogleDohResponse> googleDohResponses = this.dnsToDoHController.process(dnsRequestPacket);
-        List<DnsPacket> dnsResponsePackets = googleDohResponses.stream().map(
+        List<DohResponse> dohResponses = this.dnsToDoHController.process(dnsRequestPacket);
+        List<DnsPacket> dnsResponsePackets = dohResponses.stream().map(
                 this::createResponsePacket
         ).collect(Collectors.toList());
 
         dnsResponsePackets.forEach(this::offerPacket);
     }
 
-    private DnsPacket createResponsePacket(GoogleDohResponse dohResponse) {
+    private DnsPacket createResponsePacket(DohResponse dohResponse) {
         DnsPacket dnsResponsePacket = IpUtil.buildDnsPacketFrom(dnsRequestPacket);
         DoHToDnsMapper.map(dohResponse, dnsResponsePacket);
         dnsResponsePacket.fillBackingBuffer();

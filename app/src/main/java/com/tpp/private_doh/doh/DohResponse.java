@@ -5,17 +5,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GoogleDohResponse {
+public class DohResponse {
+    private boolean TC = false;
+    private boolean RD = false;
+    private boolean RA = false;
+    private boolean AD = false;
+    private boolean CD = false;
+
     @JsonProperty("Question")
     private List<Question> questions = new ArrayList<>();
     @JsonProperty("Answer")
     private List<Answer> answers = new ArrayList<>();
-    public GoogleDohResponse() {
+    public DohResponse() {
     } // needed by Jackson
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GoogleDohResponse {");
+        final StringBuilder sb = new StringBuilder("DohResponse {");
         sb.append("Question=").append(questions);
         sb.append(", Answers=").append(answers);
         sb.append('}');
@@ -33,6 +39,12 @@ public class GoogleDohResponse {
     static public class Question {
         private String name;
         private int type;
+
+        public void setName(String name) { this.name = name; }
+
+        public void setType(int type) {
+            this.type = type;
+        }
 
         public String getName() {
             return name;

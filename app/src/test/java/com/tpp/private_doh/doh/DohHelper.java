@@ -4,15 +4,15 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
-public class GoogleDohHelper {
+public class DohHelper {
 
-    public String buildGoogleDohResponse() {
+    public String buildDohResponse() {
         return "{\"Status\": 0, \"TC\":false, \"RD\":true, \"RA\":true, \"AD\":false, \"CD\":false, \"Question\": [{ \"name\":\"apple.com.\", \"type\":1 }], \"Answer\": [ { \"name\":\"apple.com.\", \"type\":1, \"TTL\":3599,\"data\":\"17.178.96.59\" }, { \"name\":\"apple.com.\", \"type\":1, \"TTL\": 3599, \"data\":\"17.172.224.47\" },  { \"name\":\"apple.com.\", \"type\":1, \"TTL\":3599, \"data\":\"17.142.160.59\" } ], \"edns_client_subnet\":\"12.34.56.78/0\" }";
     }
 
-    public void verifyGoogleDohResponse(GoogleDohResponse googleDohResponse) {
-        List<GoogleDohResponse.Answer> answers = googleDohResponse.getAnswers();
-        List<GoogleDohResponse.Question> questions = googleDohResponse.getQuestions();
+    public void verifyDohResponse(DohResponse dohResponse) {
+        List<DohResponse.Answer> answers = dohResponse.getAnswers();
+        List<DohResponse.Question> questions = dohResponse.getQuestions();
         assertEquals(1, questions.size());
         assertEquals("apple.com.", questions.get(0).getName());
         assertEquals(1, questions.get(0).getType());

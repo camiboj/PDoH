@@ -14,7 +14,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
+import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
+import com.tpp.private_doh.doh.Quad9DoHRequester;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -82,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     public void clickSwitch(View view) {
         this.startVpn();
     }
@@ -90,11 +91,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
     }
 
     public void clickGoogleDoH(View view) {
-        Thread t = new Thread(new GoogleDoHRequester("www.baeldung.com"));
+        Thread t = new Thread(new CloudflareDoHRequester("www.baeldung.com"));
         t.start();
+
+        Thread tg = new Thread(new GoogleDoHRequester("www.baeldung.com"));
+        tg.start();
+
+        Thread tq = new Thread(new Quad9DoHRequester("www.baeldung.com"));
+        tq.start();
     }
 }

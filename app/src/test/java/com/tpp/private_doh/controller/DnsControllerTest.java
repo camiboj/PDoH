@@ -11,7 +11,7 @@ import com.tpp.private_doh.dns.DnsAnswer;
 import com.tpp.private_doh.dns.DnsHeader;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
-import com.tpp.private_doh.doh.GoogleDohResponse;
+import com.tpp.private_doh.doh.DohResponse;
 import com.tpp.private_doh.protocol.IP4Header;
 import com.tpp.private_doh.protocol.UdpHeader;
 
@@ -42,13 +42,13 @@ public class DnsControllerTest extends Helper {
     private DnsHeader dnsHeader;
 
     @Mock
-    private GoogleDohResponse googleDohResponse;
+    private DohResponse dohResponse;
 
     @Mock
-    private GoogleDohResponse.Answer answer;
+    private DohResponse.Answer answer;
 
     @Mock
-    private GoogleDohResponse.Question question;
+    private DohResponse.Question question;
 
     @Test
     public void testDnsToDohControllerWorksOk() {
@@ -93,18 +93,18 @@ public class DnsControllerTest extends Helper {
         when(answer.getTtl()).thenReturn(ttl);
         when(answer.getType()).thenReturn(answerType);
 
-        // GoogleDohResponse
-        List<GoogleDohResponse.Answer> answers = new ArrayList<>();
+        // DohResponse
+        List<DohResponse.Answer> answers = new ArrayList<>();
         answers.add(answer);
-        when(googleDohResponse.getAnswers()).thenReturn(answers);
-        List<GoogleDohResponse.Question> questions = new ArrayList<>();
+        when(dohResponse.getAnswers()).thenReturn(answers);
+        List<DohResponse.Question> questions = new ArrayList<>();
         questions.add(question);
-        when(googleDohResponse.getQuestions()).thenReturn(questions);
+        when(dohResponse.getQuestions()).thenReturn(questions);
 
         // DnsToDohController
-        List<GoogleDohResponse> googleDohResponseList = new ArrayList<>();
-        googleDohResponseList.add(googleDohResponse);
-        when(dnsToDoHController.process(dnsPacket)).thenReturn(googleDohResponseList);
+        List<DohResponse> dohResponseList = new ArrayList<>();
+        dohResponseList.add(dohResponse);
+        when(dnsToDoHController.process(dnsPacket)).thenReturn(dohResponseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);
         DnsController dnsController = new DnsController(dnsPacket, dnsPackets, dnsToDoHController);

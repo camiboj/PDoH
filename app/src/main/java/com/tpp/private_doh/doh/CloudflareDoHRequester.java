@@ -8,20 +8,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GoogleDoHRequester extends DoHRequester {
-    private static String ENDPOINT = "https://8.8.8.8/resolve?";
+public class CloudflareDoHRequester extends DoHRequester {
+    private static String ENDPOINT = "https://1.1.1.1/dns-query?";
     private static Map<String, List<String>> HEADERS = new HashMap<String, List<String>>() {
         {
-            put("Accept", Collections.singletonList("application/json"));
+            put("Accept", Collections.singletonList("application/dns-json"));
         }
     };
 
-    public GoogleDoHRequester(String name) {
+    public CloudflareDoHRequester(String name) {
         super(name, ENDPOINT, HEADERS);
     }
 
     @VisibleForTesting
-    public GoogleDoHRequester(String name, URL url) {
+    public CloudflareDoHRequester(String name, URL url) {
         super(name, ENDPOINT, HEADERS, url);
     }
 }

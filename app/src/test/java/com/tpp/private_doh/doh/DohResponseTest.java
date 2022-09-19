@@ -7,14 +7,14 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-public class GoogleDohResponseTest extends GoogleDohHelper {
+public class DohResponseTest extends DohHelper {
 
     @Test
-    public void testGoogleDohResponseBuiltOk() throws IOException {
+    public void testDohResponseBuiltOk() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        String response = buildGoogleDohResponse();
-        GoogleDohResponse googleDohResponse = mapper.readValue(response, GoogleDohResponse.class);
-        verifyGoogleDohResponse(googleDohResponse);
+        String response = buildDohResponse();
+        DohResponse dohResponse = mapper.readValue(response, DohResponse.class);
+        verifyDohResponse(dohResponse);
     }
 }

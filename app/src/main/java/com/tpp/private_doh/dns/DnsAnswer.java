@@ -74,7 +74,7 @@ public class DnsAnswer {
     }
 
     public String toString() {
-        return "GoogleDohAnswer {" + "name=" + name +
+        return "DohAnswer {" + "name=" + name +
                 ", type=" + type +
                 ", ttl=" + ttl +
                 ", data=" + data +

@@ -1,7 +1,6 @@
 package com.tpp.private_doh.doh;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GoogleDoHRequesterTest extends DohHelper {
+public class Quad9DohRequesterTest extends DohHelper {
     private static String NAME = "someName";
 
     @Mock
@@ -28,21 +27,20 @@ public class GoogleDoHRequesterTest extends DohHelper {
     private HttpURLConnection httpURLConnection;
 
     @Test
-    public void testGoogleDohFlow() throws IOException {
+    public void testQuad9DohFlow() throws IOException {
         when(url.openConnection()).thenReturn(httpURLConnection);
         String response = buildDohResponse();
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester(NAME, url);
-        googleDoHRequester.run();
+        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester(NAME, url);
+        quad9DoHRequester.run();
         verify(httpURLConnection).setRequestMethod(any());
-        verify(httpURLConnection).setRequestProperty("Accept", "application/json");
-        verifyDohResponse(googleDoHRequester.getDohResponse());
+        verifyDohResponse(quad9DoHRequester.getDohResponse());
     }
 
     @Test
-    public void testGoogleDohRequesterBuildsOk() {
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester(NAME);
-        assertEquals("https://8.8.8.8/resolve?name=someName", googleDoHRequester.getUrl().toString());
+    public void testGQuad9DohRequesterBuildsOk() {
+        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester(NAME);
+        assertEquals("https://9.9.9.9:5053/dns-query?name=someName", quad9DoHRequester.getUrl().toString());
     }
 }
