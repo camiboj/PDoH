@@ -6,7 +6,12 @@ import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsController;
+import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.dns.DnsPacket;
+import com.tpp.private_doh.doh.CloudflareDoHRequester;
+import com.tpp.private_doh.doh.DoHRequester;
+import com.tpp.private_doh.doh.GoogleDoHRequester;
+import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
@@ -18,6 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,6 +40,7 @@ public class NetworkManager implements Runnable {
     private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService dnsWorkers;
+    private ShardingController shardingController;
 
     public NetworkManager(FileDescriptor vpnFileDescriptor,
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
@@ -42,6 +50,13 @@ public class NetworkManager implements Runnable {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
+
+        List<DoHRequester> doHRequesters = new ArrayList<>();
+        doHRequesters.add(new GoogleDoHRequester());
+        doHRequesters.add(new Quad9DoHRequester());
+        doHRequesters.add(new CloudflareDoHRequester());
+        this.shardingController = new ShardingController(doHRequesters, 2); // TODO: remove harcoded number
+
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
     }
@@ -109,7 +124,7 @@ public class NetworkManager implements Runnable {
             if (packet.isDNS()) {
                 DnsPacket dnsPacket = (DnsPacket) packet;
                 Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
-                dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue));
+                dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue, shardingController));
             } else if (packet.isUDP()) {
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {

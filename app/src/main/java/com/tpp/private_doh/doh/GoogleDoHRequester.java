@@ -16,12 +16,7 @@ public class GoogleDoHRequester extends DoHRequester {
         }
     };
 
-    public GoogleDoHRequester(String name) {
-        super(name, ENDPOINT, HEADERS);
-    }
-
-    @VisibleForTesting
-    public GoogleDoHRequester(String name, URL url) {
-        super(name, ENDPOINT, HEADERS, url);
+    public GoogleDoHRequester() {
+        super(ENDPOINT, HEADERS);
     }
 }

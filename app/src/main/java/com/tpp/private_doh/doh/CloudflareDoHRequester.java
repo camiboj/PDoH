@@ -16,12 +16,7 @@ public class CloudflareDoHRequester extends DoHRequester {
         }
     };
 
-    public CloudflareDoHRequester(String name) {
-        super(name, ENDPOINT, HEADERS);
-    }
-
-    @VisibleForTesting
-    public CloudflareDoHRequester(String name, URL url) {
-        super(name, ENDPOINT, HEADERS, url);
+    public CloudflareDoHRequester() {
+        super(ENDPOINT, HEADERS);
     }
 }

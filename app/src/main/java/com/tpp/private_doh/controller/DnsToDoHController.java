@@ -1,5 +1,7 @@
 package com.tpp.private_doh.controller;
 
+import android.util.Log;
+
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
 import com.tpp.private_doh.doh.DoHRequester;
@@ -11,9 +13,14 @@ import java.util.stream.Collectors;
 
 public class DnsToDoHController {
     private static final String TAG = DnsToDoHController.class.getSimpleName();
-    ;
+    private ShardingController shardingController;
+
+    public DnsToDoHController(ShardingController shardingController) {
+        this.shardingController = shardingController;
+    }
 
     public List<DohResponse> process(DnsPacket dnsPacket) {
+        Log.i(TAG, "Processing new package");
         List<DnsQuestion> questions = dnsPacket.getQuestions();
         questions.forEach(this::processQuestion);
 
@@ -21,14 +28,15 @@ public class DnsToDoHController {
                 this::processQuestion
         ).collect(Collectors.toList());
 
-        List<Thread> threads = requesters.stream().map(
+        /*List<Thread> threads = requesters.stream().map(
                 this::startThreads
         ).collect(Collectors.toList());
 
-        threads.forEach(this::joinThreads);
+        threads.forEach(this::joinThreads);*/
         return requesters.stream().map(DoHRequester::getDohResponse).collect(Collectors.toList());
     }
 
+    /*
     private Thread startThreads(DoHRequester requester) {
         Thread t = new Thread(requester);
         t.start();
@@ -41,13 +49,13 @@ public class DnsToDoHController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     private DoHRequester processQuestion(DnsQuestion question) {
+        return shardingController.executeRequest(question.getName(), question.getType());
         //GoogleDoHRequester googleDoH = new GoogleDoHRequester(question.getName());
         //CloudflareDoHRequester dohRequester = new CloudflareDoHRequester(question.getName());
-        Quad9DoHRequester dohRequester = new Quad9DoHRequester(question.getName());
-        dohRequester.setType(question.getType());
-        return dohRequester;
+        //Quad9DoHRequester dohRequester = new Quad9DoHRequester();
+        //dohRequester.setType(question.getType());
     }
 }

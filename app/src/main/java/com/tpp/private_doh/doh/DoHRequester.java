@@ -20,51 +20,28 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class DoHRequester implements Runnable {
+public abstract class DoHRequester {
     // https://www.baeldung.com/java-http-request
     // https://www.baeldung.com/httpurlconnection-post
 
-    private final URL url;
-    // TODO: Make mandatory for subclasses to override this attr
     protected String TAG;
-    Map<String, String> parameters = new HashMap<>();
+
     private DohResponse dohResponse;
     private String endpoint;
     private Map<String, List<String>> headers;
 
-    public DoHRequester(String name, String endpoint, Map<String, List<String>> headers) {
+    public DoHRequester(String endpoint, Map<String, List<String>> headers) {
         TAG = this.getClass().getSimpleName();
-        parameters.put("name", name);
-        this.endpoint = endpoint;
-        this.url = buildUrl();
-        this.headers = headers;
-    }
-
-    @VisibleForTesting
-    public DoHRequester(String name, String endpoint, Map<String, List<String>> headers, URL url) {
-        TAG = this.getClass().getSimpleName();
-        parameters.put("name", name);
         this.endpoint = endpoint;
         this.headers = headers;
-        this.url = url;
     }
 
     public DohResponse getDohResponse() {
         return dohResponse;
     }
 
-    public void setType(int type) {
-        // Possible parameters https://developers.google.com/speed/public-dns/docs/doh/json
-        parameters.put("type", Integer.toString(type));
-    }
-
-    @VisibleForTesting
-    public URL getUrl() {
-        return this.url;
-    }
-
-    @Override
-    public void run() {
+    public void executeRequest(String name, int type) {
+        URL url = buildUrl(name, type);
         HttpURLConnection con = null;
         BufferedReader in = null;
         try {
@@ -103,22 +80,21 @@ public abstract class DoHRequester implements Runnable {
         }
     }
 
-    private String getParameters() throws UnsupportedEncodingException {
-        return ParameterStringBuilder.getParamsString(parameters);
-    }
-
-    private String getFinalEndpoint() {
+    private String getFinalEndpoint(String name, int type) {
         try {
-            String parameters = ParameterStringBuilder.getParamsString(this.parameters);
+            Map<String, String> inputParameters = new HashMap<>();
+            inputParameters.put("name", name);
+            inputParameters.put("type", Integer.toString(type));
+            String parameters = ParameterStringBuilder.getParamsString(inputParameters);
             return String.format("%s%s", this.endpoint, parameters);
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("There was a problem building the endpoint");
         }
     }
 
-    private URL buildUrl() {
+    private URL buildUrl(String name, int type) {
         try {
-            return new URL(getFinalEndpoint());
+            return new URL(getFinalEndpoint(name, type));
         } catch (MalformedURLException e) {
             throw new IllegalStateException("There was a problem building the URL");
         }
