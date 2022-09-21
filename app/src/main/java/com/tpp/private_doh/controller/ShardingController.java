@@ -1,24 +1,34 @@
 package com.tpp.private_doh.controller;
 
 import com.tpp.private_doh.doh.DoHRequester;
+import com.tpp.private_doh.doh.DohResponse;
 import com.tpp.private_doh.util.CombinationUtils;
 
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.stream.Collectors;
 
 public class ShardingController {
-
     private List<List<DoHRequester>> doHRequesters;
     private int actualIdx;
+    private int nSharders;
 
     public ShardingController(List<DoHRequester> doHRequesters, int n) {
         this.doHRequesters = CombinationUtils.combination(doHRequesters, n);
         this.actualIdx = 0;
+        this.nSharders = n;
     }
 
-    public DoHRequester executeRequest(String name, int type) {
-        DoHRequester doHRequester = this.doHRequesters.get(actualIdx).get(0);
-        doHRequester.executeRequest(name, type); // TODO: implement racing properly
+    public List<Runnable> executeRequest(String name, int type, BlockingQueue<DohResponse> responses) {
+        List<DoHRequester> doHRequesters = this.doHRequesters.get(actualIdx);
         actualIdx = actualIdx == (doHRequesters.size() - 1) ? 0 : actualIdx + 1;
-        return doHRequester;
+        return doHRequesters.stream()
+                .map(doHRequester -> ((Runnable) () -> doHRequester.executeRequest(name, type, responses)))
+                .collect(Collectors.toList());
+    }
+
+    public int getNSharders() {
+        return nSharders;
     }
 }

@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 
 public abstract class DoHRequester {
@@ -40,7 +41,7 @@ public abstract class DoHRequester {
         return dohResponse;
     }
 
-    public void executeRequest(String name, int type) {
+    public void executeRequest(String name, int type, BlockingQueue<DohResponse> responses) {
         URL url = buildUrl(name, type);
         HttpURLConnection con = null;
         BufferedReader in = null;
@@ -60,8 +61,8 @@ public abstract class DoHRequester {
             Log.i(TAG, String.format("Response: %s", response));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
             dohResponse = mapper.readValue(response.toString(), DohResponse.class);
+            responses.offer(dohResponse); // TODO: delete dohResponse as attribute class
             Log.i(TAG, String.format("DohAnswer: %s", dohResponse));
         } catch (IOException e) {
             e.printStackTrace();
