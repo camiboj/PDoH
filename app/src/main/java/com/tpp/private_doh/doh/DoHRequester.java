@@ -2,6 +2,8 @@ package com.tpp.private_doh.doh;
 
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,12 +21,8 @@ import java.util.Map;
 
 
 public abstract class DoHRequester {
-    // https://www.baeldung.com/java-http-request
-    // https://www.baeldung.com/httpurlconnection-post
-
     protected String TAG;
 
-    private DohResponse dohResponse;
     private String endpoint;
     private Map<String, List<String>> headers;
 
@@ -34,12 +32,12 @@ public abstract class DoHRequester {
         this.headers = headers;
     }
 
-    public DohResponse getDohResponse() {
-        return dohResponse;
+    public DohResponse executeRequest(String name, int type) {
+        return executeRequest(buildUrl(name, type));
     }
 
-    public DohResponse executeRequest(String name, int type) {
-        URL url = buildUrl(name, type);
+    @VisibleForTesting
+    public DohResponse executeRequest(URL url) {
         HttpURLConnection con = null;
         BufferedReader in = null;
         try {

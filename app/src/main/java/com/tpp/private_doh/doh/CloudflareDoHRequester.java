@@ -1,8 +1,5 @@
 package com.tpp.private_doh.doh;
 
-import androidx.annotation.VisibleForTesting;
-
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

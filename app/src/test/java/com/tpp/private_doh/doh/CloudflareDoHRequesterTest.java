@@ -1,6 +1,5 @@
 package com.tpp.private_doh.doh;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,8 +17,6 @@ import java.net.URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CloudflareDoHRequesterTest extends DohHelper {
-    private static String NAME = "someName";
-
     @Mock
     private URL url;
 
@@ -32,16 +29,10 @@ public class CloudflareDoHRequesterTest extends DohHelper {
         String response = buildDohResponse();
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
-        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester(NAME, url);
-        cloudflareDoHRequester.run();
+        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester();
+        DohResponse dohResponse = cloudflareDoHRequester.executeRequest(url);
         verify(httpURLConnection).setRequestMethod(any());
         verify(httpURLConnection).setRequestProperty("Accept", "application/dns-json");
-        verifyDohResponse(cloudflareDoHRequester.getDohResponse());
-    }
-
-    @Test
-    public void testCloudflareDohRequesterBuildsOk() {
-        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester(NAME);
-        assertEquals("https://1.1.1.1/dns-query?name=someName", cloudflareDoHRequester.getUrl().toString());
+        verifyDohResponse(dohResponse);
     }
 }
