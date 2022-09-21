@@ -2,8 +2,6 @@ package com.tpp.private_doh.doh;
 
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -18,7 +16,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 
 
 public abstract class DoHRequester {
@@ -41,7 +38,7 @@ public abstract class DoHRequester {
         return dohResponse;
     }
 
-    public void executeRequest(String name, int type, BlockingQueue<DohResponse> responses) {
+    public DohResponse executeRequest(String name, int type) {
         URL url = buildUrl(name, type);
         HttpURLConnection con = null;
         BufferedReader in = null;
@@ -61,11 +58,11 @@ public abstract class DoHRequester {
             Log.i(TAG, String.format("Response: %s", response));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            dohResponse = mapper.readValue(response.toString(), DohResponse.class);
-            responses.offer(dohResponse); // TODO: delete dohResponse as attribute class
+            DohResponse dohResponse = mapper.readValue(response.toString(), DohResponse.class);
             Log.i(TAG, String.format("DohAnswer: %s", dohResponse));
+            return dohResponse;
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Something happened while executing request");
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -74,8 +71,7 @@ public abstract class DoHRequester {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    Log.i("tag", "Fallo1");
-                    e.printStackTrace();
+                    throw new RuntimeException("Something happened while executing request");
                 }
             }
         }
