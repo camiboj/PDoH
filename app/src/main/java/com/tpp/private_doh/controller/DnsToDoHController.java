@@ -47,6 +47,6 @@ public class DnsToDoHController {
         List<Runnable> requesters = shardingController.executeRequest(question.getName(), question.getType(), responses);
         List<Thread> threads = requesters.stream().map(this::startThreads).collect(Collectors.toList());
         threads.forEach(this::joinThreads);
-        return responses.peek(); // TODO: get element as soon as it is available
+        return responses.peek(); // TODO: get element as soon as it is available. Maybe implement conditional variable algorithm
     }
 }
