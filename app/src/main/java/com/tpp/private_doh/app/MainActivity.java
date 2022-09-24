@@ -94,13 +94,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void clickGoogleDoH(View view) {
-        Thread t = new Thread(new CloudflareDoHRequester("www.baeldung.com"));
+        /*Thread t = new Thread(new CloudflareDoHRequester("www.baeldung.com"));
         t.start();
 
         Thread tg = new Thread(new GoogleDoHRequester("www.baeldung.com"));
         tg.start();
 
         Thread tq = new Thread(new Quad9DoHRequester("www.baeldung.com"));
-        tq.start();
+        tq.start();*/
     }
 }

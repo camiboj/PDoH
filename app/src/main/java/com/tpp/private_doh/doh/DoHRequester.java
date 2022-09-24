@@ -20,51 +20,24 @@ import java.util.List;
 import java.util.Map;
 
 
-public abstract class DoHRequester implements Runnable {
-    // https://www.baeldung.com/java-http-request
-    // https://www.baeldung.com/httpurlconnection-post
-
-    private final URL url;
-    // TODO: Make mandatory for subclasses to override this attr
+public abstract class DoHRequester {
     protected String TAG;
-    Map<String, String> parameters = new HashMap<>();
-    private DohResponse dohResponse;
+
     private String endpoint;
     private Map<String, List<String>> headers;
 
-    public DoHRequester(String name, String endpoint, Map<String, List<String>> headers) {
+    public DoHRequester(String endpoint, Map<String, List<String>> headers) {
         TAG = this.getClass().getSimpleName();
-        parameters.put("name", name);
         this.endpoint = endpoint;
-        this.url = buildUrl();
         this.headers = headers;
+    }
+
+    public DohResponse executeRequest(String name, int type) {
+        return executeRequest(buildUrl(name, type));
     }
 
     @VisibleForTesting
-    public DoHRequester(String name, String endpoint, Map<String, List<String>> headers, URL url) {
-        TAG = this.getClass().getSimpleName();
-        parameters.put("name", name);
-        this.endpoint = endpoint;
-        this.headers = headers;
-        this.url = url;
-    }
-
-    public DohResponse getDohResponse() {
-        return dohResponse;
-    }
-
-    public void setType(int type) {
-        // Possible parameters https://developers.google.com/speed/public-dns/docs/doh/json
-        parameters.put("type", Integer.toString(type));
-    }
-
-    @VisibleForTesting
-    public URL getUrl() {
-        return this.url;
-    }
-
-    @Override
-    public void run() {
+    public DohResponse executeRequest(URL url) {
         HttpURLConnection con = null;
         BufferedReader in = null;
         try {
@@ -83,11 +56,11 @@ public abstract class DoHRequester implements Runnable {
             Log.i(TAG, String.format("Response: %s", response));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-            dohResponse = mapper.readValue(response.toString(), DohResponse.class);
+            DohResponse dohResponse = mapper.readValue(response.toString(), DohResponse.class);
             Log.i(TAG, String.format("DohAnswer: %s", dohResponse));
+            return dohResponse;
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Something happened while executing request");
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -96,29 +69,27 @@ public abstract class DoHRequester implements Runnable {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    Log.i("tag", "Fallo1");
-                    e.printStackTrace();
+                    throw new RuntimeException("Something happened while executing request");
                 }
             }
         }
     }
 
-    private String getParameters() throws UnsupportedEncodingException {
-        return ParameterStringBuilder.getParamsString(parameters);
-    }
-
-    private String getFinalEndpoint() {
+    private String getFinalEndpoint(String name, int type) {
         try {
-            String parameters = ParameterStringBuilder.getParamsString(this.parameters);
+            Map<String, String> inputParameters = new HashMap<>();
+            inputParameters.put("name", name);
+            inputParameters.put("type", Integer.toString(type));
+            String parameters = ParameterStringBuilder.getParamsString(inputParameters);
             return String.format("%s%s", this.endpoint, parameters);
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("There was a problem building the endpoint");
         }
     }
 
-    private URL buildUrl() {
+    private URL buildUrl(String name, int type) {
         try {
-            return new URL(getFinalEndpoint());
+            return new URL(getFinalEndpoint(name, type));
         } catch (MalformedURLException e) {
             throw new IllegalStateException("There was a problem building the URL");
         }

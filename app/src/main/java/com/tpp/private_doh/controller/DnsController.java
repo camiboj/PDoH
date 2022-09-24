@@ -20,8 +20,10 @@ public class DnsController implements Runnable {
     private final BlockingQueue<DnsPacket> dnsResponsesQueue;
     private final DnsToDoHController dnsToDoHController;
 
-    public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue) {
-        this(dnsRequestPacket, dnsResponsesQueue, new DnsToDoHController());
+    public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
+                         ShardingController shardingController) {
+        this(dnsRequestPacket, dnsResponsesQueue, new DnsToDoHController(shardingController));
+        Log.i(TAG, "Creating new DnsController");
     }
 
     @VisibleForTesting

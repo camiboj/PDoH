@@ -1,7 +1,5 @@
 package com.tpp.private_doh.doh;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,8 +17,6 @@ import java.net.URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GoogleDoHRequesterTest extends DohHelper {
-    private static String NAME = "someName";
-
     @Mock
     private URL url;
 
@@ -33,16 +29,10 @@ public class GoogleDoHRequesterTest extends DohHelper {
         String response = buildDohResponse();
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester(NAME, url);
-        googleDoHRequester.run();
+        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester();
+        DohResponse dohResponse = googleDoHRequester.executeRequest(url);
         verify(httpURLConnection).setRequestMethod(any());
         verify(httpURLConnection).setRequestProperty("Accept", "application/json");
-        verifyDohResponse(googleDoHRequester.getDohResponse());
-    }
-
-    @Test
-    public void testGoogleDohRequesterBuildsOk() {
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester(NAME);
-        assertEquals("https://8.8.8.8/resolve?name=someName", googleDoHRequester.getUrl().toString());
+        verifyDohResponse(dohResponse);
     }
 }

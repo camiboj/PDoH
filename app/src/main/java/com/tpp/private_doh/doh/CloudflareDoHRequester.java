@@ -1,8 +1,5 @@
 package com.tpp.private_doh.doh;
 
-import androidx.annotation.VisibleForTesting;
-
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +13,7 @@ public class CloudflareDoHRequester extends DoHRequester {
         }
     };
 
-    public CloudflareDoHRequester(String name) {
-        super(name, ENDPOINT, HEADERS);
-    }
-
-    @VisibleForTesting
-    public CloudflareDoHRequester(String name, URL url) {
-        super(name, ENDPOINT, HEADERS, url);
+    public CloudflareDoHRequester() {
+        super(ENDPOINT, HEADERS);
     }
 }

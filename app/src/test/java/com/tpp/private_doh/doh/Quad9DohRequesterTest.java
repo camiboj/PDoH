@@ -1,6 +1,5 @@
 package com.tpp.private_doh.doh;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,8 +17,6 @@ import java.net.URL;
 
 @RunWith(MockitoJUnitRunner.class)
 public class Quad9DohRequesterTest extends DohHelper {
-    private static String NAME = "someName";
-
     @Mock
     private URL url;
 
@@ -32,15 +29,9 @@ public class Quad9DohRequesterTest extends DohHelper {
         String response = buildDohResponse();
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
-        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester(NAME, url);
-        quad9DoHRequester.run();
+        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester();
+        DohResponse dohResponse = quad9DoHRequester.executeRequest(url);
         verify(httpURLConnection).setRequestMethod(any());
-        verifyDohResponse(quad9DoHRequester.getDohResponse());
-    }
-
-    @Test
-    public void testGQuad9DohRequesterBuildsOk() {
-        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester(NAME);
-        assertEquals("https://9.9.9.9:5053/dns-query?name=someName", quad9DoHRequester.getUrl().toString());
+        verifyDohResponse(dohResponse);
     }
 }

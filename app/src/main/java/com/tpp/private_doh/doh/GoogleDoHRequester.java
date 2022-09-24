@@ -1,8 +1,5 @@
 package com.tpp.private_doh.doh;
 
-import androidx.annotation.VisibleForTesting;
-
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +13,7 @@ public class GoogleDoHRequester extends DoHRequester {
         }
     };
 
-    public GoogleDoHRequester(String name) {
-        super(name, ENDPOINT, HEADERS);
-    }
-
-    @VisibleForTesting
-    public GoogleDoHRequester(String name, URL url) {
-        super(name, ENDPOINT, HEADERS, url);
+    public GoogleDoHRequester() {
+        super(ENDPOINT, HEADERS);
     }
 }
