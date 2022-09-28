@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DohResponse {
+public class Response {
     private boolean TC = false;
     private boolean RD = false;
     private boolean RA = false;
@@ -16,7 +16,7 @@ public class DohResponse {
     private List<Question> questions = new ArrayList<>();
     @JsonProperty("Answer")
     private List<Answer> answers = new ArrayList<>();
-    public DohResponse() {
+    public Response() {
     } // needed by Jackson
 
     @Override

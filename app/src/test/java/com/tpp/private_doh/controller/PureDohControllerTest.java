@@ -11,7 +11,7 @@ import com.tpp.private_doh.dns.DnsAnswer;
 import com.tpp.private_doh.dns.DnsHeader;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
-import com.tpp.private_doh.doh.DohResponse;
+import com.tpp.private_doh.doh.Response;
 import com.tpp.private_doh.protocol.IP4Header;
 import com.tpp.private_doh.protocol.UdpHeader;
 
@@ -19,24 +19,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.xbill.DNS.Address;
-import org.xbill.DNS.DClass;
-import org.xbill.DNS.Message;
-import org.xbill.DNS.Name;
-import org.xbill.DNS.Record;
-import org.xbill.DNS.Resolver;
-import org.xbill.DNS.SimpleResolver;
-import org.xbill.DNS.TextParseException;
-import org.xbill.DNS.Type;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PureDohControllerTest extends Helper {
@@ -54,13 +42,13 @@ public class PureDohControllerTest extends Helper {
     private DnsHeader dnsHeader;
 
     @Mock
-    private DohResponse dohResponse;
+    private Response response;
 
     @Mock
-    private DohResponse.Answer answer;
+    private Response.Answer answer;
 
     @Mock
-    private DohResponse.Question question;
+    private Response.Question question;
 
     @Test
     public void testDnsToDohControllerWorksOk() {
@@ -106,17 +94,17 @@ public class PureDohControllerTest extends Helper {
         when(answer.getType()).thenReturn(answerType);
 
         // DohResponse
-        List<DohResponse.Answer> answers = new ArrayList<>();
+        List<Response.Answer> answers = new ArrayList<>();
         answers.add(answer);
-        when(dohResponse.getAnswers()).thenReturn(answers);
-        List<DohResponse.Question> questions = new ArrayList<>();
+        when(response.getAnswers()).thenReturn(answers);
+        List<Response.Question> questions = new ArrayList<>();
         questions.add(question);
-        when(dohResponse.getQuestions()).thenReturn(questions);
+        when(response.getQuestions()).thenReturn(questions);
 
         // DnsToDohController
-        List<DohResponse> dohResponseList = new ArrayList<>();
-        dohResponseList.add(dohResponse);
-        when(dnsToDoHController.process(dnsPacket)).thenReturn(dohResponseList);
+        List<Response> responseList = new ArrayList<>();
+        responseList.add(response);
+        when(dnsToDoHController.process(dnsPacket)).thenReturn(responseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);
         PureDohController pureDohController = new PureDohController(dnsPacket, dnsPackets, dnsToDoHController);

@@ -125,7 +125,8 @@ public class NetworkManager implements Runnable {
                 DnsPacket dnsPacket = (DnsPacket) packet;
                 Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
 
-                if (!dnsPacket.getQuestions().isEmpty() && dnsPacket.getQuestions().get(0).getName().equals("www.google.com")) {
+                // TODO: create a more robust way to find out if we should bypass this packet
+                if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8")) {
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
                     dnsWorkers.submit(new PureDnsController(packet, deviceToNetworkUDPQueue));

@@ -1,11 +1,9 @@
 package com.tpp.private_doh.util;
 
 import com.tpp.private_doh.doh.DoHRequester;
-import com.tpp.private_doh.doh.DohResponse;
 
 import org.paukov.combinatorics3.Generator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

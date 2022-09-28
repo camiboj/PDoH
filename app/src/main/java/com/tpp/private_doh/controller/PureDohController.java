@@ -5,7 +5,7 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.doh.DohResponse;
+import com.tpp.private_doh.doh.Response;
 import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.util.DoHToDnsMapper;
 
@@ -36,17 +36,17 @@ public class PureDohController implements Runnable {
     @Override
     public void run() {
         Log.i(TAG, "About to process a DNS Request");
-        List<DohResponse> dohResponses = this.dnsToDoHController.process(dnsRequestPacket);
-        List<DnsPacket> dnsResponsePackets = dohResponses.stream().map(
+        List<Response> respons = this.dnsToDoHController.process(dnsRequestPacket);
+        List<DnsPacket> dnsResponsePackets = respons.stream().map(
                 this::createResponsePacket
         ).collect(Collectors.toList());
 
         dnsResponsePackets.forEach(this::offerPacket);
     }
 
-    private DnsPacket createResponsePacket(DohResponse dohResponse) {
+    private DnsPacket createResponsePacket(Response response) {
         DnsPacket dnsResponsePacket = IpUtil.buildDnsPacketFrom(dnsRequestPacket);
-        DoHToDnsMapper.map(dohResponse, dnsResponsePacket);
+        DoHToDnsMapper.map(response, dnsResponsePacket);
         dnsResponsePacket.fillBackingBuffer();
         return dnsResponsePacket;
     }

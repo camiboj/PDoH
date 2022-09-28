@@ -30,7 +30,7 @@ public class GoogleDoHRequesterTest extends DohHelper {
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
         GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester();
-        DohResponse dohResponse = googleDoHRequester.executeRequest(url);
+        Response dohResponse = googleDoHRequester.executeRequest(url);
         verify(httpURLConnection).setRequestMethod(any());
         verify(httpURLConnection).setRequestProperty("Accept", "application/json");
         verifyDohResponse(dohResponse);
