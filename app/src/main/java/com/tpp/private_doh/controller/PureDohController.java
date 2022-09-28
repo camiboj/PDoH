@@ -13,22 +13,21 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
-public class DnsController implements Runnable {
-    private static final String TAG = DnsController.class.getSimpleName();
+public class PureDohController implements Runnable {
+    private static final String TAG = PureDohController.class.getSimpleName();
     ;
     private final DnsPacket dnsRequestPacket;
     private final BlockingQueue<DnsPacket> dnsResponsesQueue;
     private final DnsToDoHController dnsToDoHController;
 
-    public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
-                         ShardingController shardingController) {
+    public PureDohController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
+                             ShardingController shardingController) {
         this(dnsRequestPacket, dnsResponsesQueue, new DnsToDoHController(shardingController));
-        Log.i(TAG, "Creating new DnsController");
     }
 
     @VisibleForTesting
-    public DnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
-                         DnsToDoHController dnsToDoHController) {
+    public PureDohController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
+                             DnsToDoHController dnsToDoHController) {
         this.dnsRequestPacket = dnsRequestPacket;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsToDoHController = dnsToDoHController;

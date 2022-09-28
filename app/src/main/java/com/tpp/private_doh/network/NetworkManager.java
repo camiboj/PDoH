@@ -5,7 +5,7 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
-import com.tpp.private_doh.controller.DnsController;
+import com.tpp.private_doh.controller.PureDnsController;
 import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
@@ -124,7 +124,14 @@ public class NetworkManager implements Runnable {
             if (packet.isDNS()) {
                 DnsPacket dnsPacket = (DnsPacket) packet;
                 Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
-                dnsWorkers.submit(new DnsController(dnsPacket, dnsResponsesQueue, shardingController));
+
+                if (!dnsPacket.getQuestions().isEmpty() && dnsPacket.getQuestions().get(0).getName().equals("www.google.com")) {
+                    deviceToNetworkUDPQueue.offer(packet);
+                } else {
+                    dnsWorkers.submit(new PureDnsController(packet, deviceToNetworkUDPQueue));
+                }
+
+                //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, shardingController));
             } else if (packet.isUDP()) {
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {

@@ -1,24 +1,23 @@
 package com.tpp.private_doh.protocol;
 
 import com.tpp.private_doh.util.BitUtils;
+import com.tpp.private_doh.util.IpUtils;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class IP4Header {
-    private final byte version;
+    private byte version;
     private final byte IHL;
     private final int headerLength;
     private final short typeOfService;
-    private int identificationAndFlagsAndFragmentOffset;
     private final short TTL;
     private final int protocolNum;
     private final TransportProtocol protocol;
     private final InetAddress sourceAddress;
-    private final InetAddress destinationAddress;
+    private InetAddress destinationAddress;
     private final int optionsAndPadding;
-
+    private int identificationAndFlagsAndFragmentOffset;
     private int totalLength;
     private int headerChecksum;
 
@@ -42,7 +41,7 @@ public class IP4Header {
         this.optionsAndPadding = optionsAndPadding;
     }
 
-    public IP4Header(ByteBuffer buffer) throws UnknownHostException {
+    public IP4Header(ByteBuffer buffer) {
         byte versionAndIHL = buffer.get();
         this.version = (byte) (versionAndIHL >> 4);
         this.IHL = (byte) (versionAndIHL & 0x0F);
@@ -60,10 +59,10 @@ public class IP4Header {
 
         byte[] addressBytes = new byte[4];
         buffer.get(addressBytes, 0, 4);
-        this.sourceAddress = InetAddress.getByAddress(addressBytes);
+        this.sourceAddress = IpUtils.getByAddress(addressBytes);
 
         buffer.get(addressBytes, 0, 4);
-        this.destinationAddress = InetAddress.getByAddress(addressBytes);
+        this.destinationAddress = IpUtils.getByAddress(addressBytes);
 
         this.optionsAndPadding = 0;
     }
@@ -130,5 +129,21 @@ public class IP4Header {
 
     public void setIdentificationAndFlagsAndFragmentOffset(int i) {
         identificationAndFlagsAndFragmentOffset = i;
+    }
+
+    public void setDestinationAddress(InetAddress destinationAddress) {
+        this.destinationAddress = destinationAddress;
+    }
+
+    public void setDestinationAddress(String pickedIp) {
+        this.destinationAddress = IpUtils.getByName(pickedIp);
+    }
+
+    public void setDestinationAddress(byte[] pickedIp) {
+        this.destinationAddress = IpUtils.getByAddress(pickedIp);
+    }
+
+    public void setVersion(int version) {
+        this.version = (byte) version;
     }
 }

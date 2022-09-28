@@ -19,15 +19,27 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.xbill.DNS.Address;
+import org.xbill.DNS.DClass;
+import org.xbill.DNS.Message;
+import org.xbill.DNS.Name;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.Resolver;
+import org.xbill.DNS.SimpleResolver;
+import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DnsControllerTest extends Helper {
+public class PureDohControllerTest extends Helper {
 
     @Mock
     private DnsToDoHController dnsToDoHController;
@@ -107,9 +119,9 @@ public class DnsControllerTest extends Helper {
         when(dnsToDoHController.process(dnsPacket)).thenReturn(dohResponseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);
-        DnsController dnsController = new DnsController(dnsPacket, dnsPackets, dnsToDoHController);
+        PureDohController pureDohController = new PureDohController(dnsPacket, dnsPackets, dnsToDoHController);
 
-        dnsController.run();
+        pureDohController.run();
 
         verify(dnsToDoHController).process(dnsPacket);
         assertEquals(1, dnsPackets.size());
