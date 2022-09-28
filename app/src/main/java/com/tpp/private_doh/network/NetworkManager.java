@@ -129,7 +129,7 @@ public class NetworkManager implements Runnable {
                 if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8")) {
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    dnsWorkers.submit(new PureDnsController(packet, deviceToNetworkUDPQueue));
+                    dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue));
                 }
 
                 //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, shardingController));

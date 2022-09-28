@@ -36,8 +36,8 @@ public class PureDohController implements Runnable {
     @Override
     public void run() {
         Log.i(TAG, "About to process a DNS Request");
-        List<Response> respons = this.dnsToDoHController.process(dnsRequestPacket);
-        List<DnsPacket> dnsResponsePackets = respons.stream().map(
+        List<Response> responses = this.dnsToDoHController.process(dnsRequestPacket);
+        List<DnsPacket> dnsResponsePackets = responses.stream().map(
                 this::createResponsePacket
         ).collect(Collectors.toList());
 

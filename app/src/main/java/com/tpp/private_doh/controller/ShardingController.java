@@ -26,8 +26,4 @@ public class ShardingController {
                 .map(doHRequester -> CompletableFuture.supplyAsync(() -> doHRequester.executeRequest(name, type)))
                 .collect(Collectors.toList());
     }
-
-    public int getNSharders() {
-        return nSharders;
-    }
 }

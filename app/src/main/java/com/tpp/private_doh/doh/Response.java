@@ -16,8 +16,15 @@ public class Response {
     private List<Question> questions = new ArrayList<>();
     @JsonProperty("Answer")
     private List<Answer> answers = new ArrayList<>();
+
     public Response() {
     } // needed by Jackson
+
+    public Response(List<Question> questions,
+                    List<Answer> answers) {
+        this.questions = questions;
+        this.answers = answers;
+    }
 
     @Override
     public String toString() {
@@ -40,9 +47,8 @@ public class Response {
         private String name;
         private int type;
 
-        public void setName(String name) { this.name = name; }
-
-        public void setType(int type) {
+        public Question(String name, int type) {
+            this.name = name;
             this.type = type;
         }
 
@@ -50,8 +56,16 @@ public class Response {
             return name;
         }
 
+        public void setName(String name) {
+            this.name = name;
+        }
+
         public int getType() {
             return type;
+        }
+
+        public void setType(int type) {
+            this.type = type;
         }
 
         @Override
@@ -73,6 +87,13 @@ public class Response {
 
         public Answer() {
         } // needed by Jackson
+
+        public Answer(String name, int type, int ttl, String data) {
+            this.name = name;
+            this.type = type;
+            this.ttl = ttl;
+            this.data = data;
+        }
 
         public String getName() {
             return name;
