@@ -2,6 +2,8 @@ package com.tpp.private_doh.doh;
 
 import static org.junit.Assert.assertEquals;
 
+import com.tpp.private_doh.dns.Response;
+
 import java.util.List;
 
 public class DohHelper {

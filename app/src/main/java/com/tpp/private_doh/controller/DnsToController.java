@@ -1,7 +1,7 @@
 package com.tpp.private_doh.controller;
 
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.doh.Response;
+import com.tpp.private_doh.dns.Response;
 
 import java.util.List;
 

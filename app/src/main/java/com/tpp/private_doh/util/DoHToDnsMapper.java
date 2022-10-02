@@ -3,7 +3,7 @@ package com.tpp.private_doh.util;
 import android.util.Log;
 
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.doh.Response;
+import com.tpp.private_doh.dns.Response;
 
 public class DoHToDnsMapper {
     private static final String TAG = DoHToDnsMapper.class.getSimpleName();

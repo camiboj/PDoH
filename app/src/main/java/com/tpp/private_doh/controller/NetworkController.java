@@ -3,7 +3,7 @@ package com.tpp.private_doh.controller;
 import android.util.Log;
 
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.doh.Response;
+import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.util.DoHToDnsMapper;
 

@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.tpp.private_doh.dns.Response;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;

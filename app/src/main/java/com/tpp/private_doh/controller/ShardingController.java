@@ -1,6 +1,6 @@
 package com.tpp.private_doh.controller;
 
-import com.tpp.private_doh.doh.Response;
+import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
 

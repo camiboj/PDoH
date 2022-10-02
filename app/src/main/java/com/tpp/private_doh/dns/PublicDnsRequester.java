@@ -1,6 +1,5 @@
 package com.tpp.private_doh.dns;
 
-import com.tpp.private_doh.doh.Response;
 import com.tpp.private_doh.util.Requester;
 
 import org.xbill.DNS.DClass;

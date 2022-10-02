@@ -6,6 +6,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.Requester;
 
 import java.io.BufferedReader;
@@ -19,6 +20,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 public abstract class DoHRequester implements Requester {
@@ -57,9 +59,21 @@ public abstract class DoHRequester implements Requester {
             Log.i(TAG, String.format("Response: %s", response));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            Response dohResponse = mapper.readValue(response.toString(), Response.class);
+            DohResponse dohResponse = mapper.readValue(response.toString(), DohResponse.class);
             Log.i(TAG, String.format("DohAnswer: %s", dohResponse));
-            return dohResponse;
+
+            List<DohResponse.Question> dohQuestions = dohResponse.getQuestions();
+            List<Response.Question> questions = dohQuestions.stream().map(dohQuestion ->
+                    new Response.Question(dohQuestion.getName(), dohQuestion.getType()))
+                    .collect(Collectors.toList());
+
+            List<DohResponse.Answer> dohAnswers = dohResponse.getAnswers();
+            List<Response.Answer> answers = dohAnswers.stream().map(dohAnswer ->
+                    new Response.Answer(dohAnswer.getName(), dohAnswer.getType(), dohAnswer.getTtl(),
+                            dohAnswer.getData()))
+                    .collect(Collectors.toList());
+
+            return new Response(questions, answers);
         } catch (IOException e) {
             throw new RuntimeException("Something happened while executing request");
         } finally {

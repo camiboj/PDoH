@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
-import com.tpp.private_doh.doh.Response;
+import com.tpp.private_doh.dns.Response;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

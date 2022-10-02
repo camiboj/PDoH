@@ -5,6 +5,8 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
+import com.tpp.private_doh.controller.DnsToPublicDnsController;
+import com.tpp.private_doh.controller.PureDnsController;
 import com.tpp.private_doh.controller.PureDohController;
 import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.dns.DnsPacket;
@@ -126,13 +128,13 @@ public class NetworkManager implements Runnable {
                 Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
 
                 // TODO: create a more robust way to find out if we should bypass this packet
-                /*if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8")) {
+                if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8")) {
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
+                    //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, shardingController));
                     dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, new DnsToPublicDnsController()));
-                }*/
+                }
 
-                dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, shardingController));
             } else if (packet.isUDP()) {
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {

@@ -2,12 +2,13 @@ package com.tpp.private_doh.doh;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tpp.private_doh.dns.Response;
 
 import org.junit.Test;
 
 import java.io.IOException;
 
-public class ResponseTest extends DohHelper {
+public class DohResponseTest extends DohHelper {
 
     @Test
     public void testDohResponseBuiltOk() throws IOException {

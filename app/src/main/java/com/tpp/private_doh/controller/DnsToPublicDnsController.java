@@ -3,7 +3,7 @@ package com.tpp.private_doh.controller;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
 import com.tpp.private_doh.dns.PublicDnsRequester;
-import com.tpp.private_doh.doh.Response;
+import com.tpp.private_doh.dns.Response;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Response {
+public class DohResponse {
     private boolean TC = false;
     private boolean RD = false;
     private boolean RA = false;
@@ -17,14 +17,8 @@ public class Response {
     @JsonProperty("Answer")
     private List<Answer> answers = new ArrayList<>();
 
-    public Response() {
+    public DohResponse() {
     } // needed by Jackson
-
-    public Response(List<Question> questions,
-                    List<Answer> answers) {
-        this.questions = questions;
-        this.answers = answers;
-    }
 
     @Override
     public String toString() {
@@ -46,11 +40,6 @@ public class Response {
     static public class Question {
         private String name;
         private int type;
-
-        public Question(String name, int type) {
-            this.name = name;
-            this.type = type;
-        }
 
         public String getName() {
             return name;
@@ -87,13 +76,6 @@ public class Response {
 
         public Answer() {
         } // needed by Jackson
-
-        public Answer(String name, int type, int ttl, String data) {
-            this.name = name;
-            this.type = type;
-            this.ttl = ttl;
-            this.data = data;
-        }
 
         public String getName() {
             return name;
