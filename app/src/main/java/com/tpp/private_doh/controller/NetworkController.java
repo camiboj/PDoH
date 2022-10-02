@@ -5,7 +5,7 @@ import android.util.Log;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.protocol.IpUtil;
-import com.tpp.private_doh.util.DoHToDnsMapper;
+import com.tpp.private_doh.mapper.DoHToDnsMapper;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
