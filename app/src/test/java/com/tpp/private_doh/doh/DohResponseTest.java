@@ -3,6 +3,7 @@ package com.tpp.private_doh.doh;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tpp.private_doh.dns.Response;
+import com.tpp.private_doh.mapper.DoHToDnsMapper;
 
 import org.junit.Test;
 
@@ -15,7 +16,8 @@ public class DohResponseTest extends DohHelper {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         String response = buildDohResponse();
-        Response dohResponse = mapper.readValue(response, Response.class);
-        verifyDohResponse(dohResponse);
+        DohResponse dohResponse = mapper.readValue(response, DohResponse.class);
+        Response dnsResponse = DoHToDnsMapper.map(dohResponse);
+        verifyDohResponse(dnsResponse);
     }
 }
