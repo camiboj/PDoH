@@ -5,17 +5,16 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
-import com.tpp.private_doh.controller.DnsToPublicDnsController;
-import com.tpp.private_doh.controller.PureDnsController;
+import com.tpp.private_doh.controller.PureDohController;
 import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
-import com.tpp.private_doh.doh.DoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
 import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
+import com.tpp.private_doh.util.Requester;
 import com.tpp.private_doh.util.ResourceUtils;
 
 import java.io.FileDescriptor;
@@ -52,11 +51,11 @@ public class NetworkManager implements Runnable {
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
 
-        List<DoHRequester> doHRequesters = new ArrayList<>();
-        doHRequesters.add(new GoogleDoHRequester());
-        doHRequesters.add(new Quad9DoHRequester());
-        doHRequesters.add(new CloudflareDoHRequester());
-        this.shardingController = new ShardingController(doHRequesters, 2); // TODO: remove harcoded number
+        List<Requester> requesters = new ArrayList<>();
+        requesters.add(new GoogleDoHRequester());
+        requesters.add(new Quad9DoHRequester());
+        requesters.add(new CloudflareDoHRequester());
+        this.shardingController = new ShardingController(requesters, 2); // TODO: remove harcoded number
 
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
@@ -127,13 +126,13 @@ public class NetworkManager implements Runnable {
                 Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
 
                 // TODO: create a more robust way to find out if we should bypass this packet
-                if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8")) {
+                /*if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8")) {
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
                     dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, new DnsToPublicDnsController()));
-                }
+                }*/
 
-                //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, shardingController));
+                dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, shardingController));
             } else if (packet.isUDP()) {
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {
