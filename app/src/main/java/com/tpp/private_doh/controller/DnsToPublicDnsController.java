@@ -4,8 +4,11 @@ import android.util.Log;
 
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
+import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
+import com.tpp.private_doh.util.Requester;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -16,8 +19,15 @@ public class DnsToPublicDnsController implements DnsToController {
     private final ShardingController shardingController;
 
     // TODO: maybe we can create the sharding controller inside
-    public DnsToPublicDnsController(ShardingController shardingController) {
-        this.shardingController = shardingController;
+    public DnsToPublicDnsController() {
+        List<Requester> requesters = new ArrayList<>();
+
+        PublicDnsRequester publicDnsRequester = new PublicDnsRequester("8.8.8.8");
+        PublicDnsRequester otherPublicDnsRequester = new PublicDnsRequester("1.1.1.1");
+        requesters.add(publicDnsRequester);
+        requesters.add(otherPublicDnsRequester);
+
+        this.shardingController = new ShardingController(requesters, 2); // TODO: remove harcoded number
     }
 
     public List<Response> process(DnsPacket dnsPacket) {

@@ -9,9 +9,8 @@ import java.util.concurrent.BlockingQueue;
 public class PureDohController extends NetworkController {
     private static final String TAG = PureDohController.class.getSimpleName();
 
-    public PureDohController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
-                             ShardingController shardingController) {
-        this(dnsRequestPacket, dnsResponsesQueue, new DnsToDoHController(shardingController));
+    public PureDohController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue) {
+        this(dnsRequestPacket, dnsResponsesQueue, new DnsToDoHController());
     }
 
     @VisibleForTesting

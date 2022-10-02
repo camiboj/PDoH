@@ -6,8 +6,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class PureDnsController extends NetworkController {
 
-    public PureDnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
-                             ShardingController shardingController) {
-        super(dnsRequestPacket, dnsResponsesQueue, new DnsToPublicDnsController(shardingController));
+    public PureDnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue) {
+        super(dnsRequestPacket, dnsResponsesQueue, new DnsToPublicDnsController()); // TODO: create controller inside class
     }
 }

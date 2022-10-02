@@ -7,13 +7,10 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.PureDnsController;
 import com.tpp.private_doh.controller.PureDohController;
-import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
-import com.tpp.private_doh.util.Requester;
 import com.tpp.private_doh.util.ResourceUtils;
 
 import java.io.FileDescriptor;
@@ -22,8 +19,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,7 +34,6 @@ public class NetworkManager implements Runnable {
     private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService dnsWorkers;
-    private ShardingController shardingController;
 
     public NetworkManager(FileDescriptor vpnFileDescriptor,
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
@@ -49,22 +43,6 @@ public class NetworkManager implements Runnable {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
-
-
-        List<Requester> requesters = new ArrayList<>();
-
-        PublicDnsRequester publicDnsRequester = new PublicDnsRequester("8.8.8.8");
-        PublicDnsRequester otherPublicDnsRequester = new PublicDnsRequester("1.1.1.1");
-        requesters.add(publicDnsRequester);
-        requesters.add(otherPublicDnsRequester);
-
-        /*requesters.add(new GoogleDoHRequester());
-        requesters.add(new CloudflareDoHRequester());
-        requesters.add(new Quad9DoHRequester());*/
-
-
-        this.shardingController = new ShardingController(requesters, 2); // TODO: remove harcoded number
-
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
     }
@@ -138,8 +116,8 @@ public class NetworkManager implements Runnable {
                         dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("1.1.1.1")) {
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, shardingController));
-                    dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, shardingController));
+                    dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue));
+                    //dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue));
                 }
 
             } else if (packet.isUDP()) {
