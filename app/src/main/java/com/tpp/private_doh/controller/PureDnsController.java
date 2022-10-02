@@ -2,38 +2,20 @@ package com.tpp.private_doh.controller;
 
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.dns.DnsQuestion;
-import com.tpp.private_doh.dns.DnsRequester;
-import com.tpp.private_doh.doh.Response;
+import com.tpp.private_doh.dns.PublicDnsRequester;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import java.util.stream.Collectors;
 
 public class PureDnsController extends NetworkController {
     private static final String TAG = PureDnsController.class.getSimpleName();
     private final List<String> ips;
-    private final DnsRequester dnsRequester;
+    private final PublicDnsRequester publicDnsRequester;
 
-    public PureDnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue) {
-        super(dnsRequestPacket, dnsResponsesQueue);
+    public PureDnsController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
+                             DnsToController dnsToController) {
+        super(dnsRequestPacket, dnsResponsesQueue, dnsToController);
         this.ips = PublicDnsIps.IPS;
-        this.dnsRequester = new DnsRequester();
-    }
-
-    @Override
-    public void run() {
-        // TODO: move this to a DnsToDnsController
-        List<DnsQuestion> questions = dnsRequestPacket.getQuestions();
-        List<Response> responses = questions.stream().map(dnsQuestion -> {
-            String name = dnsQuestion.getName() + "."; // This is a requirement of dns-java library
-            return dnsRequester.executeRequest(name, dnsQuestion.getType());
-        }).collect(Collectors.toList());
-
-        List<DnsPacket> dnsResponsePackets = responses.stream().map(
-                this::createResponsePacket
-        ).collect(Collectors.toList());
-
-        dnsResponsePackets.forEach(this::offerPacket);
+        this.publicDnsRequester = new PublicDnsRequester();
     }
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class DnsToDoHController {
+public class DnsToDoHController implements DnsToController {
     private static final String TAG = DnsToDoHController.class.getSimpleName();
     private ShardingController shardingController;
 

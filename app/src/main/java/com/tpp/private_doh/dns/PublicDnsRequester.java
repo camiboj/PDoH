@@ -14,7 +14,7 @@ import org.xbill.DNS.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DnsRequester implements Requester {
+public class PublicDnsRequester implements Requester {
     @Override
     public Response executeRequest(String name, int type) {
         try {
