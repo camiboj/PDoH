@@ -12,12 +12,18 @@ import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.Type;
 
 public class PublicDnsRequester implements Requester {
+    private final String resolver;
+
+    public PublicDnsRequester(String resolver) {
+        this.resolver = resolver;
+    }
+
     @Override
     public Response executeRequest(String name, int type) {
         try {
             Record queryRecord = Record.newRecord(Name.fromString(name), Type.A, DClass.IN); // TODO: map class from type parameter to Type
             Message queryMessage = Message.newQuery(queryRecord);
-            Resolver r = new SimpleResolver("8.8.8.8");
+            Resolver r = new SimpleResolver(resolver);
             Message message = r.sendAsync(queryMessage).toCompletableFuture().get();
             return PublicDnsToDnsMapper.map(message);
         } catch (Exception e) {

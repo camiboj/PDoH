@@ -21,7 +21,7 @@ public class ShardingController {
 
     public List<CompletableFuture<Response>> executeRequest(String name, int type) {
         List<Requester> requesters = this.requesters.get(actualIdx);
-        actualIdx = actualIdx == (requesters.size() - 1) ? 0 : actualIdx + 1;
+        actualIdx = actualIdx == (this.requesters.size() - 1) ? 0 : actualIdx + 1;
         return requesters.stream()
                 .map(requester -> CompletableFuture.supplyAsync(() -> requester.executeRequest(name, type)))
                 .collect(Collectors.toList());
