@@ -112,12 +112,11 @@ public class NetworkManager implements Runnable {
                 Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
 
                 // TODO: create a more robust way to find out if we should bypass this packet
-                if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8") ||
-                        dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("1.1.1.1")) {
+                if (dnsPacket.getLastQuestion().getName().equals("fiubaMap")) {
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue));
-                    //dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue));
+                    //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue));
+                    dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue));
                 }
 
             } else if (packet.isUDP()) {

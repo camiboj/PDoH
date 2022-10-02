@@ -18,7 +18,6 @@ public class DnsToPublicDnsController implements DnsToController {
     private static final String TAG = DnsToController.class.getSimpleName();
     private final ShardingController shardingController;
 
-    // TODO: maybe we can create the sharding controller inside
     public DnsToPublicDnsController() {
         List<Requester> requesters = new ArrayList<>();
 
