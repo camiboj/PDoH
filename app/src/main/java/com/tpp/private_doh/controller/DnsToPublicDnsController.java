@@ -12,10 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class DnsToPublicDnsController implements DnsToController {
-    private static final String TAG = DnsToController.class.getSimpleName();
+    private static final String TAG = DnsToPublicDnsController.class.getSimpleName();
     private final ShardingController shardingController;
 
     public DnsToPublicDnsController() {
@@ -30,18 +31,26 @@ public class DnsToPublicDnsController implements DnsToController {
     }
 
     public List<Response> process(DnsPacket dnsPacket) {
-        Log.i(TAG, "Processing new package");
         List<DnsQuestion> questions = dnsPacket.getQuestions();
         return questions.stream().map(this::processQuestion).collect(Collectors.toList());
     }
 
     private Response processQuestion(DnsQuestion question) {
+        Log.i(TAG, "Processing question");
         String name = question.getName() + "."; // This is a requirement of dns-java library
         List<CompletableFuture<Response>> requesters = shardingController.executeRequest(name, question.getType());
         CompletableFuture<Response>[] requestersArray = requesters.stream().toArray(CompletableFuture[]::new);
+        Log.i(TAG, "Obtaining completable futures");
         try {
-            return (Response) CompletableFuture.anyOf(requestersArray).get();
-        } catch (ExecutionException | InterruptedException e) {
+            Object object = CompletableFuture.anyOf(requestersArray).get(100, TimeUnit.MILLISECONDS);
+            if (object instanceof Response) {
+                Log.i(TAG, "About to return response");
+                return (Response) object;
+            }
+            Log.i(TAG, "Something bad happened while casting");
+            return null;
+        } catch (Exception e) {
+            Log.i(TAG, "Something bad happened while executing request");
             throw new RuntimeException("Something happened while processing DohRequest");
         }
     }

@@ -28,7 +28,7 @@ public class PublicDnsRequester implements Requester {
             Message queryMessage = Message.newQuery(queryRecord);
 
             // TODO: this is super harcoded change this
-            queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
+            //queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
 
             Resolver r = new SimpleResolver(resolver);
             Message message = r.sendAsync(queryMessage).toCompletableFuture().get();

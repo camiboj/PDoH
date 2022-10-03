@@ -4,8 +4,8 @@ import android.util.Log;
 
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.Response;
-import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.mapper.DoHToDnsMapper;
+import com.tpp.private_doh.protocol.IpUtil;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -26,8 +26,8 @@ public class NetworkController implements Runnable {
     }
 
     public void run() {
-        Log.i(TAG, "About to process a DNS Request");
         List<Response> responses = this.dnsToController.process(dnsRequestPacket);
+        Log.i(TAG, "Obtaining responses");
         List<DnsPacket> dnsResponsePackets = responses.stream().map(
                 this::createResponsePacket
         ).collect(Collectors.toList());
@@ -36,6 +36,7 @@ public class NetworkController implements Runnable {
     }
 
     protected DnsPacket createResponsePacket(Response response) {
+        Log.i(TAG, "About to create response packet");
         DnsPacket dnsResponsePacket = IpUtil.buildDnsPacketFrom(dnsRequestPacket);
         DoHToDnsMapper.map(response, dnsResponsePacket);
         dnsResponsePacket.fillBackingBuffer();
@@ -43,6 +44,7 @@ public class NetworkController implements Runnable {
     }
 
     protected void offerPacket(DnsPacket dnsResponsePacket) {
+        Log.i(TAG, "About to send dns response to dns down worker");
         dnsResponsesQueue.offer(dnsResponsePacket);
     }
 }
