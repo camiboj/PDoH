@@ -6,7 +6,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.PureDnsController;
-import com.tpp.private_doh.controller.PureDohController;
 import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.PublicDnsRequester;
@@ -138,13 +137,12 @@ public class NetworkManager implements Runnable {
                 //Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
 
                 // TODO: create a more robust way to find out if we should bypass this packet
-                if (dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("8.8.8.8") ||
-                        dnsPacket.getIp4Header().getDestinationAddress().getHostAddress().equals("1.1.1.1")) {
+                if (dnsPacket.getLastQuestion().getName().equals("fiubaMap")) {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, pureDohShardingController));
-                    //dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, pureDnsShardingController));
+                    //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, pureDohShardingController));
+                    dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, pureDnsShardingController));
                 }
 
             } else if (packet.isUDP()) {

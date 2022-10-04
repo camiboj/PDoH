@@ -26,18 +26,11 @@ public class DnsToPublicDnsController implements DnsToController {
     private Response processQuestion(DnsQuestion question) {
         Log.i(TAG, "Processing question");
         String name = question.getName() + "."; // This is a requirement of dns-java library
-        //return shardingController.executeOtherRequest(name, question.getType());
         try {
             List<CompletableFuture<Response>> requesters = shardingController.executeRequest(name, question.getType());
             CompletableFuture<Response>[] requestersArray = requesters.stream().toArray(CompletableFuture[]::new);
             Log.i(TAG, "Obtaining completable futures");
-            Object object = CompletableFuture.anyOf(requestersArray).get();
-            if (object instanceof Response) {
-                Log.i(TAG, "About to return response");
-                return (Response) object;
-            }
-            Log.i(TAG, String.format("Something bad happened while casting, %s", object.getClass()));
-            return null;
+            return (Response) CompletableFuture.anyOf(requestersArray).get();
         } catch (Exception e) {
             Log.i(TAG, "Something bad happened while executing request", e);
             throw new RuntimeException("Something happened while processing DohRequest");

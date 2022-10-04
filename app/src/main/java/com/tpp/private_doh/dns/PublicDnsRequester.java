@@ -8,6 +8,7 @@ import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
+import org.xbill.DNS.Section;
 import org.xbill.DNS.SimpleResolver;
 import org.xbill.DNS.Type;
 
@@ -26,8 +27,7 @@ public class PublicDnsRequester implements Requester {
             Record queryRecord = Record.newRecord(Name.fromString(name), Type.A, DClass.IN); // TODO: map class from type parameter to Type
             Message queryMessage = Message.newQuery(queryRecord);
 
-            // TODO: this is super harcoded change this
-            //queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
+            queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
 
             Resolver r = new SimpleResolver(resolver);
             return r.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
