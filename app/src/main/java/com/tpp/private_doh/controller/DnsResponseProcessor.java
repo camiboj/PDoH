@@ -11,15 +11,15 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.stream.Collectors;
 
-public class NetworkController implements Runnable {
-    private static final String TAG = NetworkController.class.getSimpleName();
+public class DnsResponseProcessor implements Runnable {
+    private static final String TAG = DnsResponseProcessor.class.getSimpleName();
 
     protected final DnsPacket dnsRequestPacket;
     protected final BlockingQueue<DnsPacket> dnsResponsesQueue;
     protected final DnsToController dnsToController;
 
-    public NetworkController(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
-                             DnsToController dnsToController) {
+    public DnsResponseProcessor(DnsPacket dnsRequestPacket, BlockingQueue<DnsPacket> dnsResponsesQueue,
+                                DnsToController dnsToController) {
         this.dnsRequestPacket = dnsRequestPacket;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsToController = dnsToController;

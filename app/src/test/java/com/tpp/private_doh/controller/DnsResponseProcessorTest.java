@@ -27,7 +27,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NetworkControllerTest extends Helper {
+public class DnsResponseProcessorTest extends Helper {
 
     @Mock
     private DnsToController dnsToController;
@@ -107,9 +107,9 @@ public class NetworkControllerTest extends Helper {
         when(dnsToController.process(dnsPacket)).thenReturn(responseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);
-        NetworkController networkController = new NetworkController(dnsPacket, dnsPackets, dnsToController);
+        DnsResponseProcessor dnsResponseProcessor = new DnsResponseProcessor(dnsPacket, dnsPackets, dnsToController);
 
-        networkController.run();
+        dnsResponseProcessor.run();
 
         verify(dnsToController).process(dnsPacket);
         assertEquals(1, dnsPackets.size());
