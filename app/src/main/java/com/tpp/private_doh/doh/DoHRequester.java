@@ -20,6 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +39,8 @@ public abstract class DoHRequester implements Requester {
         this.headers = headers;
     }
 
-    public CompletableFuture<Message> executeRequest(String name, int type) {
-        return CompletableFuture.supplyAsync(() -> new Message());
+    public CompletableFuture<Response> executeRequest(String name, int type) {
+        return CompletableFuture.supplyAsync(() -> new Response(new ArrayList<>(), new ArrayList<>()));
         //return executeRequest(buildUrl(name, type));
     }
 

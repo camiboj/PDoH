@@ -1,5 +1,6 @@
 package com.tpp.private_doh.controller;
 
+import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
 
@@ -22,7 +23,7 @@ public class ShardingController {
         this.nSharders = n;
     }
 
-    public List<CompletableFuture<Message>> executeRequest(String name, int type) {
+    public List<CompletableFuture<Response>> executeRequest(String name, int type) {
         List<Requester> requesters = this.requesters.get(actualIdx);
         this.actualIdx = ((actualIdx == (this.requesters.size() - 1)) ? 0 : actualIdx + 1);
 

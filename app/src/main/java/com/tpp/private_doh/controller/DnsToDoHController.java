@@ -28,8 +28,7 @@ public class DnsToDoHController implements DnsToController {
     }
 
     private Response processQuestion(DnsQuestion question) {
-        List<CompletableFuture<Message>> requesters = shardingController.executeRequest(question.getName(), question.getType());
-        //List<CompletableFuture<Response>> requesters = shardingController.executeRequest(question.getName(), question.getType());
+        List<CompletableFuture<Response>> requesters = shardingController.executeRequest(question.getName(), question.getType());
         CompletableFuture<Response>[] requestersArray = requesters.stream().toArray(CompletableFuture[]::new);
         try {
             return (Response) CompletableFuture.anyOf(requestersArray).get();

@@ -1,5 +1,6 @@
 package com.tpp.private_doh.dns;
 
+import com.tpp.private_doh.mapper.PublicDnsToDnsMapper;
 import com.tpp.private_doh.util.Requester;
 
 import org.xbill.DNS.DClass;
@@ -20,7 +21,7 @@ public class PublicDnsRequester implements Requester {
     }
 
     @Override
-    public CompletableFuture<Message> executeRequest(String name, int type) {
+    public CompletableFuture<Response> executeRequest(String name, int type) {
         try {
             Record queryRecord = Record.newRecord(Name.fromString(name), Type.A, DClass.IN); // TODO: map class from type parameter to Type
             Message queryMessage = Message.newQuery(queryRecord);
@@ -29,8 +30,7 @@ public class PublicDnsRequester implements Requester {
             //queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
 
             Resolver r = new SimpleResolver(resolver);
-            return r.sendAsync(queryMessage).toCompletableFuture();
-            //return PublicDnsToDnsMapper.map(message);
+            return r.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }

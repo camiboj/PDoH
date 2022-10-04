@@ -1,9 +1,9 @@
 package com.tpp.private_doh.util;
 
-import org.xbill.DNS.Message;
+import com.tpp.private_doh.dns.Response;
 
 import java.util.concurrent.CompletableFuture;
 
 public interface Requester {
-    CompletableFuture<Message> executeRequest(String name, int type);
+    CompletableFuture<Response> executeRequest(String name, int type);
 }

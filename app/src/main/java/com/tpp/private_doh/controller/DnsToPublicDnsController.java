@@ -5,12 +5,7 @@ import android.util.Log;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
 import com.tpp.private_doh.dns.Response;
-import com.tpp.private_doh.mapper.DoHToDnsMapper;
-import com.tpp.private_doh.mapper.PublicDnsToDnsMapper;
 
-import org.xbill.DNS.Message;
-
-import java.security.MessageDigest;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -33,13 +28,13 @@ public class DnsToPublicDnsController implements DnsToController {
         String name = question.getName() + "."; // This is a requirement of dns-java library
         //return shardingController.executeOtherRequest(name, question.getType());
         try {
-            List<CompletableFuture<Message>> requesters = shardingController.executeRequest(name, question.getType());
-            CompletableFuture<Message>[] requestersArray = requesters.stream().toArray(CompletableFuture[]::new);
+            List<CompletableFuture<Response>> requesters = shardingController.executeRequest(name, question.getType());
+            CompletableFuture<Response>[] requestersArray = requesters.stream().toArray(CompletableFuture[]::new);
             Log.i(TAG, "Obtaining completable futures");
             Object object = CompletableFuture.anyOf(requestersArray).get();
-            if (object instanceof Message) {
+            if (object instanceof Response) {
                 Log.i(TAG, "About to return response");
-                return PublicDnsToDnsMapper.map((Message) object);
+                return (Response) object;
             }
             Log.i(TAG, String.format("Something bad happened while casting, %s", object.getClass()));
             return null;
