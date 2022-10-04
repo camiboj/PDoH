@@ -10,6 +10,8 @@ import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.mapper.DoHToDnsMapper;
 import com.tpp.private_doh.util.Requester;
 
+import org.xbill.DNS.Message;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,7 +23,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
 
 public abstract class DoHRequester implements Requester {
@@ -36,8 +38,9 @@ public abstract class DoHRequester implements Requester {
         this.headers = headers;
     }
 
-    public Response executeRequest(String name, int type) {
-        return executeRequest(buildUrl(name, type));
+    public CompletableFuture<Message> executeRequest(String name, int type) {
+        return CompletableFuture.supplyAsync(() -> new Message());
+        //return executeRequest(buildUrl(name, type));
     }
 
     @VisibleForTesting
