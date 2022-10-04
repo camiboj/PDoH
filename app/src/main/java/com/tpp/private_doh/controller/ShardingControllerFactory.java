@@ -36,12 +36,8 @@ public class ShardingControllerFactory {
         pureDohRequesters.add(cloudflareDohRequester);
         pureDohRequesters.add(quad9DohRequester);
 
-        hybridDnsRequesters.add(publicDnsRequester);
-        hybridDnsRequesters.add(googleDohRequester);
-        hybridDnsRequesters.add(publicDnsRequester2);
-        hybridDnsRequesters.add(cloudflareDohRequester);
-        hybridDnsRequesters.add(publicDnsRequester3);
-        hybridDnsRequesters.add(quad9DohRequester);
+        hybridDnsRequesters.addAll(pureDnsRequesters);
+        hybridDnsRequesters.addAll(pureDohRequesters);
 
         this.pureDnsShardingController = new ShardingController(pureDnsRequesters, 2);
         this.pureDohShardingController = new ShardingController(pureDohRequesters, 2);
