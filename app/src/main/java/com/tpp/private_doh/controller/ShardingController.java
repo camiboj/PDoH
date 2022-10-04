@@ -4,8 +4,6 @@ import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
 
-import org.xbill.DNS.Message;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -29,7 +27,6 @@ public class ShardingController {
 
         return requesters.stream()
                 .map(requester -> requester.executeRequest(name, type))
-                //.map(requester -> CompletableFuture.supplyAsync(() -> requester.executeRequest(name, type)))
                 .collect(Collectors.toList());
     }
 }

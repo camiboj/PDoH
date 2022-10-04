@@ -143,8 +143,8 @@ public class NetworkManager implements Runnable {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, pureDohShardingController));
-                    dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, pureDnsShardingController));
+                    dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, pureDohShardingController));
+                    //dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, pureDnsShardingController));
                 }
 
             } else if (packet.isUDP()) {

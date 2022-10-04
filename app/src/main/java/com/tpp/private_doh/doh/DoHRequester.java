@@ -10,8 +10,6 @@ import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.mapper.DoHToDnsMapper;
 import com.tpp.private_doh.util.Requester;
 
-import org.xbill.DNS.Message;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,7 +18,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +37,7 @@ public abstract class DoHRequester implements Requester {
     }
 
     public CompletableFuture<Response> executeRequest(String name, int type) {
-        return CompletableFuture.supplyAsync(() -> new Response(new ArrayList<>(), new ArrayList<>()));
-        //return executeRequest(buildUrl(name, type));
+        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type)));
     }
 
     @VisibleForTesting
@@ -67,7 +63,7 @@ public abstract class DoHRequester implements Requester {
             DohResponse dohResponse = mapper.readValue(response.toString(), DohResponse.class);
             Log.i(TAG, String.format("DohAnswer: %s", dohResponse));
 
-           return DoHToDnsMapper.map(dohResponse);
+            return DoHToDnsMapper.map(dohResponse);
         } catch (IOException e) {
             throw new RuntimeException("Something happened while executing request");
         } finally {
