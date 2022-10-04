@@ -5,14 +5,15 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
-import com.tpp.private_doh.controller.DnsToController;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
+import com.tpp.private_doh.controller.DnsToController;
 import com.tpp.private_doh.controller.ShardingController;
+import com.tpp.private_doh.controller.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
+import com.tpp.private_doh.doh.DoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
-import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
@@ -42,8 +43,7 @@ public class NetworkManager implements Runnable {
     private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService dnsWorkers;
-    private ShardingController pureDnsShardingController;
-    private ShardingController pureDohShardingController;
+    private ShardingControllerFactory shardingControllerFactory;
 
     public NetworkManager(FileDescriptor vpnFileDescriptor,
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
@@ -83,22 +83,7 @@ public class NetworkManager implements Runnable {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsWorkers = dnsWorkers;
-
-        PublicDnsRequester publicDnsRequester = new PublicDnsRequester("8.8.8.8");
-        PublicDnsRequester publicDnsRequester2 = new PublicDnsRequester("8.8.8.8");
-        PublicDnsRequester publicDnsRequester3 = new PublicDnsRequester("8.8.8.8");
-
-        List<Requester> pureDnsRequesters = new ArrayList<>();
-        pureDnsRequesters.add(publicDnsRequester);
-        pureDnsRequesters.add(publicDnsRequester2);
-        pureDnsRequesters.add(publicDnsRequester3);
-        this.pureDnsShardingController = new ShardingController(pureDnsRequesters, 2);
-
-        List<Requester> pureDohRequester = new ArrayList<>();
-        pureDohRequester.add(new GoogleDoHRequester());
-        pureDohRequester.add(new CloudflareDoHRequester());
-        pureDohRequester.add(new Quad9DoHRequester());
-        this.pureDohShardingController = new ShardingController(pureDohRequester, 2);
+        this.shardingControllerFactory = new ShardingControllerFactory();
     }
 
     @Override
@@ -142,9 +127,9 @@ public class NetworkManager implements Runnable {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    //dnsWorkers.submit(new NetworkController(dnsPacket, dnsResponsesQueue, new DnsToController(pureDohShardingController)));
-
-                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(pureDnsShardingController)));
+                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
+                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
+                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getHybridDnsShardingController())));
                 }
 
             } else if (packet.isUDP()) {
