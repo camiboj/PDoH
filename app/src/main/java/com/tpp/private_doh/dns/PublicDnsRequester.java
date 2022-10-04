@@ -24,7 +24,8 @@ public class PublicDnsRequester implements Requester {
     @Override
     public CompletableFuture<Response> executeRequest(String name, int type) {
         try {
-            Record queryRecord = Record.newRecord(Name.fromString(name), Type.A, DClass.IN); // TODO: map class from type parameter to Type
+            String queryName = name + "."; // This is a requirement of dns-java library
+            Record queryRecord = Record.newRecord(Name.fromString(queryName), Type.A, DClass.IN); // TODO: map class from type parameter to Type
             Message queryMessage = Message.newQuery(queryRecord);
 
             queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);

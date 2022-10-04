@@ -27,10 +27,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PureDohControllerTest extends Helper {
+public class NetworkControllerTest extends Helper {
 
     @Mock
-    private DnsToDoHController dnsToDoHController;
+    private DnsToController dnsToController;
 
     @Mock
     private IP4Header ip4Header;
@@ -104,14 +104,14 @@ public class PureDohControllerTest extends Helper {
         // DnsToDohController
         List<Response> responseList = new ArrayList<>();
         responseList.add(response);
-        when(dnsToDoHController.process(dnsPacket)).thenReturn(responseList);
+        when(dnsToController.process(dnsPacket)).thenReturn(responseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);
-        PureDohController pureDohController = new PureDohController(dnsPacket, dnsPackets, dnsToDoHController);
+        NetworkController networkController = new NetworkController(dnsPacket, dnsPackets, dnsToController);
 
-        pureDohController.run();
+        networkController.run();
 
-        verify(dnsToDoHController).process(dnsPacket);
+        verify(dnsToController).process(dnsPacket);
         assertEquals(1, dnsPackets.size());
         DnsPacket dnsPacketResult = dnsPackets.peek();
         assertNotNull(dnsPacketResult);

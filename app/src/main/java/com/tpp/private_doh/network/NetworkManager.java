@@ -5,7 +5,8 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
-import com.tpp.private_doh.controller.PureDnsController;
+import com.tpp.private_doh.controller.DnsToController;
+import com.tpp.private_doh.controller.NetworkController;
 import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.PublicDnsRequester;
@@ -141,8 +142,9 @@ public class NetworkManager implements Runnable {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    //dnsWorkers.submit(new PureDohController(dnsPacket, dnsResponsesQueue, pureDohShardingController));
-                    dnsWorkers.submit(new PureDnsController(dnsPacket, dnsResponsesQueue, pureDnsShardingController));
+                    //dnsWorkers.submit(new NetworkController(dnsPacket, dnsResponsesQueue, new DnsToController(pureDohShardingController)));
+
+                    dnsWorkers.submit(new NetworkController(dnsPacket, dnsResponsesQueue, new DnsToController(pureDnsShardingController)));
                 }
 
             } else if (packet.isUDP()) {
