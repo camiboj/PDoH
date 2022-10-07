@@ -2,11 +2,12 @@ package com.tpp.private_doh.controller;
 
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
-import com.tpp.private_doh.doh.DoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
+import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.util.Requester;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,28 +18,12 @@ public class ShardingControllerFactory {
     private final ShardingController hybridDnsShardingController;
 
     public ShardingControllerFactory() {
-        List<String> pureDnsResolvers = new ArrayList<>();
-        pureDnsResolvers.add("208.67.222.222");
-        pureDnsResolvers.add("208.67.220.220");
-        pureDnsResolvers.add("1.1.1.1");
-        pureDnsResolvers.add("1.0.0.1");
-        pureDnsResolvers.add("8.8.8.8");
-        pureDnsResolvers.add("8.8.4.4");
-        pureDnsResolvers.add("9.9.9.9");
-        pureDnsResolvers.add("149.112.112.112");
-
-        DoHRequester googleDohRequester = new GoogleDoHRequester();
-        DoHRequester cloudflareDohRequester = new CloudflareDoHRequester();
-        DoHRequester quad9DohRequester = new CloudflareDoHRequester();
-
+        List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
         List<Requester> pureDnsRequesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
-        List<Requester> pureDohRequesters = new ArrayList<>();
+
+        List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
+
         List<Requester> hybridDnsRequesters = new ArrayList<>();
-
-        pureDohRequesters.add(googleDohRequester);
-        pureDohRequesters.add(cloudflareDohRequester);
-        pureDohRequesters.add(quad9DohRequester);
-
         hybridDnsRequesters.addAll(pureDnsRequesters);
         hybridDnsRequesters.addAll(pureDohRequesters);
 

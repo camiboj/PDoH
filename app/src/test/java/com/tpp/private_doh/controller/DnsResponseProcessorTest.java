@@ -22,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -94,16 +95,13 @@ public class DnsResponseProcessorTest extends Helper {
         when(answer.getType()).thenReturn(answerType);
 
         // DohResponse
-        List<Response.Answer> answers = new ArrayList<>();
-        answers.add(answer);
+        List<Response.Answer> answers = Collections.singletonList(answer);
         when(response.getAnswers()).thenReturn(answers);
-        List<Response.Question> questions = new ArrayList<>();
-        questions.add(question);
+        List<Response.Question> questions = Collections.singletonList(question);
         when(response.getQuestions()).thenReturn(questions);
 
         // DnsToDohController
-        List<Response> responseList = new ArrayList<>();
-        responseList.add(response);
+        List<Response> responseList = Collections.singletonList(response);
         when(dnsToController.process(dnsPacket)).thenReturn(responseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);

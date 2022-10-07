@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class DnsAnswerTest {
@@ -60,10 +62,7 @@ public class DnsAnswerTest {
         int type = 5;
         int ttl = 1;
         String data = "com.other.cname";
-        List<String> dataInList = new ArrayList<>();
-        dataInList.add("com");
-        dataInList.add("other");
-        dataInList.add("cname");
+        List<String> dataInList = Arrays.asList("com", "other", "cname");
 
         DnsAnswer dnsAnswer = new DnsAnswer(name, type, ttl, data);
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
@@ -107,10 +106,6 @@ public class DnsAnswerTest {
         int type = 5;
         int ttl = 1;
         String data = "com.other.cname";
-        List<String> dataInList = new ArrayList<>();
-        dataInList.add("com");
-        dataInList.add("other");
-        dataInList.add("cname");
 
         DnsAnswer dnsAnswer = new DnsAnswer(name, type, ttl, data);
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
