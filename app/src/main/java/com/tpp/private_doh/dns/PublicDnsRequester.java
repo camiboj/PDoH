@@ -40,7 +40,7 @@ public class PublicDnsRequester implements Requester {
     public CompletableFuture<Response> executeRequest(String name, int type) {
         try {
             String queryName = name + "."; // This is a requirement of dns-java library
-            Record queryRecord = Record.newRecord(Name.fromString(queryName), type, DClass.IN); // TODO: map class from type parameter to Type
+            Record queryRecord = Record.newRecord(Name.fromString(queryName), type, DClass.IN);
             Message queryMessage = Message.newQuery(queryRecord);
 
             // Sentinel to recognize this packet while capturing
