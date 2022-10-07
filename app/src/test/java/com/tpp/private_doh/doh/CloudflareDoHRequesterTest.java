@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.tpp.private_doh.dns.Response;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,7 +32,7 @@ public class CloudflareDoHRequesterTest extends DohHelper {
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
         CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester();
-        DohResponse dohResponse = cloudflareDoHRequester.executeRequest(url);
+        Response dohResponse = cloudflareDoHRequester.executeRequest(url);
         verify(httpURLConnection).setRequestMethod(any());
         verify(httpURLConnection).setRequestProperty("Accept", "application/dns-json");
         verifyDohResponse(dohResponse);

@@ -3,6 +3,7 @@ package com.tpp.private_doh.dns;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.util.BitUtils;
+import com.tpp.private_doh.util.IpUtils;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -40,7 +41,7 @@ public class DnsAnswer {
         // TODO: map all types, for now I only saw type 1 and type 5 responses
         if (type == 1) {
             try {
-                InetAddress ip = InetAddress.getByName(data);
+                InetAddress ip = IpUtils.getByName(data);
                 buffer.putShort(BitUtils.intToShort(4)); // IPV4
                 this.firstAnswerNamePos = buffer.position();
                 buffer.put(ip.getAddress());

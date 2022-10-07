@@ -1,18 +1,14 @@
 package com.tpp.private_doh.util;
 
-import com.tpp.private_doh.doh.DoHRequester;
-import com.tpp.private_doh.doh.DohResponse;
-
 import org.paukov.combinatorics3.Generator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CombinationUtils {
 
-    public static List<List<DoHRequester>> combination(List<DoHRequester> doHRequesters, int k) {
-        return Generator.combination(doHRequesters)
+    public static List<List<Requester>> combination(List<Requester> requesters, int k) {
+        return Generator.combination(requesters)
                 .simple(k)
                 .stream()
                 .collect(Collectors.toList());

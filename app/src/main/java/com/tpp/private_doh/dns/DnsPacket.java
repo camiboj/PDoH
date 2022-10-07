@@ -31,6 +31,10 @@ public class DnsPacket extends Packet {
         this.questions = new ArrayList<>();
     }
 
+    public DnsQuestion getLastQuestion() {
+        return questions.get(questions.size() - 1);
+    }
+
     public boolean isDNS() {
         return true;
     }

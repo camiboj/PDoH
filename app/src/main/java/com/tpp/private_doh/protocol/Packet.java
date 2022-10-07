@@ -19,7 +19,7 @@ public class Packet {
     private boolean isUDP;
     private IP4Header ip4Header;
     private Header header;
-    private ByteBuffer backingBuffer;
+    protected ByteBuffer backingBuffer;
 
     public Packet(IP4Header ip4Header, Header header, ByteBuffer backingBuffer) {
         this.ip4Header = ip4Header;
@@ -126,7 +126,7 @@ public class Packet {
         updateIP4Checksum();
     }
 
-    private void updateIP4Checksum() {
+    public void updateIP4Checksum() {
         ByteBuffer buffer = backingBuffer.duplicate();
         buffer.position(0);
 
@@ -197,6 +197,10 @@ public class Packet {
 
     public ByteBuffer getBackingBuffer() {
         return backingBuffer;
+    }
+
+    public void setBackingBuffer(ByteBuffer byteBuffer) {
+        this.backingBuffer = byteBuffer;
     }
 }
 

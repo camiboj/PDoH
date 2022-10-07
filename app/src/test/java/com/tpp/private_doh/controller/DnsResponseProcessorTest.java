@@ -11,7 +11,7 @@ import com.tpp.private_doh.dns.DnsAnswer;
 import com.tpp.private_doh.dns.DnsHeader;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.dns.DnsQuestion;
-import com.tpp.private_doh.doh.DohResponse;
+import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.protocol.IP4Header;
 import com.tpp.private_doh.protocol.UdpHeader;
 
@@ -22,15 +22,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DnsControllerTest extends Helper {
+public class DnsResponseProcessorTest extends Helper {
 
     @Mock
-    private DnsToDoHController dnsToDoHController;
+    private DnsToController dnsToController;
 
     @Mock
     private IP4Header ip4Header;
@@ -42,13 +43,13 @@ public class DnsControllerTest extends Helper {
     private DnsHeader dnsHeader;
 
     @Mock
-    private DohResponse dohResponse;
+    private Response response;
 
     @Mock
-    private DohResponse.Answer answer;
+    private Response.Answer answer;
 
     @Mock
-    private DohResponse.Question question;
+    private Response.Question question;
 
     @Test
     public void testDnsToDohControllerWorksOk() {
@@ -94,24 +95,21 @@ public class DnsControllerTest extends Helper {
         when(answer.getType()).thenReturn(answerType);
 
         // DohResponse
-        List<DohResponse.Answer> answers = new ArrayList<>();
-        answers.add(answer);
-        when(dohResponse.getAnswers()).thenReturn(answers);
-        List<DohResponse.Question> questions = new ArrayList<>();
-        questions.add(question);
-        when(dohResponse.getQuestions()).thenReturn(questions);
+        List<Response.Answer> answers = Collections.singletonList(answer);
+        when(response.getAnswers()).thenReturn(answers);
+        List<Response.Question> questions = Collections.singletonList(question);
+        when(response.getQuestions()).thenReturn(questions);
 
         // DnsToDohController
-        List<DohResponse> dohResponseList = new ArrayList<>();
-        dohResponseList.add(dohResponse);
-        when(dnsToDoHController.process(dnsPacket)).thenReturn(dohResponseList);
+        List<Response> responseList = Collections.singletonList(response);
+        when(dnsToController.process(dnsPacket)).thenReturn(responseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);
-        DnsController dnsController = new DnsController(dnsPacket, dnsPackets, dnsToDoHController);
+        DnsResponseProcessor dnsResponseProcessor = new DnsResponseProcessor(dnsPacket, dnsPackets, dnsToController);
 
-        dnsController.run();
+        dnsResponseProcessor.run();
 
-        verify(dnsToDoHController).process(dnsPacket);
+        verify(dnsToController).process(dnsPacket);
         assertEquals(1, dnsPackets.size());
         DnsPacket dnsPacketResult = dnsPackets.peek();
         assertNotNull(dnsPacketResult);

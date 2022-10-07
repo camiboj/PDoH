@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.tpp.private_doh.dns.Response;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,7 +32,7 @@ public class Quad9DohRequesterTest extends DohHelper {
         InputStream is = new ByteArrayInputStream(response.getBytes());
         when(httpURLConnection.getInputStream()).thenReturn(is);
         Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester();
-        DohResponse dohResponse = quad9DoHRequester.executeRequest(url);
+        Response dohResponse = quad9DoHRequester.executeRequest(url);
         verify(httpURLConnection).setRequestMethod(any());
         verifyDohResponse(dohResponse);
     }

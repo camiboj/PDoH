@@ -6,6 +6,9 @@ import androidx.annotation.VisibleForTesting;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tpp.private_doh.dns.Response;
+import com.tpp.private_doh.mapper.DoHToDnsMapper;
+import com.tpp.private_doh.util.Requester;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,9 +21,10 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 
-public abstract class DoHRequester {
+public abstract class DoHRequester implements Requester {
     protected String TAG;
 
     private String endpoint;
@@ -32,12 +36,12 @@ public abstract class DoHRequester {
         this.headers = headers;
     }
 
-    public DohResponse executeRequest(String name, int type) {
-        return executeRequest(buildUrl(name, type));
+    public CompletableFuture<Response> executeRequest(String name, int type) {
+        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type)));
     }
 
     @VisibleForTesting
-    public DohResponse executeRequest(URL url) {
+    public Response executeRequest(URL url) {
         HttpURLConnection con = null;
         BufferedReader in = null;
         try {
@@ -58,7 +62,8 @@ public abstract class DoHRequester {
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             DohResponse dohResponse = mapper.readValue(response.toString(), DohResponse.class);
             Log.i(TAG, String.format("DohAnswer: %s", dohResponse));
-            return dohResponse;
+
+            return DoHToDnsMapper.map(dohResponse);
         } catch (IOException e) {
             throw new RuntimeException("Something happened while executing request");
         } finally {
