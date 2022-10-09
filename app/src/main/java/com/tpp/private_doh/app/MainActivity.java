@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
-
-        findViewById(R.id.textView1);
     }
 
     @Override
@@ -91,16 +89,5 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-    }
-
-    public void clickGoogleDoH(View view) {
-        /*Thread t = new Thread(new CloudflareDoHRequester("www.baeldung.com"));
-        t.start();
-
-        Thread tg = new Thread(new GoogleDoHRequester("www.baeldung.com"));
-        tg.start();
-
-        Thread tq = new Thread(new Quad9DoHRequester("www.baeldung.com"));
-        tq.start();*/
     }
 }
