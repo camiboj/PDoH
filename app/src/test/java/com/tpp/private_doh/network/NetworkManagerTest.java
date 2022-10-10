@@ -55,7 +55,7 @@ public class NetworkManagerTest extends Helper {
 
     @Test
     public void testNetworkManagerHandlesDnsPacketsOk() throws IOException {
-        DnsPacket dnsPacket = buildDnsPacket();
+        DnsPacket dnsPacket = buildDnsAndIp4HeaderPacket();
         dnsPacket.fillBackingBuffer();
         ByteBuffer buffer = dnsPacket.getBackingBuffer();
         int nBytes = 74;
@@ -71,7 +71,7 @@ public class NetworkManagerTest extends Helper {
 
     @Test
     public void testNetworkManagerHandlesUdpPacketsOk() throws IOException {
-        Packet udpPacket = buildUdpPacket();
+        Packet udpPacket = buildUdpAndIp4Header();
         ByteBuffer buffer = udpPacket.getBackingBuffer();
         int nBytes = 28;
         buffer.position(nBytes);
@@ -89,7 +89,7 @@ public class NetworkManagerTest extends Helper {
 
     @Test
     public void testNetworkManagerHandlesTcpPacketsOk() throws IOException {
-        Packet tcpPacket = buildTcpPacket();
+        Packet tcpPacket = buildTcpAndIp4Packet();
         ByteBuffer buffer = tcpPacket.getBackingBuffer();
         int nBytes = 40;
         buffer.position(nBytes);

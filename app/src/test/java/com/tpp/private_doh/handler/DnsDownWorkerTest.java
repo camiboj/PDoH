@@ -25,7 +25,7 @@ public class DnsDownWorkerTest extends Helper {
         BlockingQueue<ByteBuffer> networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
         BlockingQueue<DnsPacket> dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
 
-        DnsPacket dnsPacket = buildDnsPacket();
+        DnsPacket dnsPacket = buildDnsAndIp4HeaderPacket();
         dnsPacket.fillBackingBuffer();
         dnsResponsesQueue.offer(dnsPacket);
 

@@ -7,17 +7,11 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
-import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.controller.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.dns.PublicDnsRequester;
-import com.tpp.private_doh.doh.CloudflareDoHRequester;
-import com.tpp.private_doh.doh.DoHRequester;
-import com.tpp.private_doh.doh.GoogleDoHRequester;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
-import com.tpp.private_doh.util.Requester;
 import com.tpp.private_doh.util.ResourceUtils;
 
 import java.io.FileDescriptor;
@@ -26,8 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -127,8 +119,8 @@ public class NetworkManager implements Runnable {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
-                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
+                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
+                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
                     //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getHybridDnsShardingController())));
                 }
 
@@ -138,7 +130,7 @@ public class NetworkManager implements Runnable {
                 deviceToNetworkTCPQueue.offer(packet);
             } else {
                 Log.w(TAG, String.format("Unknown packet protocol type %d",
-                        packet.getIp4Header().getProtocol().getNumber()));
+                        packet.getNetworkLayerHeader().getProtocol().getNumber()));
             }
         } else {
             try {

@@ -4,7 +4,7 @@ import android.net.VpnService;
 import android.util.Log;
 
 import com.tpp.private_doh.protocol.IP4Header;
-import com.tpp.private_doh.protocol.IpUtil;
+import com.tpp.private_doh.protocol.NetworkLayerHeader;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.UdpHeader;
 
@@ -16,10 +16,8 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.Selector;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class in charge of UDP packet handling
@@ -50,7 +48,7 @@ public class UdpPacketHandler implements Runnable {
 
             while (true) {
                 Packet packet = queue.take();
-                InetAddress destinationAddress = packet.getIp4Header().getDestinationAddress();
+                InetAddress destinationAddress = packet.getNetworkLayerHeader().getDestinationAddress();
                 UdpHeader header = (UdpHeader) packet.getHeader();
                 int destinationPort = header.getDestinationPort();
                 int sourcePort = header.getSourcePort();
@@ -65,11 +63,11 @@ public class UdpPacketHandler implements Runnable {
                     outputChannel.socket().bind(null);
                     outputChannel.connect(new InetSocketAddress(destinationAddress, destinationPort));
                     outputChannel.configureBlocking(false);
-                    IP4Header ip4Header = packet.getIp4Header();
+                    NetworkLayerHeader networkLayerHeader = packet.getNetworkLayerHeader();
 
-                    InetSocketAddress local = new InetSocketAddress(ip4Header.getSourceAddress(),
+                    InetSocketAddress local = new InetSocketAddress(networkLayerHeader.getSourceAddress(),
                             header.getSourcePort());
-                    InetSocketAddress remote = new InetSocketAddress(ip4Header.getDestinationAddress(),
+                    InetSocketAddress remote = new InetSocketAddress(networkLayerHeader.getDestinationAddress(),
                             header.getDestinationPort());
                     tunnel = new UdpTunnel(local, remote, outputChannel);
                     tunnelQueue.offer(tunnel);

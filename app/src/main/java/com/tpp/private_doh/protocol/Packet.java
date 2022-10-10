@@ -10,19 +10,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Representation of an IP Packet
  */
 public class Packet {
-    public static final int IP4_HEADER_SIZE = 20;
     public static final int TCP_HEADER_SIZE = 20;
     public static final int UDP_HEADER_SIZE = 8;
 
     private int packId;
     private boolean isTCP;
     private boolean isUDP;
-    private IP4Header ip4Header;
-    private Header header;
+    private NetworkLayerHeader networkLayerHeader;
+    private TransportLayerHeader header;
     protected ByteBuffer backingBuffer;
 
-    public Packet(IP4Header ip4Header, Header header, ByteBuffer backingBuffer) {
-        this.ip4Header = ip4Header;
+    public Packet(NetworkLayerHeader networkLayerHeader, TransportLayerHeader header, ByteBuffer backingBuffer) {
+        this.networkLayerHeader = networkLayerHeader;
         this.header = header;
         this.backingBuffer = backingBuffer;
         this.isTCP = true;
@@ -30,8 +29,8 @@ public class Packet {
         this.setPackId();
     }
 
-    public Packet(IP4Header ip4Header, ByteBuffer backingBuffer) {
-        this.ip4Header = ip4Header;
+    public Packet(NetworkLayerHeader networkLayerHeader, ByteBuffer backingBuffer) {
+        this.networkLayerHeader = networkLayerHeader;
         this.backingBuffer = backingBuffer;
         this.isTCP = false;
         this.isUDP = false;
@@ -54,7 +53,7 @@ public class Packet {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Packet{");
-        sb.append("ip4Header=").append(ip4Header);
+        sb.append("ip4Header=").append(networkLayerHeader);
         if (isTCP) sb.append(", tcpHeader=").append(header);
         else if (isUDP) sb.append(", udpHeader=").append(header);
         sb.append(", payloadSize=").append(backingBuffer.limit() - backingBuffer.position());
@@ -82,24 +81,24 @@ public class Packet {
         TcpHeader tcpHeader = (TcpHeader) header;
 
         tcpHeader.setFlags(flags);
-        backingBuffer.put(IP4_HEADER_SIZE + 13, flags);
+        backingBuffer.put(this.networkLayerHeader.getHeaderSize() + 13, flags);
 
         tcpHeader.setSequenceNumber(sequenceNum);
-        backingBuffer.putInt(IP4_HEADER_SIZE + 4, (int) sequenceNum);
+        backingBuffer.putInt(this.networkLayerHeader.getHeaderSize() + 4, (int) sequenceNum);
 
         tcpHeader.setAcknowledgementNumber(ackNum);
-        backingBuffer.putInt(IP4_HEADER_SIZE + 8, (int) ackNum);
+        backingBuffer.putInt(this.networkLayerHeader.getHeaderSize() + 8, (int) ackNum);
 
         // Reset header size, since we don't need options
         byte dataOffset = (byte) (TCP_HEADER_SIZE << 2);
         tcpHeader.setDataOffsetAndReserved(dataOffset);
-        backingBuffer.put(IP4_HEADER_SIZE + 12, dataOffset);
+        backingBuffer.put(this.networkLayerHeader.getHeaderSize() + 12, dataOffset);
 
         updateTCPChecksum(payloadSize);
 
-        int ip4TotalLength = IP4_HEADER_SIZE + TCP_HEADER_SIZE + payloadSize;
-        backingBuffer.putShort(2, (short) ip4TotalLength);
-        ip4Header.setTotalLength(ip4TotalLength);
+        int networkLayerHeaderTotalLength = this.networkLayerHeader.getHeaderSize() + TCP_HEADER_SIZE + payloadSize;
+        backingBuffer.putShort(2, (short) networkLayerHeaderTotalLength);
+        networkLayerHeader.setTotalLength(networkLayerHeaderTotalLength);
 
         updateIP4Checksum();
     }
@@ -110,18 +109,18 @@ public class Packet {
         backingBuffer = buffer;
 
         int udpTotalLength = UDP_HEADER_SIZE + payloadSize;
-        backingBuffer.putShort(IP4_HEADER_SIZE + 4, (short) udpTotalLength);
+        backingBuffer.putShort(this.networkLayerHeader.getHeaderSize() + 4, (short) udpTotalLength);
 
         UdpHeader udpHeader = (UdpHeader) header;
         udpHeader.setLength(udpTotalLength);
 
         // Disable UDP checksum validation
-        backingBuffer.putShort(IP4_HEADER_SIZE + 6, (short) 0);
+        backingBuffer.putShort(this.networkLayerHeader.getHeaderSize() + 6, (short) 0);
         udpHeader.setChecksum(0);
 
-        int ip4TotalLength = IP4_HEADER_SIZE + udpTotalLength;
+        int ip4TotalLength = this.networkLayerHeader.getHeaderSize() + udpTotalLength;
         backingBuffer.putShort(2, (short) ip4TotalLength);
-        ip4Header.setTotalLength(ip4TotalLength);
+        networkLayerHeader.setTotalLength(ip4TotalLength);
 
         updateIP4Checksum();
     }
@@ -133,7 +132,7 @@ public class Packet {
         // Clear previous checksum
         buffer.putShort(10, (short) 0);
 
-        int ipLength = ip4Header.getHeaderLength();
+        int ipLength = networkLayerHeader.getHeaderLength();
         int sum = 0;
         while (ipLength > 0) {
             sum += BitUtils.getUnsignedShort(buffer.getShort());
@@ -143,7 +142,7 @@ public class Packet {
             sum = (sum & 0xFFFF) + (sum >> 16);
 
         sum = ~sum;
-        ip4Header.setHeaderChecksum(sum);
+        networkLayerHeader.setHeaderChecksum(sum);
         backingBuffer.putShort(10, (short) sum);
     }
 
@@ -152,20 +151,20 @@ public class Packet {
         int tcpLength = TCP_HEADER_SIZE + payloadSize;
 
         // Calculate pseudo-header checksum
-        ByteBuffer buffer = ByteBuffer.wrap(ip4Header.getSourceAddress().getAddress());
+        ByteBuffer buffer = ByteBuffer.wrap(networkLayerHeader.getSourceAddress().getAddress());
         sum = BitUtils.getUnsignedShort(buffer.getShort()) + BitUtils.getUnsignedShort(buffer.getShort());
 
-        buffer = ByteBuffer.wrap(ip4Header.getDestinationAddress().getAddress());
+        buffer = ByteBuffer.wrap(networkLayerHeader.getDestinationAddress().getAddress());
         sum += BitUtils.getUnsignedShort(buffer.getShort()) + BitUtils.getUnsignedShort(buffer.getShort());
 
         sum += TransportProtocol.TCP.getNumber() + tcpLength;
 
         buffer = backingBuffer.duplicate();
         // Clear previous checksum
-        buffer.putShort(IP4_HEADER_SIZE + 16, (short) 0);
+        buffer.putShort(this.networkLayerHeader.getHeaderSize() + 16, (short) 0);
 
         // Calculate TCP segment checksum
-        buffer.position(IP4_HEADER_SIZE);
+        buffer.position(this.networkLayerHeader.getHeaderSize());
         while (tcpLength > 1) {
             sum += BitUtils.getUnsignedShort(buffer.getShort());
             tcpLength -= 2;
@@ -179,24 +178,28 @@ public class Packet {
         sum = ~sum;
         TcpHeader tcpHeader = (TcpHeader) header;
         tcpHeader.setChecksum(sum);
-        backingBuffer.putShort(IP4_HEADER_SIZE + 16, (short) sum);
+        backingBuffer.putShort(this.networkLayerHeader.getHeaderSize() + 16, (short) sum);
     }
 
     protected void fillHeader(ByteBuffer buffer) {
-        ip4Header.fillBuffer(buffer);
+        networkLayerHeader.fillBuffer(buffer);
         header.fillBuffer(buffer);
     }
 
-    public IP4Header getIp4Header() {
-        return ip4Header;
+    public NetworkLayerHeader getNetworkLayerHeader() {
+        return networkLayerHeader;
     }
 
-    public Header getHeader() {
+    public TransportLayerHeader getHeader() {
         return header;
     }
 
     public ByteBuffer getBackingBuffer() {
         return backingBuffer;
+    }
+
+    public int getNetworkLayerHeaderSize() {
+        return this.networkLayerHeader.getHeaderSize();
     }
 
     public void setBackingBuffer(ByteBuffer byteBuffer) {

@@ -3,8 +3,8 @@ package com.tpp.private_doh.handler;
 import android.net.VpnService;
 import android.util.Log;
 
-import com.tpp.private_doh.protocol.IP4Header;
 import com.tpp.private_doh.protocol.IpUtil;
+import com.tpp.private_doh.protocol.NetworkLayerHeader;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.TCBStatus;
 import com.tpp.private_doh.protocol.TcpHeader;
@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 public class TcpPacketHandler implements Runnable {
-    private static int HEADER_SIZE = Packet.IP4_HEADER_SIZE + Packet.TCP_HEADER_SIZE;
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final VpnService vpnService;
@@ -44,10 +43,10 @@ public class TcpPacketHandler implements Runnable {
 
     private TcpPipe initPipe(Packet packet) throws Exception {
         TcpPipe pipe = new TcpPipe();
-        IP4Header ip4Header = packet.getIp4Header();
+        NetworkLayerHeader networkLayerHeader = packet.getNetworkLayerHeader();
         TcpHeader tcpHeader = (TcpHeader) packet.getHeader();
-        pipe.sourceAddress = new InetSocketAddress(ip4Header.getSourceAddress(), tcpHeader.getSourcePort());
-        pipe.destinationAddress = new InetSocketAddress(ip4Header.getDestinationAddress(), tcpHeader.getDestinationPort());
+        pipe.sourceAddress = new InetSocketAddress(networkLayerHeader.getSourceAddress(), tcpHeader.getSourcePort());
+        pipe.destinationAddress = new InetSocketAddress(networkLayerHeader.getDestinationAddress(), tcpHeader.getDestinationPort());
         pipe.remote = SocketChannel.open();
         objAttrUtil.setAttr(pipe.remote, "type", "remote");
         objAttrUtil.setAttr(pipe.remote, "pipe", pipe);
@@ -68,8 +67,9 @@ public class TcpPacketHandler implements Runnable {
         Packet packet = IpUtil.buildTcpPacket(pipe.destinationAddress, pipe.sourceAddress, flag,
                 pipe.myAcknowledgementNum, pipe.mySequenceNum, pipe.packId);
         pipe.packId += 1;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
-        byteBuffer.position(HEADER_SIZE);
+        int headerSize = packet.getNetworkLayerHeaderSize() + Packet.TCP_HEADER_SIZE;
+        ByteBuffer byteBuffer = ByteBuffer.allocate(headerSize + dataLen);
+        byteBuffer.position(headerSize);
         if (data != null) {
             if (byteBuffer.remaining() < data.length) {
                 System.currentTimeMillis();
@@ -77,7 +77,7 @@ public class TcpPacketHandler implements Runnable {
             byteBuffer.put(data);
         }
         packet.updateTCPBuffer(byteBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
-        byteBuffer.position(HEADER_SIZE + dataLen);
+        byteBuffer.position(headerSize + dataLen);
         networkToDeviceQueue.offer(byteBuffer);
         if ((flag & (byte) TcpHeader.SYN) != 0) {
             pipe.mySequenceNum += 1;
@@ -239,7 +239,7 @@ public class TcpPacketHandler implements Runnable {
             if (currentPacket == null) {
                 return;
             }
-            InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
+            InetAddress destinationAddress = currentPacket.getNetworkLayerHeader().getDestinationAddress();
             TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
             int destinationPort = tcpHeader.getDestinationPort();
             int sourcePort = tcpHeader.getSourcePort();

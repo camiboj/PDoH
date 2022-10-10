@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -61,6 +60,7 @@ public class DnsResponseProcessorTest extends Helper {
         when(ip4Header.getDestinationAddress()).thenReturn(destinationAddress);
         when(ip4Header.getIdentificationAndFlagsAndFragmentOffset())
                 .thenReturn(identificationAndFlagsAndFragmentOffset);
+        when(ip4Header.isIpv4()).thenReturn(true);
 
         // UdpHeader
         int destinationPort = 1;
@@ -102,6 +102,7 @@ public class DnsResponseProcessorTest extends Helper {
 
         // DnsToDohController
         List<Response> responseList = Collections.singletonList(response);
+
         when(dnsToController.process(dnsPacket)).thenReturn(responseList);
 
         BlockingQueue<DnsPacket> dnsPackets = new ArrayBlockingQueue<>(1000);

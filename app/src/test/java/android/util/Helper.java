@@ -53,7 +53,7 @@ public class Helper {
         }
     }
 
-    protected Packet buildUdpPacket() {
+    protected Packet buildUdpAndIp4Header() {
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         int optionsAndPadding = 1;
         IP4Header ip4Header = new IP4Header(VERSION, IHL, HEADER_LENGTH, TYPE_OF_SERVICE, TOTAL_LENGTH,
@@ -66,7 +66,7 @@ public class Helper {
         return new Packet(ip4Header, udpHeader, byteBuffer);
     }
 
-    protected Packet buildTcpPacket() {
+    protected Packet buildTcpAndIp4Packet() {
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         int optionsAndPadding = 1;
         IP4Header ip4Header = new IP4Header(VERSION, IHL, HEADER_LENGTH, TYPE_OF_SERVICE, TOTAL_LENGTH,
@@ -91,7 +91,7 @@ public class Helper {
         return new Packet(ip4Header, tcpHeader, byteBuffer);
     }
 
-    protected DnsPacket buildDnsPacket() {
+    protected DnsPacket buildDnsAndIp4HeaderPacket() {
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         int optionsAndPadding = 1;
         IP4Header ip4Header = new IP4Header(VERSION, IHL, HEADER_LENGTH, TYPE_OF_SERVICE, TOTAL_LENGTH,
@@ -103,7 +103,7 @@ public class Helper {
         DnsHeader dnsHeader = new DnsHeader(IDENTIFICATION, FLAGS, N_QUESTIONS, N_ANSWERS,
                 N_AUTHORITY_RESOURCE_RECORDS, N_ADDITIONAL_RRS);
         dnsHeader.putOn(byteBuffer);
-        byteBuffer.position(Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE);
+        byteBuffer.position(ip4Header.getHeaderSize() + Packet.UDP_HEADER_SIZE);
 
         DnsPacket dnsPacket = new DnsPacket(ip4Header, udpHeader, byteBuffer);
         dnsPacket.addQuestion(QUESTION_NAME, QUESTION_TYPE);

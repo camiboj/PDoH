@@ -95,7 +95,7 @@ public class DnsPacketTest {
         dnsPacket.fillBackingBuffer();
         ByteBuffer buffer = dnsPacket.getBackingBuffer();
 
-        assertEquals(Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE, buffer.position());
+        assertEquals(dnsPacket.getNetworkLayerHeaderSize() + Packet.UDP_HEADER_SIZE, buffer.position());
         // DnsHeader
         assertEquals(IDENTIFICATION, buffer.getShort());
         assertEquals(FLAGS, buffer.getShort());

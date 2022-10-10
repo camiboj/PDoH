@@ -4,7 +4,7 @@ import com.tpp.private_doh.util.BitUtils;
 
 import java.nio.ByteBuffer;
 
-public class UdpHeader implements Header {
+public class UdpHeader implements TransportLayerHeader {
     private int sourcePort;
     private int destinationPort;
     private int length;

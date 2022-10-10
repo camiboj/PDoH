@@ -18,12 +18,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class UdpDownWorker implements Runnable {
+    protected final static String TAG = UdpDownWorker.class.getSimpleName();
     public final AtomicInteger ipId;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final BlockingQueue<UdpTunnel> tunnelQueue;
     private final Selector selector;
-    private final int headerSize;
-    protected final static String TAG = UdpDownWorker.class.getSimpleName();;
+    private boolean isIpv4;
+    ;
 
     public UdpDownWorker(Selector selector, BlockingQueue<ByteBuffer> networkToDeviceQueue,
                          BlockingQueue<UdpTunnel> tunnelQueue) {
@@ -31,17 +32,17 @@ public class UdpDownWorker implements Runnable {
         this.tunnelQueue = tunnelQueue;
         this.selector = selector;
         this.ipId = new AtomicInteger();
-        this.headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
     }
 
     private void sendUdpPack(UdpTunnel tunnel, byte[] data) throws IOException {
         int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
         Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
-        byteBuffer.position(this.headerSize);
+        int headerSize = packet.getNetworkLayerHeaderSize() + Packet.UDP_HEADER_SIZE;
+        byteBuffer.position(headerSize);
         Optional.ofNullable(data).ifPresent(byteBuffer::put);
         packet.updateUDPBuffer(byteBuffer, dataLen);
-        byteBuffer.position(this.headerSize + dataLen);
+        byteBuffer.position(headerSize + dataLen);
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 
@@ -92,7 +93,7 @@ public class UdpDownWorker implements Runnable {
         }
     }
 
-    private ByteBuffer getData(SelectionKey key) throws IOException{
+    private ByteBuffer getData(SelectionKey key) throws IOException {
         DatagramChannel inputChannel = (DatagramChannel) key.channel();
         ByteBuffer receiveBuffer = ByteBufferPool.acquire();
         inputChannel.read(receiveBuffer);

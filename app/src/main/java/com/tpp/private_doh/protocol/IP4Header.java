@@ -6,8 +6,9 @@ import com.tpp.private_doh.util.IpUtils;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
-public class IP4Header {
-    private byte version;
+public class IP4Header implements NetworkLayerHeader {
+    private static final int IP4_HEADER_SIZE = 20;
+
     private final byte IHL;
     private final int headerLength;
     private final short typeOfService;
@@ -15,8 +16,9 @@ public class IP4Header {
     private final int protocolNum;
     private final TransportProtocol protocol;
     private final InetAddress sourceAddress;
-    private InetAddress destinationAddress;
     private final int optionsAndPadding;
+    private byte version;
+    private InetAddress destinationAddress;
     private int identificationAndFlagsAndFragmentOffset;
     private int totalLength;
     private int headerChecksum;
@@ -87,6 +89,11 @@ public class IP4Header {
     }
 
     @Override
+    public int getHeaderSize() {
+        return IP4_HEADER_SIZE;
+    }
+
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("IP4Header{");
         sb.append("version=").append(version);
@@ -115,6 +122,11 @@ public class IP4Header {
         this.headerChecksum = sum;
     }
 
+    @Override
+    public boolean isIpv4() {
+        return true;
+    }
+
     public InetAddress getDestinationAddress() {
         return destinationAddress;
     }
@@ -129,18 +141,6 @@ public class IP4Header {
 
     public void setIdentificationAndFlagsAndFragmentOffset(int i) {
         identificationAndFlagsAndFragmentOffset = i;
-    }
-
-    public void setDestinationAddress(InetAddress destinationAddress) {
-        this.destinationAddress = destinationAddress;
-    }
-
-    public void setDestinationAddress(String pickedIp) {
-        this.destinationAddress = IpUtils.getByName(pickedIp);
-    }
-
-    public void setDestinationAddress(byte[] pickedIp) {
-        this.destinationAddress = IpUtils.getByAddress(pickedIp);
     }
 
     public void setVersion(int version) {

@@ -26,23 +26,14 @@ public class IpUtil {
     public static int FLAGS = 33152; // It was checked against a DNS packet
 
     public static DnsPacket buildDnsPacketFrom(DnsPacket other) {
-        IP4Header sourceIp4Header = other.getIp4Header();
+        NetworkLayerHeader otherNetworkLayer = other.getNetworkLayerHeader();
         UdpHeader sourceUdpHeader = (UdpHeader) other.getHeader();
         DnsHeader sourceDnsHeader = other.getDnsHeader();
-
-        InetAddress otherSourceAddress = sourceIp4Header.getSourceAddress();
-        InetAddress otherDestinationAddress = sourceIp4Header.getDestinationAddress();
-        int idAndFlagsAndFragmentOffset = sourceIp4Header.getIdentificationAndFlagsAndFragmentOffset();
 
         int otherDestinationPort = sourceUdpHeader.getDestinationPort();
         int otherSourcePort = sourceUdpHeader.getSourcePort();
 
-        IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
-                TYPE_OF_SERVICE, TOTAL_LENGTH,
-                idAndFlagsAndFragmentOffset,
-                TTL, TransportProtocol.UDP.getNumber(), TransportProtocol.UDP, HEADER_CHECKSUM,
-                otherDestinationAddress, otherSourceAddress,
-                OPTIONS_AND_PADDING);
+        NetworkLayerHeader ip4Header = NetworkLayerHeaderFactory.createHeader(otherNetworkLayer);
 
         UdpHeader udpHeader = new UdpHeader(otherDestinationPort, otherSourcePort);
         DnsHeader dnsHeader = new DnsHeader(sourceDnsHeader.getIdentification(), FLAGS,
@@ -54,7 +45,8 @@ public class IpUtil {
     }
 
     public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
-        dnsResponse.getIp4Header().setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
+        // TODO: change this
+        ((IP4Header) dnsResponse.getNetworkLayerHeader()).setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
     }
 
     public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId) {

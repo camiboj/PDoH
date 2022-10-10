@@ -4,7 +4,7 @@ import com.tpp.private_doh.util.BitUtils;
 
 import java.nio.ByteBuffer;
 
-public class TcpHeader implements Header {
+public class TcpHeader implements TransportLayerHeader {
     public static final int TCP_HEADER_SIZE = 20;
     public static final int FIN = 0x01;
     public static final int SYN = 0x02;

@@ -19,14 +19,12 @@ public class DnsDownWorker implements Runnable {
     public final AtomicInteger ipId;
     private final BlockingQueue<DnsPacket> dnsResponsesQueue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    private final int headerSize;
 
     public DnsDownWorker(BlockingQueue<ByteBuffer> networkToDeviceQueue,
                          BlockingQueue<DnsPacket> dnsResponsesQueue) {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
         ipId = new AtomicInteger();
-        this.headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
     }
 
     @Override
@@ -56,9 +54,10 @@ public class DnsDownWorker implements Runnable {
 
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         dnsResponse.updateUDPBuffer(byteBuffer, dataLen); // Fill udp and ip header
-        byteBuffer.position(this.headerSize);
+        int headerSize = dnsResponse.getNetworkLayerHeaderSize() + Packet.UDP_HEADER_SIZE;
+        byteBuffer.position(headerSize);
         byteBuffer.put(data); // Fill DNS data
-        byteBuffer.position(this.headerSize + dataLen);
+        byteBuffer.position(headerSize + dataLen);
 
         Log.i(TAG, "[dns] About to send dns packet");
         this.networkToDeviceQueue.offer(byteBuffer);

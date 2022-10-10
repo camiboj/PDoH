@@ -17,7 +17,7 @@ public class PacketFactoryTest extends Helper {
 
     @Test
     public void packetFactoryCreatesDnsPacketOk() throws UnknownHostException {
-        DnsPacket dnsPacket = buildDnsPacket();
+        DnsPacket dnsPacket = buildDnsAndIp4HeaderPacket();
         dnsPacket.fillBackingBuffer();
         ByteBuffer buffer = dnsPacket.getBackingBuffer();
         buffer.position(0);
@@ -31,7 +31,7 @@ public class PacketFactoryTest extends Helper {
 
     @Test
     public void packetFactoryCreatesUdpPacketOk() throws UnknownHostException {
-        Packet udpPacket = buildUdpPacket();
+        Packet udpPacket = buildUdpAndIp4Header();
         ByteBuffer buffer = udpPacket.getBackingBuffer();
         buffer.position(0);
         Packet packetResult = PacketFactory.createPacket(buffer);
@@ -43,7 +43,7 @@ public class PacketFactoryTest extends Helper {
 
     @Test
     public void packetFactoryCreatesTcpPacketOk() throws UnknownHostException {
-        Packet tcpPacket = buildTcpPacket();
+        Packet tcpPacket = buildTcpAndIp4Packet();
         ByteBuffer buffer = tcpPacket.getBackingBuffer();
         buffer.position(0);
         Packet packetResult = PacketFactory.createPacket(buffer);
@@ -55,7 +55,7 @@ public class PacketFactoryTest extends Helper {
 
     @Test
     public void packetFactoryCreatesDnsPacketFromByteBufferOk() throws UnknownHostException {
-        DnsPacket dnsPacket = buildDnsPacket();
+        DnsPacket dnsPacket = buildDnsAndIp4HeaderPacket();
         dnsPacket.fillBackingBuffer();
         ByteBuffer buffer = dnsPacket.getBackingBuffer();
         buffer.position(0);
