@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 
 public class NetworkLayerHeaderFactory {
     public static int VERSION_TRAFFIC_CLASS_FLOW_LABEL = 1610612736; // TODO: fix this
-    public static int HOP_LIMIT = 0; // TODO: fix this
     private static int VERSION = 4;
     private static int IHL = 5;
     private static int UDP_HEADER_LENGTH = 20;
@@ -44,10 +43,9 @@ public class NetworkLayerHeaderFactory {
         }
 
         return new IP6Header(VERSION_TRAFFIC_CLASS_FLOW_LABEL, (short) IP6Header.IP6_HEADER_SIZE,
-                (byte) TransportProtocol.UDP.getNumber(), (byte) HOP_LIMIT, otherDestinationAddress,
+                (byte) TransportProtocol.UDP.getNumber(), (byte) TTL, otherDestinationAddress,
                 otherSourceAddress);
     }
-
 
     public static NetworkLayerHeader createHeader(int ipId, InetAddress sourceAddress,
                                                   InetAddress destinationAddress,
@@ -62,6 +60,6 @@ public class NetworkLayerHeaderFactory {
         }
 
         return new IP6Header(VERSION_TRAFFIC_CLASS_FLOW_LABEL, (short) IP6Header.IP6_HEADER_SIZE,
-                (byte) transportProtocol.getNumber(), (byte) HOP_LIMIT, sourceAddress, destinationAddress);
+                (byte) transportProtocol.getNumber(), (byte) TTL, sourceAddress, destinationAddress);
     }
 }
