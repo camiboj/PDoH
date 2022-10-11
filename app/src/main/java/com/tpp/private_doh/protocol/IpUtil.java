@@ -33,7 +33,7 @@ public class IpUtil {
         int otherDestinationPort = sourceUdpHeader.getDestinationPort();
         int otherSourcePort = sourceUdpHeader.getSourcePort();
 
-        NetworkLayerHeader ip4Header = NetworkLayerHeaderFactory.createHeader(otherNetworkLayer);
+        NetworkLayerHeader networkLayerHeader = NetworkLayerHeaderFactory.createHeader(otherNetworkLayer);
 
         UdpHeader udpHeader = new UdpHeader(otherDestinationPort, otherSourcePort);
         DnsHeader dnsHeader = new DnsHeader(sourceDnsHeader.getIdentification(), FLAGS,
@@ -41,7 +41,7 @@ public class IpUtil {
                 sourceDnsHeader.getNAdditionalRRs());
         // We will add the nQuestions and nAnswers with the DoH response
 
-        return new DnsPacket(ip4Header, udpHeader, dnsHeader);
+        return new DnsPacket(networkLayerHeader, udpHeader, dnsHeader);
     }
 
     public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
