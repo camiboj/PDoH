@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 public class IP4Header implements NetworkLayerHeader {
-    private static final int IP4_HEADER_SIZE = 20;
+    public static final int IP4_HEADER_SIZE = 20;
 
     private final byte IHL;
     private final int headerLength;

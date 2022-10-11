@@ -50,27 +50,20 @@ public class IpUtil {
     }
 
     public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId) {
-        IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
-                TYPE_OF_SERVICE, TOTAL_LENGTH,
-                ipId << 16 | IP_FLAG << 8 | IP_OFF,
-                TTL, TransportProtocol.UDP.getNumber(), TransportProtocol.UDP, HEADER_CHECKSUM,
-                source.getAddress(), dest.getAddress(), OPTIONS_AND_PADDING);
+        NetworkLayerHeader networkLayerHeader = NetworkLayerHeaderFactory.createHeader(ipId,
+                source.getAddress(), dest.getAddress(), TransportProtocol.UDP);
 
         UdpHeader udpHeader = new UdpHeader(source.getPort(), dest.getPort());
 
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         byteBuffer.flip();
 
-        return new Packet(ip4Header, udpHeader, byteBuffer);
+        return new Packet(networkLayerHeader, udpHeader, byteBuffer);
     }
 
     public static Packet buildTcpPacket(InetSocketAddress source, InetSocketAddress dest, byte flag, long ack, long seq, int ipId) {
-        IP4Header ip4Header = new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
-                TYPE_OF_SERVICE, TOTAL_LENGTH,
-                ipId << 16 | IP_FLAG << 8 | IP_OFF,
-                TTL, TransportProtocol.TCP.getNumber(), TransportProtocol.TCP,
-                HEADER_CHECKSUM, source.getAddress(), dest.getAddress(),
-                OPTIONS_AND_PADDING);
+        NetworkLayerHeader networkLayerHeader = NetworkLayerHeaderFactory.createHeader(ipId,
+                source.getAddress(), dest.getAddress(), TransportProtocol.TCP);
 
         TcpHeader tcpHeader = new TcpHeader(source.getPort(), dest.getPort(), seq,
                 ack, (byte) DATA_OFFSET_AND_RESERVED, TCP_HEADER_LENGTH, flag,
@@ -79,6 +72,6 @@ public class IpUtil {
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         byteBuffer.flip();
 
-        return new Packet(ip4Header, tcpHeader, byteBuffer);
+        return new Packet(networkLayerHeader, tcpHeader, byteBuffer);
     }
 }
