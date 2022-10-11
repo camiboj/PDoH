@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 public class IP6Header implements NetworkLayerHeader {
-    private static final int IP6_HEADER_SIZE = 40;
+    public static final int IP6_HEADER_SIZE = 40;
 
     private final int versionTrafficClassFlowLabel;
     private short headerLength;

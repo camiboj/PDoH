@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 public class NetworkLayerHeaderFactory {
+    public static int VERSION_TRAFFIC_CLASS_FLOW_LABEL = 1610612736; // TODO: fix this
+    public static int HOP_LIMIT = 0; // TODO: fix this
     private static int VERSION = 4;
     private static int IHL = 5;
     private static int UDP_HEADER_LENGTH = 20;
@@ -14,11 +16,6 @@ public class NetworkLayerHeaderFactory {
     private static short TTL = 64;
     private static int HEADER_CHECKSUM = 0;
     private static int OPTIONS_AND_PADDING = 0;
-    private static int DATA_OFFSET_AND_RESERVED = -96;
-    private static int TCP_HEADER_LENGTH = 40;
-    private static int WINDOW = 65535;
-    private static int URGENT_POINTER = 0;
-    public static int FLAGS = 33152; // It was checked against a DNS packet
 
     public static NetworkLayerHeader createHeader(ByteBuffer buffer) {
         byte versionAndOtherField = buffer.get();
@@ -31,13 +28,13 @@ public class NetworkLayerHeaderFactory {
     }
 
     public static NetworkLayerHeader createHeader(NetworkLayerHeader otherHeader) {
+        IP4Header ip4Header = (IP4Header) otherHeader;
+
+        InetAddress otherSourceAddress = ip4Header.getSourceAddress();
+        InetAddress otherDestinationAddress = ip4Header.getDestinationAddress();
+        int idAndFlagsAndFragmentOffset = ip4Header.getIdentificationAndFlagsAndFragmentOffset();
+
         if (otherHeader.isIpv4()) {
-            IP4Header ip4Header = (IP4Header) otherHeader;
-
-            InetAddress otherSourceAddress = ip4Header.getSourceAddress();
-            InetAddress otherDestinationAddress = ip4Header.getDestinationAddress();
-            int idAndFlagsAndFragmentOffset = ip4Header.getIdentificationAndFlagsAndFragmentOffset();
-
             return new IP4Header((byte) VERSION, (byte) IHL, UDP_HEADER_LENGTH,
                     TYPE_OF_SERVICE, TOTAL_LENGTH,
                     idAndFlagsAndFragmentOffset,
@@ -46,8 +43,11 @@ public class NetworkLayerHeaderFactory {
                     OPTIONS_AND_PADDING);
         }
 
-        return null; // TODO: create ipv6 header
+        return new IP6Header(VERSION_TRAFFIC_CLASS_FLOW_LABEL, (short) IP6Header.IP6_HEADER_SIZE,
+                (byte) TransportProtocol.UDP.getNumber(), (byte) HOP_LIMIT, otherDestinationAddress,
+                otherSourceAddress);
     }
+
 
     public static NetworkLayerHeader createHeader(int ipId, InetAddress sourceAddress,
                                                   InetAddress destinationAddress,
@@ -61,6 +61,7 @@ public class NetworkLayerHeaderFactory {
                     sourceAddress, destinationAddress, OPTIONS_AND_PADDING);
         }
 
-        return null; // TODO: create ipv6 header
+        return new IP6Header(VERSION_TRAFFIC_CLASS_FLOW_LABEL, (short) IP6Header.IP6_HEADER_SIZE,
+                (byte) transportProtocol.getNumber(), (byte) HOP_LIMIT, sourceAddress, destinationAddress);
     }
 }
