@@ -49,9 +49,10 @@ public class IpUtil {
         ((IP4Header) dnsResponse.getNetworkLayerHeader()).setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
     }
 
-    public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId) {
+    public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId,
+                                        boolean isIpv4) {
         NetworkLayerHeader networkLayerHeader = NetworkLayerHeaderFactory.createHeader(ipId,
-                source.getAddress(), dest.getAddress(), TransportProtocol.UDP);
+                source.getAddress(), dest.getAddress(), TransportProtocol.UDP, isIpv4);
 
         UdpHeader udpHeader = new UdpHeader(source.getPort(), dest.getPort());
 
@@ -63,7 +64,7 @@ public class IpUtil {
 
     public static Packet buildTcpPacket(InetSocketAddress source, InetSocketAddress dest, byte flag, long ack, long seq, int ipId) {
         NetworkLayerHeader networkLayerHeader = NetworkLayerHeaderFactory.createHeader(ipId,
-                source.getAddress(), dest.getAddress(), TransportProtocol.TCP);
+                source.getAddress(), dest.getAddress(), TransportProtocol.TCP, true); //TODO: change this
 
         TcpHeader tcpHeader = new TcpHeader(source.getPort(), dest.getPort(), seq,
                 ack, (byte) DATA_OFFSET_AND_RESERVED, TCP_HEADER_LENGTH, flag,

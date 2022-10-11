@@ -48,6 +48,7 @@ public class UdpPacketHandler implements Runnable {
 
             while (true) {
                 Packet packet = queue.take();
+                udpdw.setIsIpv4(packet.getNetworkLayerHeader().isIpv4());
                 InetAddress destinationAddress = packet.getNetworkLayerHeader().getDestinationAddress();
                 UdpHeader header = (UdpHeader) packet.getHeader();
                 int destinationPort = header.getDestinationPort();

@@ -36,7 +36,8 @@ public class UdpDownWorker implements Runnable {
 
     private void sendUdpPack(UdpTunnel tunnel, byte[] data) throws IOException {
         int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
-        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
+        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1),
+                this.isIpv4);
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
         int headerSize = packet.getNetworkLayerHeaderSize() + Packet.UDP_HEADER_SIZE;
         byteBuffer.position(headerSize);
@@ -98,6 +99,10 @@ public class UdpDownWorker implements Runnable {
         ByteBuffer receiveBuffer = ByteBufferPool.acquire();
         inputChannel.read(receiveBuffer);
         return receiveBuffer;
+    }
+
+    public void setIsIpv4(boolean ipv4) {
+        this.isIpv4 = ipv4;
     }
 }
 

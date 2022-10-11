@@ -51,13 +51,16 @@ public class NetworkLayerHeaderFactory {
 
     public static NetworkLayerHeader createHeader(int ipId, InetAddress sourceAddress,
                                                   InetAddress destinationAddress,
-                                                  TransportProtocol transportProtocol) {
-        return new IP4Header((byte) VERSION, (byte) IHL, IP4Header.IP4_HEADER_SIZE,
-                TYPE_OF_SERVICE, TOTAL_LENGTH,
-                ipId << 16 | IP_FLAG << 8 | IP_OFF,
-                TTL, transportProtocol.getNumber(), transportProtocol, HEADER_CHECKSUM,
-                sourceAddress, destinationAddress, OPTIONS_AND_PADDING);
+                                                  TransportProtocol transportProtocol,
+                                                  boolean isIpv4) {
+        if (isIpv4) {
+            return new IP4Header((byte) VERSION, (byte) IHL, IP4Header.IP4_HEADER_SIZE,
+                    TYPE_OF_SERVICE, TOTAL_LENGTH,
+                    ipId << 16 | IP_FLAG << 8 | IP_OFF,
+                    TTL, transportProtocol.getNumber(), transportProtocol, HEADER_CHECKSUM,
+                    sourceAddress, destinationAddress, OPTIONS_AND_PADDING);
+        }
 
-        // TODO: add ipv6 management
+        return null; // TODO: create ipv6 header
     }
 }
