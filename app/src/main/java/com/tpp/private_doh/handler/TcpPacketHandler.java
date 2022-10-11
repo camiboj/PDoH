@@ -30,6 +30,7 @@ public class TcpPacketHandler implements Runnable {
     private final ObjAttrUtil objAttrUtil;
     private Selector selector;
     private Map<String, TcpPipe> pipes;
+    private boolean isIpv4;
 
     public TcpPacketHandler(BlockingQueue<Packet> queue,
                             BlockingQueue<ByteBuffer> networkToDeviceQueue,
@@ -65,7 +66,7 @@ public class TcpPacketHandler implements Runnable {
             dataLen = data.length;
         }
         Packet packet = IpUtil.buildTcpPacket(pipe.destinationAddress, pipe.sourceAddress, flag,
-                pipe.myAcknowledgementNum, pipe.mySequenceNum, pipe.packId);
+                pipe.myAcknowledgementNum, pipe.mySequenceNum, pipe.packId, this.isIpv4);
         pipe.packId += 1;
         int headerSize = packet.getNetworkLayerHeaderSize() + Packet.TCP_HEADER_SIZE;
         ByteBuffer byteBuffer = ByteBuffer.allocate(headerSize + dataLen);
@@ -239,6 +240,7 @@ public class TcpPacketHandler implements Runnable {
             if (currentPacket == null) {
                 return;
             }
+            this.isIpv4 = currentPacket.getNetworkLayerHeader().isIpv4();
             InetAddress destinationAddress = currentPacket.getNetworkLayerHeader().getDestinationAddress();
             TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
             int destinationPort = tcpHeader.getDestinationPort();

@@ -62,9 +62,10 @@ public class IpUtil {
         return new Packet(networkLayerHeader, udpHeader, byteBuffer);
     }
 
-    public static Packet buildTcpPacket(InetSocketAddress source, InetSocketAddress dest, byte flag, long ack, long seq, int ipId) {
+    public static Packet buildTcpPacket(InetSocketAddress source, InetSocketAddress dest, byte flag,
+                                        long ack, long seq, int ipId, boolean isIpv4) {
         NetworkLayerHeader networkLayerHeader = NetworkLayerHeaderFactory.createHeader(ipId,
-                source.getAddress(), dest.getAddress(), TransportProtocol.TCP, true); //TODO: change this
+                source.getAddress(), dest.getAddress(), TransportProtocol.TCP, isIpv4);
 
         TcpHeader tcpHeader = new TcpHeader(source.getPort(), dest.getPort(), seq,
                 ack, (byte) DATA_OFFSET_AND_RESERVED, TCP_HEADER_LENGTH, flag,
