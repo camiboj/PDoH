@@ -36,20 +36,13 @@ public class DnsAnswer {
         buffer.putShort(BitUtils.intToShort(ANSWER_CLASS));
         buffer.putInt(ttl);
 
-        // Type 1 -> IP Address
-        // Type 5 -> CNAMEs
-        // TODO: map all types, for now I only saw type 1 and type 5 responses
-        if (type == 1) {
-            try {
-                InetAddress ip = IpUtils.getByName(data);
-                buffer.putShort(BitUtils.intToShort(4)); // IPV4
-                this.firstAnswerNamePos = buffer.position();
-                buffer.put(ip.getAddress());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        if (type == 1) { // Ipv4 - Record A
+            putIp(4, buffer);
         }
-        if (type == 5) {
+        if (type == 28) { //Ipv6 - Record AAAA
+            putIp(16, buffer);
+        }
+        if (type == 5) { // Record CNAME
             buffer.putShort(BitUtils.intToShort(data.length() + 1));
             DnsName dnsName = new DnsName(data);
             this.firstAnswerNamePos = buffer.position();
@@ -57,6 +50,17 @@ public class DnsAnswer {
         }
 
         return this.firstAnswerNamePos;
+    }
+
+    private void putIp(int bytes, ByteBuffer buffer) {
+        try {
+            InetAddress ip = IpUtils.getByName(data);
+            buffer.putShort(BitUtils.intToShort(bytes));
+            this.firstAnswerNamePos = buffer.position();
+            buffer.put(ip.getAddress());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @VisibleForTesting
