@@ -45,8 +45,7 @@ public class IpUtil {
     }
 
     public static void updateIdentificationAndFlagsAndFragmentOffset(DnsPacket dnsResponse, int ipId) {
-        // TODO: change this
-        ((IP4Header) dnsResponse.getNetworkLayerHeader()).setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
+        dnsResponse.getNetworkLayerHeader().setIdentificationAndFlagsAndFragmentOffset(ipId << 16 | IP_FLAG << 8 | IP_OFF);
     }
 
     public static Packet buildUdpPacket(InetSocketAddress source, InetSocketAddress dest, int ipId,

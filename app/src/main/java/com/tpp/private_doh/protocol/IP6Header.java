@@ -89,4 +89,9 @@ public class IP6Header implements NetworkLayerHeader {
     public boolean isIpv4() {
         return false;
     }
+
+    @Override
+    public void setIdentificationAndFlagsAndFragmentOffset(int i) {
+        // Do nothing
+    }
 }

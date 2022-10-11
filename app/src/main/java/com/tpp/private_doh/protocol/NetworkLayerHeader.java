@@ -13,4 +13,5 @@ public interface NetworkLayerHeader {
     int getHeaderLength();
     void setHeaderChecksum(int sum);
     boolean isIpv4();
+    void setIdentificationAndFlagsAndFragmentOffset(int i);
 }
