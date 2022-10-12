@@ -37,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
+        setSeekBar();
+    }
+
+    private void setSeekBar() {
         SeekBar seekBar = findViewById(R.id.RacingSeekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
