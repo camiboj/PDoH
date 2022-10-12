@@ -22,8 +22,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MainActivity extends AppCompatActivity {
 
     private static final int VPN_REQUEST_CODE = 0x0F;
+    private int racing_amount = 2;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
+    private SeekBar seekBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,17 +39,22 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
-        setSeekBar();
+        seekBar = findViewById(R.id.RacingSeekBar);
+        setSeekBar(findViewById(R.id.progress));
     }
 
-    private void setSeekBar() {
-        SeekBar seekBar = findViewById(R.id.RacingSeekBar);
+    private void setSeekBar(TextView t) {
+        seekBar.setProgress(racing_amount);
+        // TODO: when we get the dns/doh servers list
+        // seekBar.setMin();
+        // seekBar.setMax();
+
+        t.setText(String.valueOf(racing_amount));
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                TextView t = findViewById(R.id.progress);
                 t.setText(String.valueOf(i));
-
             }
 
             @Override
@@ -86,9 +93,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            //waitingForVPNStart = true;
+            PDoHVpnService.setRacingAmount(this.seekBar.getProgress());
             startService(new Intent(this, PDoHVpnService.class));
-            //enableButton(false);
         }
     }
 
@@ -99,8 +105,9 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
-            SeekBar seekBar = findViewById(R.id.RacingSeekBar);
-            seekBar.setEnabled(false);
+            this.seekBar.setEnabled(false);
+            findViewById(R.id.startVpn).setEnabled(false);
+
         }
     }
 
