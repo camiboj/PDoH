@@ -41,8 +41,9 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                TextView t=(TextView)findViewById(R.id.progress);
+                TextView t = findViewById(R.id.progress);
                 t.setText(String.valueOf(i));
+
             }
 
             @Override
@@ -94,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
+            SeekBar seekBar = findViewById(R.id.RacingSeekBar);
+            seekBar.setEnabled(false);
         }
     }
 
