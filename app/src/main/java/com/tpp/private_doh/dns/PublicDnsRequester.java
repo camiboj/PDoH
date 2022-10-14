@@ -21,11 +21,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class PublicDnsRequester implements Requester {
     protected final static String TAG = PublicDnsRequester.class.getSimpleName();
+    private String ip;
     private Resolver resolver;
 
-    public PublicDnsRequester(String resolver) {
+    public PublicDnsRequester(String ip) {
         try {
-            this.resolver = new SimpleResolver(resolver);
+            this.ip = ip;
+            this.resolver = new SimpleResolver(ip);
         } catch (UnknownHostException e) {
             Log.i(TAG, "Unknown resolver to build DnsRequester");
         }
@@ -33,6 +35,7 @@ public class PublicDnsRequester implements Requester {
 
     @VisibleForTesting
     public PublicDnsRequester(SimpleResolver resolver) {
+        this.ip = "";
         this.resolver = resolver;
     }
 
@@ -50,5 +53,10 @@ public class PublicDnsRequester implements Requester {
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }
+    }
+
+    @Override
+    public String getIp() {
+        return this.ip;
     }
 }

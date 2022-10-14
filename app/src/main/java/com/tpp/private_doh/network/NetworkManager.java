@@ -137,8 +137,11 @@ public class NetworkManager implements Runnable {
             } else if (packet.isTCP()) {
                 deviceToNetworkTCPQueue.offer(packet);
             } else {
-                Log.w(TAG, String.format("Unknown packet protocol type %d",
-                        packet.getIp4Header().getProtocol().getNumber()));
+                String type = packet.getIp4Header().getProtocol().toString();
+                if (type.equals("ICMP")) {
+                    return;
+                }
+                Log.w(TAG, String.format("Unknown packet protocol type %s", type));
             }
         } else {
             try {

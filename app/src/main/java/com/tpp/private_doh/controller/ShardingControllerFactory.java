@@ -14,10 +14,14 @@ import java.util.stream.Collectors;
 public class ShardingControllerFactory {
 
     private final ShardingController pureDnsShardingController;
-    private final ShardingController pureDohShardingController;
-    private final ShardingController hybridDnsShardingController;
+    private ShardingController pureDohShardingController; // TODO: make final
+    private ShardingController hybridDnsShardingController; // TODO: make final
 
     public ShardingControllerFactory() {
+        PingController pingController = new PingController();
+        Thread t = new Thread(pingController);
+        t.start();
+
         List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
         List<Requester> pureDnsRequesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
 
@@ -27,9 +31,9 @@ public class ShardingControllerFactory {
         hybridDnsRequesters.addAll(pureDnsRequesters);
         hybridDnsRequesters.addAll(pureDohRequesters);
 
-        this.pureDnsShardingController = new ShardingController(pureDnsRequesters, 2);
-        this.pureDohShardingController = new ShardingController(pureDohRequesters, 2);
-        this.hybridDnsShardingController = new ShardingController(hybridDnsRequesters, 2);
+        this.pureDnsShardingController = new ShardingController(pureDnsRequesters, 2, pingController); // TODO: only ping in this case
+        /*this.pureDohShardingController = new ShardingController(pureDohRequesters, 2, pingController);
+        this.hybridDnsShardingController = new ShardingController(hybridDnsRequesters, 2, pingController);*/
     }
 
     public ShardingController getPureDnsShardingController() {

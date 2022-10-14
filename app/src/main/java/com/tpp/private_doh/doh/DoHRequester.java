@@ -108,6 +108,11 @@ public abstract class DoHRequester implements Requester {
         }
     }
 
+    @Override
+    public String getIp() {
+        return "";
+    }
+
     static class ParameterStringBuilder {
         public static String getParamsString(Map<String, String> params)
                 throws UnsupportedEncodingException {
