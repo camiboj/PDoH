@@ -103,11 +103,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data, int protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            PDoHVpnService.setRacingAmount(this.seekBar.getProgress());
+            PDoHVpnService.setProtocolId(protocol);
+            PDoHVpnService.setRacingAmount(racingAmount);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
@@ -133,9 +134,9 @@ public class MainActivity extends AppCompatActivity {
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
-            this.rgProtocol.setEnabled(false);
-            this.seekBar.setEnabled(false);
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress());
+            rgProtocol.setEnabled(false);
+            seekBar.setEnabled(false);
             findViewById(R.id.startVpn).setEnabled(false);
         }
     }

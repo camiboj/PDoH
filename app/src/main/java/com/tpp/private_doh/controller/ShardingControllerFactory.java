@@ -1,5 +1,7 @@
 package com.tpp.private_doh.controller;
 
+import android.util.Log;
+
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
@@ -13,34 +15,36 @@ import java.util.stream.Collectors;
 
 public class ShardingControllerFactory {
 
-    private final ShardingController pureDnsShardingController;
-    private final ShardingController pureDohShardingController;
-    private final ShardingController hybridDnsShardingController;
+    private final String TAG = this.getClass().getSimpleName();
+    private final ShardingController protocolShardingController;
 
-    public ShardingControllerFactory(Integer racingAmount) {
+    public ShardingControllerFactory(int racingAmount, int protocolId) {
         List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
-        List<Requester> pureDnsRequesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
+        List<Requester> requesters;
+        Log.i(TAG, String.format("protocolId: %d", protocolId));
+        switch (protocolId) {
+            case 1:
+                Log.i(TAG, "DOH");
+                requesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
+                break;
+            case 2:
+                Log.i(TAG, "DNS");
+                requesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
+                break;
+            case 3:
+                Log.i(TAG, "BOTH");
+                requesters = new ArrayList<>();
+                requesters.addAll(Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester()));
+                requesters.addAll(pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList()));
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + protocolId);
+        }
 
-        List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
-
-        List<Requester> hybridDnsRequesters = new ArrayList<>();
-        hybridDnsRequesters.addAll(pureDnsRequesters);
-        hybridDnsRequesters.addAll(pureDohRequesters);
-
-        this.pureDnsShardingController = new ShardingController(pureDnsRequesters, racingAmount);
-        this.pureDohShardingController = new ShardingController(pureDohRequesters, racingAmount);
-        this.hybridDnsShardingController = new ShardingController(hybridDnsRequesters, racingAmount);
+        this.protocolShardingController = new ShardingController(requesters, racingAmount);
     }
 
-    public ShardingController getPureDnsShardingController() {
-        return this.pureDnsShardingController;
-    }
-
-    public ShardingController getPureDohShardingController() {
-        return this.pureDohShardingController;
-    }
-
-    public ShardingController getHybridDnsShardingController() {
-        return this.hybridDnsShardingController;
+    public ShardingController getProtocolController() {
+        return this.protocolShardingController;
     }
 }

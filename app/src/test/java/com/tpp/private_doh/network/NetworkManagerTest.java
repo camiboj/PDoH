@@ -49,8 +49,11 @@ public class NetworkManagerTest extends Helper {
         BlockingQueue<DnsPacket> dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
         BlockingQueue<ByteBuffer> networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
+        int dohId = 1;
+        int dnsId = 2;
+        int bothId = 3;
         this.networkManager = new NetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue,
-                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, 2);
+                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, 2, dohId);
     }
 
     @Test

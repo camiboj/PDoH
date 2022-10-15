@@ -41,12 +41,14 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
-                          BlockingQueue<ByteBuffer> networkToDeviceQueue, Integer racingAmount) {
+                          BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                          int racingAmount,
+                          int protocolId) {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, protocolId);
     }
 
     @VisibleForTesting
@@ -57,10 +59,11 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
                           ExecutorService dnsWorkers,
-                          Integer racingAmount
+                          int racingAmount,
+                          int protocolId
                           ) {
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, protocolId);
     }
 
     private void buildNetworkManager(FileChannel vpnInput,
@@ -70,7 +73,8 @@ public class NetworkManager implements Runnable {
                                      BlockingQueue<DnsPacket> dnsResponsesQueue,
                                      BlockingQueue<ByteBuffer> networkToDeviceQueue,
                                      ExecutorService dnsWorkers,
-                                     Integer racingAmount) {
+                                     int racingAmount,
+                                     int protocolId) {
         this.vpnInput = vpnInput;
         this.vpnOutput = vpnOutput;
         this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
@@ -78,7 +82,7 @@ public class NetworkManager implements Runnable {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsWorkers = dnsWorkers;
-        this.shardingControllerFactory = new ShardingControllerFactory(racingAmount);
+        this.shardingControllerFactory = new ShardingControllerFactory(racingAmount, protocolId);
     }
 
     @Override
@@ -123,8 +127,9 @@ public class NetworkManager implements Runnable {
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
                     //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
-                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
+                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
                     //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getHybridDnsShardingController())));
+                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getProtocolController())));
                 }
 
             } else if (packet.isUDP()) {
