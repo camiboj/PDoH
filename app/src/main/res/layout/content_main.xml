@@ -23,6 +23,65 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.113" />
 
+
+    <TextView
+        android:id="@+id/selectProtocolTitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="76dp"
+        android:gravity="center_horizontal"
+        android:text="@string/select_protocol_to_use"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/startVpn" />
+
+    <RadioGroup
+        android:id="@+id/rgProtocol"
+        android:layout_width="124dp"
+        android:layout_height="96dp"
+        android:checkedButton="@+id/rbDoH"
+        app:layout_constraintBottom_toTopOf="@+id/RacingSeekBarText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selectProtocolTitle"
+        app:layout_constraintVertical_bias="0.053">
+
+        <RadioButton
+            android:id="@+id/rbDoH"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:text="@string/doh"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/rbDNS"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dns"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/rbBoth"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/both"
+            android:textSize="20sp" />
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/debugText"
+        android:layout_width="356dp"
+        android:layout_height="131dp"
+        app:layout_constraintBottom_toTopOf="@+id/RacingSeekBarText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rgProtocol" />
+
     <TextView
         android:id="@+id/RacingSeekBarText"
         android:layout_width="127dp"

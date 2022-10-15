@@ -6,8 +6,11 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -17,6 +20,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,6 +31,15 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private SeekBar seekBar;
+    private RadioGroup rgProtocol;
+    Map<Integer, Integer> RbIDtoProtocolID = new HashMap<Integer, Integer>()
+    {
+        {
+            put(R.id.rbDoH, 1);
+            put(R.id.rbDNS, 2);
+            put(R.id.rbBoth, 3);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,12 +47,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        int mRootWidth = toolbar.getWidth();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
+        rgProtocol = findViewById(R.id.rgProtocol);
         seekBar = findViewById(R.id.RacingSeekBar);
         setSeekBar(findViewById(R.id.progress));
     }
@@ -98,16 +112,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private int getProtocol() {
+        int selectedId = rgProtocol.getCheckedRadioButtonId();
+        RadioButton selectedRb = (RadioButton) findViewById(selectedId);
+        if (selectedId==-1) {
+            Toast.makeText(MainActivity.this, "Nothing selected", Toast.LENGTH_SHORT).show();
+            // TODO: maybe throw error
+            return -1;
+        }
+        return RbIDtoProtocolID.get(selectedId);
+    }
     private void startVpn() {
+        int protocol = getProtocol();
+        if (protocol == -1) {
+            return;
+        }
+
         Intent vpnIntent = VpnService.prepare(this);
 
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
+            this.rgProtocol.setEnabled(false);
             this.seekBar.setEnabled(false);
             findViewById(R.id.startVpn).setEnabled(false);
-
         }
     }
 
