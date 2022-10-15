@@ -17,11 +17,7 @@ public class ShardingControllerFactory {
     private ShardingController pureDohShardingController; // TODO: make final
     private ShardingController hybridDnsShardingController; // TODO: make final
 
-    public ShardingControllerFactory() {
-        PingController pingController = new PingController();
-        Thread t = new Thread(pingController);
-        t.start();
-
+    public ShardingControllerFactory(PingController pingController) {
         List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
         List<Requester> pureDnsRequesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
 

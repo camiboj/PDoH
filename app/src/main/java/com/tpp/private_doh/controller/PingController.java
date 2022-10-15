@@ -28,6 +28,12 @@ public class PingController implements Runnable {
         processIp(ip);
         Log.i(TAG, String.format("Processed ip %s", ip));
         return true;*/
+        if (! activeIps.contains(ip)) {
+            Log.i(TAG, String.format("Not active ip: %s - IPs available: %s", ip, activeIps));
+        } else {
+            Log.i(TAG, String.format("Active ip %s", ip));
+        }
+
         return activeIps.contains(ip);
     }
 

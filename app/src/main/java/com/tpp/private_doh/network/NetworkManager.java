@@ -7,6 +7,7 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
+import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.controller.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
@@ -76,6 +77,10 @@ public class NetworkManager implements Runnable {
                                      BlockingQueue<DnsPacket> dnsResponsesQueue,
                                      BlockingQueue<ByteBuffer> networkToDeviceQueue,
                                      ExecutorService dnsWorkers) {
+        PingController pingController = new PingController();
+        Thread t = new Thread(pingController);
+        t.start();
+
         this.vpnInput = vpnInput;
         this.vpnOutput = vpnOutput;
         this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
@@ -83,7 +88,7 @@ public class NetworkManager implements Runnable {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsWorkers = dnsWorkers;
-        this.shardingControllerFactory = new ShardingControllerFactory();
+        this.shardingControllerFactory = new ShardingControllerFactory(pingController);
     }
 
     @Override

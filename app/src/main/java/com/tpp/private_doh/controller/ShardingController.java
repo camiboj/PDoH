@@ -1,5 +1,7 @@
 package com.tpp.private_doh.controller;
 
+import android.util.Log;
+
 import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
@@ -28,6 +30,7 @@ public class ShardingController {
         this.actualIdx = ((actualIdx == (this.requesters.size() - 1)) ? 0 : actualIdx + 1);
 
         while (!allRequestersWork(requesters)) {
+            Log.i(TAG, String.format("Trying to reach %s and %s", requesters.get(0).getIp(), requesters.get(1).getIp()));
             requesters = this.requesters.get(actualIdx);
             this.actualIdx = ((actualIdx == (this.requesters.size() - 1)) ? 0 : actualIdx + 1);
         }
