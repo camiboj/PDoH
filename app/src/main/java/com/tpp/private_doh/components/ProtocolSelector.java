@@ -32,12 +32,10 @@ public class ProtocolSelector extends RadioGroup {
         }
     }
 
-    public ProtocolId getProtocol() {
+    public ProtocolId getProtocol() throws UnselectedProtocol {
         int selectedId = getCheckedRadioButtonId();
         if (selectedId == -1) {
-            // Toast.makeText(ProtocolSelector.this, "Nothing selected", Toast.LENGTH_SHORT).show();
-            // TODO: maybe throw error
-            return null;
+            throw new UnselectedProtocol();
         }
         return RbIDtoProtocolID.get(selectedId);
     }

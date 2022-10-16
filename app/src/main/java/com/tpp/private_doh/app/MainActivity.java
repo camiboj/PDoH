@@ -3,6 +3,7 @@ package com.tpp.private_doh.app;
 import android.content.Intent;
 import android.net.VpnService;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,12 +19,15 @@ import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.ProtocolSelector;
+import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.controller.ProtocolId;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = this.getClass().getSimpleName();
     private static final int VPN_REQUEST_CODE = 0x0F;
     private int racing_amount = 2;
     public static AtomicLong downByte = new AtomicLong(0);
@@ -106,10 +110,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void startVpn() {
-        ProtocolId protocol = protocolSelector.getProtocol();
-        if (protocol == null) {
+        ProtocolId protocol = null;
+        try {
+            protocol = protocolSelector.getProtocol();
+        } catch (UnselectedProtocol unselectedProtocol) {
+            Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
             Toast.makeText(MainActivity.this, "Nothing selected", Toast.LENGTH_SHORT).show();
-            return;
         }
 
         Intent vpnIntent = VpnService.prepare(this);
