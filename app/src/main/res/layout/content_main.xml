@@ -50,6 +50,7 @@
         android:id="@+id/protocolSelector"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:checkedButton="@id/rbDoH"
         app:layout_constraintBottom_toTopOf="@+id/RacingSeekBarText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"

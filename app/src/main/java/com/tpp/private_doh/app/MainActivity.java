@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -110,12 +109,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void startVpn() {
-        ProtocolId protocol = null;
+        ProtocolId protocol = ProtocolId.DOH;
         try {
             protocol = protocolSelector.getProtocol();
         } catch (UnselectedProtocol unselectedProtocol) {
             Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
-            Toast.makeText(MainActivity.this, "Nothing selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "No protocol selected. Set default protocol: DoH", Toast.LENGTH_SHORT).show();
         }
 
         Intent vpnIntent = VpnService.prepare(this);
