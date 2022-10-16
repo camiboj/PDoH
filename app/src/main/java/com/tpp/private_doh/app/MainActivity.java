@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,10 +17,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
+import com.tpp.private_doh.components.ProtocolSelector;
 import com.tpp.private_doh.controller.ProtocolId;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,16 +28,9 @@ public class MainActivity extends AppCompatActivity {
     private int racing_amount = 2;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
+    private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
-    private RadioGroup rgProtocol;
-    Map<Integer, ProtocolId> RbIDtoProtocolID = new HashMap<Integer, ProtocolId>()
-    {
-        {
-            put(R.id.rbDoH, ProtocolId.DOH);
-            put(R.id.rbDNS, ProtocolId.DNS);
-            put(R.id.rbBoth, ProtocolId.HYBRID);
-        }
-    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
-        rgProtocol = findViewById(R.id.rgProtocol);
+        protocolSelector = findViewById(R.id.protocolSelector);
         seekBar = findViewById(R.id.RacingSeekBar);
         setSeekBar(findViewById(R.id.progress));
     }
@@ -114,19 +104,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private ProtocolId getProtocol() {
-        int selectedId = rgProtocol.getCheckedRadioButtonId();
-        RadioButton selectedRb = (RadioButton) findViewById(selectedId);
-        if (selectedId==-1) {
-            Toast.makeText(MainActivity.this, "Nothing selected", Toast.LENGTH_SHORT).show();
-            // TODO: maybe throw error
-            return null;
-        }
-        return RbIDtoProtocolID.get(selectedId);
-    }
+
     private void startVpn() {
-        ProtocolId protocol = getProtocol();
+        ProtocolId protocol = protocolSelector.getProtocol();
         if (protocol == null) {
+            Toast.makeText(MainActivity.this, "Nothing selected", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -136,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress());
-            rgProtocol.setEnabled(false);
+            protocolSelector.setEnabled(false);
             seekBar.setEnabled(false);
             findViewById(R.id.startVpn).setEnabled(false);
         }
