@@ -18,20 +18,20 @@ public class ShardingControllerFactory {
     private final String TAG = this.getClass().getSimpleName();
     private final ShardingController protocolShardingController;
 
-    public ShardingControllerFactory(int racingAmount, int protocolId) {
+    public ShardingControllerFactory(int racingAmount, ProtocolId protocolId) {
         List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
         List<Requester> requesters;
-        Log.i(TAG, String.format("protocolId: %d", protocolId));
+        Log.i(TAG, "protocolId: " + protocolId);
         switch (protocolId) {
-            case 1:
+            case DOH:
                 Log.i(TAG, "DOH");
                 requesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
                 break;
-            case 2:
+            case DNS:
                 Log.i(TAG, "DNS");
                 requesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
                 break;
-            case 3:
+            case HYBRID:
                 Log.i(TAG, "BOTH");
                 requesters = new ArrayList<>();
                 requesters.addAll(Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester()));

@@ -19,6 +19,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
+import com.tpp.private_doh.controller.ProtocolId;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,12 +33,12 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong upByte = new AtomicLong(0);
     private SeekBar seekBar;
     private RadioGroup rgProtocol;
-    Map<Integer, Integer> RbIDtoProtocolID = new HashMap<Integer, Integer>()
+    Map<Integer, ProtocolId> RbIDtoProtocolID = new HashMap<Integer, ProtocolId>()
     {
         {
-            put(R.id.rbDoH, 1);
-            put(R.id.rbDNS, 2);
-            put(R.id.rbBoth, 3);
+            put(R.id.rbDoH, ProtocolId.DOH);
+            put(R.id.rbDNS, ProtocolId.DNS);
+            put(R.id.rbBoth, ProtocolId.HYBRID);
         }
     };
 
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data, int protocol, int racingAmount) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             PDoHVpnService.setProtocolId(protocol);
@@ -113,19 +114,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private int getProtocol() {
+    private ProtocolId getProtocol() {
         int selectedId = rgProtocol.getCheckedRadioButtonId();
         RadioButton selectedRb = (RadioButton) findViewById(selectedId);
         if (selectedId==-1) {
             Toast.makeText(MainActivity.this, "Nothing selected", Toast.LENGTH_SHORT).show();
             // TODO: maybe throw error
-            return -1;
+            return null;
         }
         return RbIDtoProtocolID.get(selectedId);
     }
     private void startVpn() {
-        int protocol = getProtocol();
-        if (protocol == -1) {
+        ProtocolId protocol = getProtocol();
+        if (protocol == null) {
             return;
         }
 

@@ -7,6 +7,7 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
+import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.controller.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.protocol.Packet;
@@ -43,7 +44,7 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
                           int racingAmount,
-                          int protocolId) {
+                          ProtocolId protocolId) {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
@@ -60,7 +61,7 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
                           ExecutorService dnsWorkers,
                           int racingAmount,
-                          int protocolId
+                          ProtocolId protocolId
                           ) {
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, protocolId);
@@ -74,7 +75,7 @@ public class NetworkManager implements Runnable {
                                      BlockingQueue<ByteBuffer> networkToDeviceQueue,
                                      ExecutorService dnsWorkers,
                                      int racingAmount,
-                                     int protocolId) {
+                                     ProtocolId protocolId) {
         this.vpnInput = vpnInput;
         this.vpnOutput = vpnOutput;
         this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
