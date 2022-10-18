@@ -3,13 +3,10 @@ package com.tpp.private_doh.controller;
 import android.util.Log;
 
 import com.tpp.private_doh.app.Ping;
-import com.tpp.private_doh.constants.PublicDnsIps;
-import com.tpp.private_doh.network.NetworkManager;
 import com.tpp.private_doh.util.IpUtils;
 
 import java.net.InetAddress;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,16 +21,16 @@ public class PingController implements Runnable {
     }
 
     public boolean isActive(String ip) {
-        /*Log.i(TAG, String.format("About to process ip %s", ip));
-        processIp(ip);
-        Log.i(TAG, String.format("Processed ip %s", ip));
-        return true;*/
-        if (! activeIps.contains(ip)) {
-            Log.i(TAG, String.format("Not active ip: %s - IPs available: %s", ip, activeIps));
+        if (!activeIps.contains(ip)) {
+            processIp(ip);
         } else {
             Log.i(TAG, String.format("Active ip %s", ip));
         }
-
+        if (!activeIps.contains(ip)) {
+            Log.i(TAG, String.format("Disabled ip %s", ip));
+        } else {
+            Log.i(TAG, String.format("Active ip %s", ip));
+        }
         return activeIps.contains(ip);
     }
 
@@ -50,11 +47,13 @@ public class PingController implements Runnable {
         final Ping ping = new Ping(dest, new Ping.PingListener() {
             @Override
             public void onPing(final long timeMs, final int count) {
+                Log.i(TAG, String.format("About to add: %s", host));
                 activeIps.add(host);
             }
 
             @Override
             public void onPingException(final Exception e, final int count) {
+                Log.i(TAG, String.format("About to delete: %s", host));
                 activeIps.remove(host);
             }
         });

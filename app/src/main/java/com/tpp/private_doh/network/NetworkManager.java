@@ -144,6 +144,10 @@ public class NetworkManager implements Runnable {
             } else {
                 String type = packet.getIp4Header().getProtocol().toString();
                 if (type.equals("ICMP")) {
+                    Log.i(TAG, "Found ICMP packet");
+                    bufferToNetwork.position(0);
+                    networkToDeviceQueue.offer(bufferToNetwork);
+                    // Add packet to networkToDeviceQueue
                     return;
                 }
                 Log.w(TAG, String.format("Unknown packet protocol type %s", type));
