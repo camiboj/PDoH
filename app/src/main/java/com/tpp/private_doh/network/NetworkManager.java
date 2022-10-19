@@ -7,17 +7,11 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
-import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.controller.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.dns.PublicDnsRequester;
-import com.tpp.private_doh.doh.CloudflareDoHRequester;
-import com.tpp.private_doh.doh.DoHRequester;
-import com.tpp.private_doh.doh.GoogleDoHRequester;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
-import com.tpp.private_doh.util.Requester;
 import com.tpp.private_doh.util.ResourceUtils;
 
 import java.io.FileDescriptor;
@@ -26,8 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,12 +41,12 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
-                          BlockingQueue<ByteBuffer> networkToDeviceQueue) {
+                          BlockingQueue<ByteBuffer> networkToDeviceQueue, Integer racingAmount) {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount);
     }
 
     @VisibleForTesting
@@ -64,9 +56,11 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                          ExecutorService dnsWorkers) {
+                          ExecutorService dnsWorkers,
+                          Integer racingAmount
+                          ) {
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount);
     }
 
     private void buildNetworkManager(FileChannel vpnInput,
@@ -75,7 +69,8 @@ public class NetworkManager implements Runnable {
                                      BlockingQueue<Packet> deviceToNetworkTCPQueue,
                                      BlockingQueue<DnsPacket> dnsResponsesQueue,
                                      BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                                     ExecutorService dnsWorkers) {
+                                     ExecutorService dnsWorkers,
+                                     Integer racingAmount) {
         this.vpnInput = vpnInput;
         this.vpnOutput = vpnOutput;
         this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
@@ -83,7 +78,7 @@ public class NetworkManager implements Runnable {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsWorkers = dnsWorkers;
-        this.shardingControllerFactory = new ShardingControllerFactory();
+        this.shardingControllerFactory = new ShardingControllerFactory(racingAmount);
     }
 
     @Override
