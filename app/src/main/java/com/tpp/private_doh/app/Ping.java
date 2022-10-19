@@ -39,7 +39,7 @@ public class Ping implements Runnable {
     protected static final short POLLIN = (short) (OsConstants.POLLIN == 0 ? 1 : OsConstants.POLLIN);
     private static final String TAG = Ping.class.getSimpleName();
     private static final int IPTOS_LOWDELAY = 0x10;
-    private static final int ECHO_PORT = 7;
+    private static final int ECHO_PORT = 53;
     private static final int MSG_DONTWAIT = 0x40;
     private final InetAddress mDest;
     private final PingListener mListener;
@@ -62,41 +62,6 @@ public class Ping implements Runnable {
         mListener = listener;
         final byte type = dest instanceof Inet6Address ? EchoPacketBuilder.TYPE_ICMP_V6 : EchoPacketBuilder.TYPE_ICMP_V4;
         setEchoPacketBuilder(new EchoPacketBuilder(type, "abcdefghijklmnopqrstuvwabcdefghi".getBytes()));
-    }
-
-    public int getTimeoutMs() {
-        return mTimeoutMs;
-    }
-
-    public void setTimeoutMs(final int timeoutMs) {
-        if (timeoutMs < 0) {
-            throw new IllegalArgumentException("Timeout must not be negative: " + timeoutMs);
-        }
-        mTimeoutMs = timeoutMs;
-    }
-
-    public int getDelayMs() {
-        return mDelayMs;
-    }
-
-    public void setDelayMs(final int delayMs) {
-        mDelayMs = delayMs;
-    }
-
-    public int getCount() {
-        return mCount;
-    }
-
-    public void setCount(final int count) {
-        mCount = count;
-    }
-
-    public Network getNetwork() {
-        return mNetwork;
-    }
-
-    public void setNetwork(final Network network) {
-        mNetwork = network;
     }
 
     public void setEchoPacketBuilder(final EchoPacketBuilder echoPacketBuilder) {

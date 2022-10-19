@@ -84,16 +84,4 @@ public class EchoPacketBuilder {
         return byteBuffer;
     }
 
-    public void setSequenceNumber(final short sequenceNumber) {
-        mSequenceNumber = sequenceNumber;
-    }
-
-    public void setIdentifier(final short identifier) {
-        mAutoIdentifier = false;
-        mIdentifier = identifier;
-    }
-
-    public void setAutoIdentifier(final boolean value) {
-        mAutoIdentifier = value;
-    }
 }
