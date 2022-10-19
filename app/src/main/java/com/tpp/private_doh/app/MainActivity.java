@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,15 +22,16 @@ import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.ProtocolSelector;
 import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.controller.ProtocolId;
+import com.tpp.private_doh.controller.ShardingControllerFactory;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int MIN_RACING_AMOUNT = 2;
     private final String TAG = this.getClass().getSimpleName();
     private static final int VPN_REQUEST_CODE = 0x0F;
-    private int racing_amount = 2;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private ProtocolSelector protocolSelector;
@@ -47,18 +49,35 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
 
-        protocolSelector = findViewById(R.id.protocolSelector);
+
         seekBar = findViewById(R.id.RacingSeekBar);
+        protocolSelector = findViewById(R.id.protocolSelector);
+
+        protocolSelector.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                setSeekBarMax();
+            }
+        });
         setSeekBar(findViewById(R.id.progress));
     }
 
-    private void setSeekBar(TextView t) {
-        seekBar.setProgress(racing_amount);
-        // TODO: when we get the dns/doh servers list
-        // seekBar.setMin();
-        // seekBar.setMax();
+    private void setSeekBarMax() {
+        int current = seekBar.getProgress();
+        try {
+            seekBar.setMax(ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol()));
+        } catch (UnselectedProtocol unselectedProtocol) {
+            Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
+        }
+        seekBar.setProgress(current);
+    }
 
-        t.setText(String.valueOf(racing_amount));
+    private void setSeekBar(TextView t) {
+        seekBar.setProgress(MIN_RACING_AMOUNT);
+        seekBar.setMin(MIN_RACING_AMOUNT);
+        setSeekBarMax();
+
+        t.setText(String.valueOf(MIN_RACING_AMOUNT));
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -101,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            PDoHVpnService.setProtocolId(protocol);
-            PDoHVpnService.setRacingAmount(racingAmount);
+            ShardingControllerFactory.setProtocolId(protocol);
+            ShardingControllerFactory.setRacingAmount(racingAmount);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
