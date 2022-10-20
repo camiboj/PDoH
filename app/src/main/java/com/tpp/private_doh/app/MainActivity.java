@@ -16,6 +16,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
+import com.tpp.private_doh.controller.PingController;
+import com.tpp.private_doh.dns.PublicDnsRequester;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -29,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        PingController pingController = new PingController();
+        Thread t = new Thread(pingController);
+        t.start();
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);

@@ -22,10 +22,12 @@ import java.util.concurrent.CompletableFuture;
 public class PublicDnsRequester implements Requester {
     protected final static String TAG = PublicDnsRequester.class.getSimpleName();
     private Resolver resolver;
+    private String ip;
 
-    public PublicDnsRequester(String resolver) {
+    public PublicDnsRequester(String ip) {
         try {
-            this.resolver = new SimpleResolver(resolver);
+            this.ip = ip;
+            this.resolver = new SimpleResolver(ip);
         } catch (UnknownHostException e) {
             Log.i(TAG, "Unknown resolver to build DnsRequester");
         }
@@ -50,5 +52,21 @@ public class PublicDnsRequester implements Requester {
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }
+    }
+
+    public CompletableFuture<Response> executeRequestWithoutSentinel(String name, int type) {
+        try {
+            String queryName = name + "."; // This is a requirement of dns-java library
+            Record queryRecord = Record.newRecord(Name.fromString(queryName), type, DClass.IN);
+            Message queryMessage = Message.newQuery(queryRecord);
+
+            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
+        } catch (Exception e) {
+            throw new RuntimeException("There was an error executing the request in DnsRequester", e);
+        }
+    }
+
+    public String getIp() {
+        return this.ip;
     }
 }
