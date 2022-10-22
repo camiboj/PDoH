@@ -5,6 +5,9 @@ import android.util.Log;
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
+import com.tpp.private_doh.doh.CloudflareDoHRequester;
+import com.tpp.private_doh.doh.GoogleDoHRequester;
+import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.util.CombinationUtils;
 
 import java.util.ArrayList;
@@ -26,6 +29,12 @@ public class PingController implements Runnable {
 
     public void setNSharders(int nSharders) {
         this.nSharders = nSharders;
+    }
+
+    public void addDohRequesters() {
+        this.activeIps.add(GoogleDoHRequester.class.getName());
+        this.activeIps.add(CloudflareDoHRequester.class.getName());
+        this.activeIps.add(Quad9DoHRequester.class.getName());
     }
 
     public List<String> getActiveIps() {

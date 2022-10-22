@@ -12,7 +12,7 @@ public class ShardingControllerFactory {
 
     private final DnsShardingController pureDnsShardingController;
     private final ShardingController pureDohShardingController;
-    //private ShardingController hybridDnsShardingController;
+    private ShardingController hybridDnsShardingController;
 
     public ShardingControllerFactory(PingController pingController, Integer racingAmount) {
         List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
@@ -23,7 +23,7 @@ public class ShardingControllerFactory {
 
         this.pureDnsShardingController = new DnsShardingController(pingController);
         this.pureDohShardingController = new DohShardingController(pureDohRequesters, racingAmount);
-        //this.hybridDnsShardingController = new ShardingController(hybridDnsRequesters, racingAmount);
+        this.hybridDnsShardingController = new HybridDnsShardingController(pingController);
     }
 
     public ShardingController getPureDnsShardingController() {
@@ -34,7 +34,7 @@ public class ShardingControllerFactory {
         return this.pureDohShardingController;
     }
 
-    /*public ShardingController getHybridDnsShardingController() {
+    public ShardingController getHybridDnsShardingController() {
         return this.hybridDnsShardingController;
-    }*/
+    }
 }
