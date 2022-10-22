@@ -2,6 +2,8 @@ package com.tpp.private_doh.controller;
 
 import android.util.Log;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
@@ -39,8 +41,14 @@ public class PingController implements Runnable {
     }
 
     public List<String> getActiveIps() {
+        if (shardingGroups.isEmpty()) {
+            return new ArrayList<>();
+        }
+        if (this.actualIdx == this.shardingGroups.size()) {
+            this.actualIdx = 0;
+        }
         int actualIdx = this.actualIdx;
-        this.actualIdx = ((actualIdx == (this.shardingGroups.size() - 1)) ? 0 : actualIdx + 1);
+        this.actualIdx += 1;
         return this.shardingGroups.get(actualIdx);
     }
 
@@ -56,7 +64,8 @@ public class PingController implements Runnable {
         }
     }
 
-    private void processIp(PublicDnsRequester publicDnsRequester) {
+    @VisibleForTesting
+    public void processIp(PublicDnsRequester publicDnsRequester) {
         try {
             Response ping = publicDnsRequester.executeRequestWithoutSentinel("google.com", 1).get(30, TimeUnit.SECONDS);
 

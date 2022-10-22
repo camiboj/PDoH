@@ -8,10 +8,10 @@ import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
 import com.tpp.private_doh.controller.PingController;
-import com.tpp.private_doh.controller.ShardingControllerFactory;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.protocol.Packet;
-import com.tpp.private_doh.protocol.PacketFactory;
+import com.tpp.private_doh.factory.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
 import com.tpp.private_doh.util.ResourceUtils;
 
@@ -85,7 +85,7 @@ public class NetworkManager implements Runnable {
         this.shardingControllerFactory = new ShardingControllerFactory(pingController, racingAmount);
 
         // This should only be executed if we select hybrid Dns
-        pingController.addDohRequesters();
+        //pingController.addDohRequesters();
     }
 
     @Override
@@ -129,9 +129,9 @@ public class NetworkManager implements Runnable {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
+                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
                     //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
-                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getHybridDnsShardingController())));
+                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getHybridDnsShardingController())));
                 }
 
             } else if (packet.isUDP()) {

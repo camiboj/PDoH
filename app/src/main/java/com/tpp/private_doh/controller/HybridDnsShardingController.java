@@ -2,6 +2,7 @@ package com.tpp.private_doh.controller;
 
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.PublicDnsRequester;
+import com.tpp.private_doh.factory.DohRequesterFactory;
 import com.tpp.private_doh.util.Requester;
 
 import java.util.List;

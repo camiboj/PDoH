@@ -1,4 +1,4 @@
-package com.tpp.private_doh.controller;
+package com.tpp.private_doh.factory;
 
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.DoHRequester;

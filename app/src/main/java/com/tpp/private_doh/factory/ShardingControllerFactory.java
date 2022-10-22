@@ -1,5 +1,10 @@
-package com.tpp.private_doh.controller;
+package com.tpp.private_doh.factory;
 
+import com.tpp.private_doh.controller.DnsShardingController;
+import com.tpp.private_doh.controller.DohShardingController;
+import com.tpp.private_doh.controller.HybridDnsShardingController;
+import com.tpp.private_doh.controller.PingController;
+import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
 import com.tpp.private_doh.doh.Quad9DoHRequester;

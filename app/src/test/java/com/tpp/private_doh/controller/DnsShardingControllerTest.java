@@ -1,39 +1,28 @@
 package com.tpp.private_doh.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import com.tpp.private_doh.util.Requester;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class DnsShardingControllerTest {
 
     @Test
-    public void testShardingControllerWorksOk() {
-        Requester requester = mock(Requester.class);
-        Requester otherRequester = mock(Requester.class);
+    public void testDnsShardingControllerWorksOk() {
+        List<String> activeIps = Arrays.asList("1.1.1.1", "2.2.2.2");
 
-        String name = "name";
-        int type = 1;
+        PingController pingController = mock(PingController.class);
+        when(pingController.getActiveIps()).thenReturn(activeIps);
 
-        List<Requester> requesters = new ArrayList<>();
-        requesters.add(requester);
-        requesters.add(otherRequester);
-
-        DnsShardingController shardingController = new DnsShardingController(requesters, 1);
-        shardingController.executeRequest(name, type);
-
-        verify(requester).executeRequest(name, type);
-        verify(otherRequester, times(0)).executeRequest(name, type);
-
-        shardingController.executeRequest(name, type);
-        verifyNoMoreInteractions(requester);
-        verify(otherRequester).executeRequest(name, type);
+        DnsShardingController shardingController = new DnsShardingController(pingController);
+        List<Requester> requesters = shardingController.getRequesters();
+        assertEquals(2, requesters.size());
     }
 }
