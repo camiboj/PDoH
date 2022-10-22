@@ -32,6 +32,7 @@ public class PingController implements Runnable {
             randomActiveIps.add(activeIp);
         }
 
+        Log.i(TAG, String.format("Random active ips: %s", randomActiveIps));
         return randomActiveIps;
     }
 

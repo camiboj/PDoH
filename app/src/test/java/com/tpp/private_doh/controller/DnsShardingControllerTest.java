@@ -12,7 +12,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShardingControllerTest {
+public class DnsShardingControllerTest {
 
     @Test
     public void testShardingControllerWorksOk() {
@@ -26,7 +26,7 @@ public class ShardingControllerTest {
         requesters.add(requester);
         requesters.add(otherRequester);
 
-        ShardingController shardingController = new ShardingController(requesters, 1);
+        DnsShardingController shardingController = new DnsShardingController(requesters, 1);
         shardingController.executeRequest(name, type);
 
         verify(requester).executeRequest(name, type);
