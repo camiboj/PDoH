@@ -21,7 +21,7 @@ public class ShardingControllerFactory {
         hybridDnsRequesters.addAll(pureDnsRequesters);
         hybridDnsRequesters.addAll(pureDohRequesters);*/
 
-        this.pureDnsShardingController = new DnsShardingController(pingController, racingAmount);
+        this.pureDnsShardingController = new DnsShardingController(pingController);
         this.pureDohShardingController = new DohShardingController(pureDohRequesters, racingAmount);
         //this.hybridDnsShardingController = new ShardingController(hybridDnsRequesters, racingAmount);
     }

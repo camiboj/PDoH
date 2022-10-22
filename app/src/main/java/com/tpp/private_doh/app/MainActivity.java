@@ -100,7 +100,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            PDoHVpnService.setRacingAmount(this.seekBar.getProgress());
+            int nSharders = this.seekBar.getProgress();
+            PDoHVpnService.setRacingAmount(nSharders);
+            pingController.setNSharders(nSharders);
             PDoHVpnService.setPingController(pingController);
             startService(new Intent(this, PDoHVpnService.class));
         }
