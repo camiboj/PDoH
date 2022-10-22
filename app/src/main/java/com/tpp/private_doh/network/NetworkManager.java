@@ -7,6 +7,7 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
+import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.protocol.Packet;
@@ -41,12 +42,13 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
-                          BlockingQueue<ByteBuffer> networkToDeviceQueue, Integer racingAmount) {
+                          BlockingQueue<ByteBuffer> networkToDeviceQueue, Integer racingAmount,
+                          PingController pingController) {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, pingController);
     }
 
     @VisibleForTesting
@@ -57,10 +59,11 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
                           ExecutorService dnsWorkers,
-                          Integer racingAmount
+                          Integer racingAmount,
+                          PingController pingController
                           ) {
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, pingController);
     }
 
     private void buildNetworkManager(FileChannel vpnInput,
@@ -70,7 +73,8 @@ public class NetworkManager implements Runnable {
                                      BlockingQueue<DnsPacket> dnsResponsesQueue,
                                      BlockingQueue<ByteBuffer> networkToDeviceQueue,
                                      ExecutorService dnsWorkers,
-                                     Integer racingAmount) {
+                                     Integer racingAmount,
+                                     PingController pingController) {
         this.vpnInput = vpnInput;
         this.vpnOutput = vpnOutput;
         this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
@@ -78,7 +82,7 @@ public class NetworkManager implements Runnable {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsWorkers = dnsWorkers;
-        this.shardingControllerFactory = new ShardingControllerFactory(racingAmount);
+        this.shardingControllerFactory = new ShardingControllerFactory(pingController, racingAmount);
     }
 
     @Override

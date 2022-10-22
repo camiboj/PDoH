@@ -28,13 +28,13 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private SeekBar seekBar;
+    private PingController pingController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        PingController pingController = new PingController();
+        this.pingController = new PingController();
         Thread t = new Thread(pingController);
         t.start();
-
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -101,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             PDoHVpnService.setRacingAmount(this.seekBar.getProgress());
+            PDoHVpnService.setPingController(pingController);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }

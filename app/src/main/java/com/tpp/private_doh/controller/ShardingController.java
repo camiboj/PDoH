@@ -1,5 +1,6 @@
 package com.tpp.private_doh.controller;
 
+import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
@@ -10,20 +11,19 @@ import java.util.stream.Collectors;
 
 public class ShardingController {
     private static final String TAG = ShardingController.class.getSimpleName();
-
-    private List<List<Requester>> requesters;
-    private int actualIdx;
+    private final PingController pingController;
     private int nSharders;
 
-    public ShardingController(List<Requester> requesters, int n) {
-        this.requesters = CombinationUtils.combination(requesters, n);
-        this.actualIdx = 0;
+    public ShardingController(PingController pingController, int n) {
+        this.pingController = pingController;
         this.nSharders = n;
     }
 
     public List<CompletableFuture<Response>> executeRequest(String name, int type) {
-        List<Requester> requesters = this.requesters.get(actualIdx);
-        this.actualIdx = ((actualIdx == (this.requesters.size() - 1)) ? 0 : actualIdx + 1);
+        List<Requester> requesters = pingController.getRandomActiveIps(nSharders)
+                .stream()
+                .map(PublicDnsRequester::new)
+                .collect(Collectors.toList());
 
         return requesters.stream()
                 .map(requester -> requester.executeRequest(name, type))

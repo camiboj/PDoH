@@ -6,9 +6,11 @@ import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -16,20 +18,26 @@ import java.util.concurrent.TimeUnit;
 public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();
 
-    private Set<String> activeIps;
+    private List<String> activeIps;
 
     public PingController() {
-        this.activeIps = new HashSet<>();
+        this.activeIps = new ArrayList<>();
     }
 
-    public boolean isActive(String ip) {
-        return activeIps.contains(ip);
+    public List<String> getRandomActiveIps(int nIps) {
+        List<String> randomActiveIps = new ArrayList<>();
+
+        for (int i = 0; i < nIps; i++) {
+            String activeIp = activeIps.get(new Random().nextInt(activeIps.size()));
+            randomActiveIps.add(activeIp);
+        }
+
+        return randomActiveIps;
     }
 
     @Override
     public void run() {
         while (true) {
-            List<String> strings = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
             PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).forEach(this::processIp);
             try {
                 Thread.sleep(1000);

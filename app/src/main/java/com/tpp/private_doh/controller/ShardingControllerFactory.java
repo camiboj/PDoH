@@ -14,33 +14,33 @@ import java.util.stream.Collectors;
 public class ShardingControllerFactory {
 
     private final ShardingController pureDnsShardingController;
-    private final ShardingController pureDohShardingController;
-    private final ShardingController hybridDnsShardingController;
+    //private ShardingController pureDohShardingController;
+    //private ShardingController hybridDnsShardingController;
 
-    public ShardingControllerFactory(Integer racingAmount) {
-        List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
+    public ShardingControllerFactory(PingController pingController, Integer racingAmount) {
+        /*List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
         List<Requester> pureDnsRequesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
 
         List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
 
         List<Requester> hybridDnsRequesters = new ArrayList<>();
         hybridDnsRequesters.addAll(pureDnsRequesters);
-        hybridDnsRequesters.addAll(pureDohRequesters);
+        hybridDnsRequesters.addAll(pureDohRequesters);*/
 
-        this.pureDnsShardingController = new ShardingController(pureDnsRequesters, racingAmount);
-        this.pureDohShardingController = new ShardingController(pureDohRequesters, racingAmount);
-        this.hybridDnsShardingController = new ShardingController(hybridDnsRequesters, racingAmount);
+        this.pureDnsShardingController = new ShardingController(pingController, racingAmount);
+        //this.pureDohShardingController = new ShardingController(pureDohRequesters, racingAmount);
+        //this.hybridDnsShardingController = new ShardingController(hybridDnsRequesters, racingAmount);
     }
 
     public ShardingController getPureDnsShardingController() {
         return this.pureDnsShardingController;
     }
 
-    public ShardingController getPureDohShardingController() {
+    /*public ShardingController getPureDohShardingController() {
         return this.pureDohShardingController;
     }
 
     public ShardingController getHybridDnsShardingController() {
         return this.hybridDnsShardingController;
-    }
+    }*/
 }
