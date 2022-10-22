@@ -12,7 +12,6 @@ public class HybridDnsShardingController extends ShardingController {
     private final PingController pingController;
 
     public HybridDnsShardingController(PingController pingController) {
-        pingController.addDohRequesters();
         this.pingController = pingController;
     }
 

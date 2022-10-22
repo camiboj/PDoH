@@ -27,7 +27,7 @@ public class DnsResponseProcessor implements Runnable {
 
     public void run() {
         List<Response> responses = this.dnsToController.process(dnsRequestPacket);
-        Log.i(TAG, "Obtaining responses");
+        Log.i(TAG, String.format("Obtaining responses: %s", responses));
         List<DnsPacket> dnsResponsePackets = responses.stream().map(
                 this::createResponsePacket
         ).collect(Collectors.toList());

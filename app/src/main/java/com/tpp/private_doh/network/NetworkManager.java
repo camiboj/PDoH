@@ -83,6 +83,9 @@ public class NetworkManager implements Runnable {
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsWorkers = dnsWorkers;
         this.shardingControllerFactory = new ShardingControllerFactory(pingController, racingAmount);
+
+        // This should only be executed if we select hybrid Dns
+        pingController.addDohRequesters();
     }
 
     @Override

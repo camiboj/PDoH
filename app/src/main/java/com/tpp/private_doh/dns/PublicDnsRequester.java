@@ -29,7 +29,7 @@ public class PublicDnsRequester implements Requester {
             this.ip = ip;
             this.resolver = new SimpleResolver(ip);
         } catch (UnknownHostException e) {
-            Log.i(TAG, "Unknown resolver to build DnsRequester");
+            Log.i(TAG, String.format("Unknown resolver to build DnsRequester: %s", ip));
         }
     }
 

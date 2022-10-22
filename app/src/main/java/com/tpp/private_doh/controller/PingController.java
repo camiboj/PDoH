@@ -32,6 +32,7 @@ public class PingController implements Runnable {
     }
 
     public void addDohRequesters() {
+        Log.i(TAG, "Someone called addDohRequesters");
         this.activeIps.add(GoogleDoHRequester.class.getName());
         this.activeIps.add(CloudflareDoHRequester.class.getName());
         this.activeIps.add(Quad9DoHRequester.class.getName());
@@ -82,6 +83,8 @@ public class PingController implements Runnable {
         List<List<String>> allGroups = CombinationUtils.combination(this.activeIps, this.nSharders);
         allGroups.forEach(group -> {
             if (!shardingGroups.contains(group)) {
+                Log.i(TAG, String.format("Active ips: %s", this.activeIps));
+                Log.i(TAG, String.format("Group: %s", group));
                 shardingGroups.add(group);
             }
         });
