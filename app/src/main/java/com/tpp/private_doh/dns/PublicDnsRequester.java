@@ -22,8 +22,11 @@ import java.util.concurrent.CompletableFuture;
 public class PublicDnsRequester implements Requester {
     protected final static String TAG = PublicDnsRequester.class.getSimpleName();
     private Resolver resolver;
+    private int count;
+    private String resolverName;
 
     public PublicDnsRequester(String resolver) {
+        this.resolverName = resolver;
         try {
             this.resolver = new SimpleResolver(resolver);
         } catch (UnknownHostException e) {
@@ -36,6 +39,12 @@ public class PublicDnsRequester implements Requester {
         this.resolver = resolver;
     }
 
+    private Response processResponse(Message message) {
+        Log.i(TAG, "count: " + count + " - resolverName: " + resolverName);
+        count = count + 1;
+        return PublicDnsToDnsMapper.map(message);
+    }
+
     @Override
     public CompletableFuture<Response> executeRequest(String name, int type) {
         try {
@@ -46,7 +55,7 @@ public class PublicDnsRequester implements Requester {
             // Sentinel to recognize this packet while capturing
             queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
 
-            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
+            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(this::processResponse);
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }
