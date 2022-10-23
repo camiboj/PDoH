@@ -9,8 +9,6 @@ public class RacingAmountInput extends androidx.appcompat.widget.AppCompatSeekBa
 
     public RacingAmountInput(Context context) {
         super(context);
-
-
     }
 
     public int getAmount() {

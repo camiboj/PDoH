@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,8 +14,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.ProtocolSelector;
@@ -30,10 +27,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MainActivity extends AppCompatActivity {
 
     private static final int MIN_RACING_AMOUNT = 2;
-    private final String TAG = this.getClass().getSimpleName();
     private static final int VPN_REQUEST_CODE = 0x0F;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
+    private final String TAG = this.getClass().getSimpleName();
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
 
@@ -45,20 +42,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
-
-
         seekBar = findViewById(R.id.RacingSeekBar);
         protocolSelector = findViewById(R.id.protocolSelector);
 
-        protocolSelector.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                setSeekBarMax();
-            }
-        });
+        protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
         setSeekBar(findViewById(R.id.progress));
     }
 
