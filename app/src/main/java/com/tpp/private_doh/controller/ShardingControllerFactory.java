@@ -44,7 +44,7 @@ public class ShardingControllerFactory {
         this.protocolShardingController = new ShardingController(requesters, racingAmount);
     }
 
-    public ShardingController getProtocolController() {
+    public ShardingController getProtocolShardingController() {
         return this.protocolShardingController;
     }
 }
