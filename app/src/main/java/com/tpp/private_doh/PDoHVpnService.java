@@ -8,6 +8,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.tpp.private_doh.config.Config;
+import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.handler.DnsDownWorker;
 import com.tpp.private_doh.handler.TcpPacketHandler;
@@ -27,7 +28,8 @@ public class PDoHVpnService extends VpnService {
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
     private static final Integer CAPACITY = 1000;
-    private static Integer RACING_AMOUNT;
+    private static ProtocolId PROTOCOL_ID;
+    private static int RACING_AMOUNT;
 
     private ParcelFileDescriptor vpnInterface = null;
 
@@ -44,6 +46,11 @@ public class PDoHVpnService extends VpnService {
         RACING_AMOUNT = n;
     }
 
+    public static void setProtocolId(ProtocolId n) {
+        // must be call only once and before creating any instance of PDoHVpnService
+        PROTOCOL_ID = n;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -58,7 +65,7 @@ public class PDoHVpnService extends VpnService {
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
         executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
         executorService.submit(new NetworkManager(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, RACING_AMOUNT));
+                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, RACING_AMOUNT, PROTOCOL_ID));
     }
 
     private void setupVPN() {
