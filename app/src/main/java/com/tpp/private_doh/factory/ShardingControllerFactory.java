@@ -1,9 +1,12 @@
 package com.tpp.private_doh.factory;
 
+import android.util.Log;
+
 import com.tpp.private_doh.controller.DnsShardingController;
 import com.tpp.private_doh.controller.DohShardingController;
 import com.tpp.private_doh.controller.HybridDnsShardingController;
 import com.tpp.private_doh.controller.PingController;
+import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
@@ -14,30 +17,34 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ShardingControllerFactory {
+    private final String TAG = this.getClass().getSimpleName();
 
-    private final DnsShardingController pureDnsShardingController;
-    private final ShardingController pureDohShardingController;
-    private final PingController pingController;
-    private ShardingController hybridDnsShardingController;
+    private final ShardingController shardingController;
 
-    public ShardingControllerFactory(PingController pingController, Integer racingAmount) {
-        List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
-
-        this.pingController = pingController;
-        this.pureDnsShardingController = new DnsShardingController(pingController);
-        this.pureDohShardingController = new DohShardingController(pureDohRequesters, racingAmount);
-        this.hybridDnsShardingController = new HybridDnsShardingController(pingController);
+    public ShardingControllerFactory(PingController pingController, Integer racingAmount,
+                                     ProtocolId protocolId) {
+        Log.i(TAG, "protocolId: " + protocolId);
+        switch (protocolId) {
+            case DOH:
+                Log.i(TAG, "DOH");
+                List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
+                this.shardingController = new DohShardingController(pureDohRequesters, racingAmount);
+                break;
+            case DNS:
+                Log.i(TAG, "DNS");
+                this.shardingController = new DnsShardingController(pingController);
+                break;
+            case HYBRID:
+                Log.i(TAG, "BOTH");
+                this.shardingController = new HybridDnsShardingController(pingController);
+                pingController.addDohRequesters();
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + protocolId);
+        }
     }
 
-    public ShardingController getPureDnsShardingController() {
-        return this.pureDnsShardingController;
-    }
-
-    public ShardingController getPureDohShardingController() {
-        return this.pureDohShardingController;
-    }
-
-    public ShardingController getHybridDnsShardingController() {
-        return this.hybridDnsShardingController;
+    public ShardingController getProtocolShardingController() {
+        return this.shardingController;
     }
 }

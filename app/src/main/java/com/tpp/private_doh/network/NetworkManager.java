@@ -8,10 +8,11 @@ import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
 import com.tpp.private_doh.controller.PingController;
-import com.tpp.private_doh.factory.ShardingControllerFactory;
+import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.dns.DnsPacket;
-import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.factory.PacketFactory;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
+import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.util.ByteBufferPool;
 import com.tpp.private_doh.util.ResourceUtils;
 
@@ -42,13 +43,15 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
-                          BlockingQueue<ByteBuffer> networkToDeviceQueue, Integer racingAmount,
-                          PingController pingController) {
+                          BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                          Integer racingAmount,
+                          PingController pingController,
+                          ProtocolId protocolId) {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
         FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, pingController);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, pingController, protocolId);
     }
 
     @VisibleForTesting
@@ -60,10 +63,10 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
                           ExecutorService dnsWorkers,
                           Integer racingAmount,
-                          PingController pingController
-                          ) {
+                          PingController pingController,
+                          ProtocolId protocolId) {
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
-                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, pingController);
+                dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, racingAmount, pingController, protocolId);
     }
 
     private void buildNetworkManager(FileChannel vpnInput,
@@ -74,7 +77,8 @@ public class NetworkManager implements Runnable {
                                      BlockingQueue<ByteBuffer> networkToDeviceQueue,
                                      ExecutorService dnsWorkers,
                                      Integer racingAmount,
-                                     PingController pingController) {
+                                     PingController pingController,
+                                     ProtocolId protocolId) {
         this.vpnInput = vpnInput;
         this.vpnOutput = vpnOutput;
         this.deviceToNetworkUDPQueue = deviceToNetworkUDPQueue;
@@ -82,10 +86,7 @@ public class NetworkManager implements Runnable {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.dnsResponsesQueue = dnsResponsesQueue;
         this.dnsWorkers = dnsWorkers;
-        this.shardingControllerFactory = new ShardingControllerFactory(pingController, racingAmount);
-
-        // This should only be executed if we select hybrid Dns
-        //pingController.addDohRequesters();
+        this.shardingControllerFactory = new ShardingControllerFactory(pingController, racingAmount, protocolId);
     }
 
     @Override
@@ -122,18 +123,14 @@ public class NetworkManager implements Runnable {
             Packet packet = PacketFactory.createPacket(bufferToNetwork);
             if (packet.isDNS()) {
                 DnsPacket dnsPacket = (DnsPacket) packet;
-                //Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
 
                 // TODO: create a more robust way to find out if we should bypass this packet
                 if (dnsPacket.getLastQuestion().getName().equals("fiubaMap")) {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
-                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
-                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getHybridDnsShardingController())));
+                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getProtocolShardingController())));
                 }
-
             } else if (packet.isUDP()) {
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {
