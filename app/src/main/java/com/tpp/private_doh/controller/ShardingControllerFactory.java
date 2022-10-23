@@ -73,7 +73,7 @@ public class ShardingControllerFactory {
         }
     }
 
-    public ShardingController getProtocolController() {
+    public ShardingController getProtocolShardingController() {
         return this.protocolShardingController;
     }
 }
