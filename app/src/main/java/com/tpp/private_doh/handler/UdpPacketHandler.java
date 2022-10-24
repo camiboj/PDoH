@@ -4,7 +4,6 @@ import android.net.VpnService;
 import android.util.Log;
 
 import com.tpp.private_doh.protocol.IP4Header;
-import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.UdpHeader;
 
@@ -16,10 +15,8 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.Selector;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class in charge of UDP packet handling
@@ -91,6 +88,8 @@ public class UdpPacketHandler implements Runnable {
                     udpSockets.remove(ipAndPort);
                 }
             }
+        } catch (InterruptedException e) {
+            Log.i(TAG, "The execution was interrupted");
         } catch (Exception e) {
             Log.e(TAG, "Error in BioUdpHandler", e);
             System.exit(0);

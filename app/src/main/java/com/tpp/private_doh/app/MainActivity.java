@@ -13,13 +13,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.ProtocolSelector;
 import com.tpp.private_doh.components.UnselectedProtocol;
+import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
 
@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private PingController pingController;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         this.pingController = new PingController();
@@ -49,13 +48,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
-
         protocolSelector = findViewById(R.id.protocolSelector);
         seekBar = findViewById(R.id.RacingSeekBar);
         setSeekBar(findViewById(R.id.progress));
+        findViewById(R.id.stopVpn).setEnabled(false);
     }
 
     private void setSeekBar(TextView t) {
@@ -115,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private void startVpn() {
         ProtocolId protocol = ProtocolId.DOH;
         try {
@@ -134,11 +129,25 @@ public class MainActivity extends AppCompatActivity {
             protocolSelector.setEnabled(false);
             seekBar.setEnabled(false);
             findViewById(R.id.startVpn).setEnabled(false);
+            findViewById(R.id.stopVpn).setEnabled(true);
         }
     }
 
-    public void clickSwitch(View view) {
+    private void stopVpn() {
+        Intent intent = new Intent(Config.STOP_SIGNAL);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        protocolSelector.setEnabled(true);
+        seekBar.setEnabled(true);
+        findViewById(R.id.startVpn).setEnabled(true);
+        findViewById(R.id.stopVpn).setEnabled(false);
+    }
+
+    public void startVpn(View view) {
         this.startVpn();
+    }
+
+    public void stopVpn(View view) {
+        this.stopVpn();
     }
 
     @Override
