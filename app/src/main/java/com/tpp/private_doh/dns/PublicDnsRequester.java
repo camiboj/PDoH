@@ -46,10 +46,7 @@ public class PublicDnsRequester implements Requester {
 
     private Response processResponse(Message message) {
         Response r = PublicDnsToDnsMapper.map(message);
-        r.setOnWinning(() -> {
-            this.count += 1;
-            Log.i(TAG,  "name: " + r.getQuestions().get(0).getName() + " - count: " + count + " - resolverName: " + resolverName);
-        });
+        r.setOnWinning(() -> this.count += 1);
         return PublicDnsToDnsMapper.map(message);
     }
 

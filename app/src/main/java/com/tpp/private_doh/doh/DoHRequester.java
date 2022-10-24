@@ -43,10 +43,7 @@ public abstract class DoHRequester implements Requester {
     }
 
     private Response processResponse(Response r) {
-        r.setOnWinning(() -> {
-            this.count += 1;
-            Log.i(TAG,  "name: " + r.getQuestions().get(0).getName() + " - count: " + count + " - resolverName: " + TAG);
-        });
+        r.setOnWinning(() -> this.count += 1);
         return r;
     }
 
