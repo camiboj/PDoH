@@ -6,4 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Requester {
     CompletableFuture<Response> executeRequest(String name, int type);
+
+    int getCount();
 }

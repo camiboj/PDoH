@@ -39,9 +39,17 @@ public class PublicDnsRequester implements Requester {
         this.resolver = resolver;
     }
 
+    @Override
+    public int getCount() {
+        return count;
+    }
+
     private Response processResponse(Message message) {
-        Log.i(TAG, "count: " + count + " - resolverName: " + resolverName);
-        count = count + 1;
+        Response r = PublicDnsToDnsMapper.map(message);
+        r.setOnWinning(() -> {
+            this.count += 1;
+            Log.i(TAG,  "name: " + r.getQuestions().get(0).getName() + " - count: " + count + " - resolverName: " + resolverName);
+        });
         return PublicDnsToDnsMapper.map(message);
     }
 
