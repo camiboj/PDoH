@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong upByte = new AtomicLong(0);
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
-
+    private TextView countOutput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         setSeekBar(findViewById(R.id.progress));
+
+        countOutput = findViewById(R.id.resolversCountsText);
     }
 
     private void setSeekBarMax() {
@@ -150,6 +152,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void clickSwitch(View view) {
         this.startVpn();
+    }
+
+    public void fetchCount(View view) {
+        // ShardingControllerFactory.getRequestersMetrics();
     }
 
     @Override
