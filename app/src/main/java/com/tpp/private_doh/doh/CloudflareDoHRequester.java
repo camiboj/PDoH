@@ -16,4 +16,10 @@ public class CloudflareDoHRequester extends DoHRequester {
     public CloudflareDoHRequester() {
         super(ENDPOINT, HEADERS);
     }
+
+
+    @Override
+    public String getName() {
+        return "Cloudflare DoH";
+    }
 }

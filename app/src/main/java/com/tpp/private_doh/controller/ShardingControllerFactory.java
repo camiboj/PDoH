@@ -11,6 +11,7 @@ import com.tpp.private_doh.util.Requester;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ShardingControllerFactory {
@@ -75,5 +76,9 @@ public class ShardingControllerFactory {
 
     public ShardingController getProtocolController() {
         return this.protocolShardingController;
+    }
+
+    public Map<String, Integer> getRequestersMetrics() {
+        return protocolShardingController.getRequestersMetrics();
     }
 }

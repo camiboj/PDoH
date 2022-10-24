@@ -44,6 +44,11 @@ public class PublicDnsRequester implements Requester {
         return count;
     }
 
+    @Override
+    public String getName() {
+        return resolverName;
+    }
+
     private Response processResponse(Message message) {
         Response r = PublicDnsToDnsMapper.map(message);
         r.setOnWinning(() -> this.count += 1);

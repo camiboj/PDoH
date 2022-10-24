@@ -113,16 +113,12 @@ public class NetworkManager implements Runnable {
             Packet packet = PacketFactory.createPacket(bufferToNetwork);
             if (packet.isDNS()) {
                 DnsPacket dnsPacket = (DnsPacket) packet;
-                //Log.i(TAG, String.format("[dns] This is a dns message: %s", dnsPacket));
 
                 // TODO: create a more robust way to find out if we should bypass this packet
                 if (dnsPacket.getLastQuestion().getName().equals("fiubaMap")) {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDohShardingController())));
-                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getPureDnsShardingController())));
-                    //dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getHybridDnsShardingController())));
                     dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getProtocolController())));
                 }
 
