@@ -124,6 +124,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void enableVpnComponents(boolean enabled) {
+        protocolSelector.setEnabled(enabled);
+        seekBar.setEnabled(enabled);
+        findViewById(R.id.startVpn).setEnabled(enabled);
+        findViewById(R.id.stopVpn).setEnabled(!enabled);
+    }
+
     private void startVpn() {
         ProtocolId protocol = ProtocolId.DOH;
         try {
@@ -139,20 +146,14 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress() + RACING_AMOUNT_OFFSET);
-            protocolSelector.setEnabled(false);
-            seekBar.setEnabled(false);
-            findViewById(R.id.startVpn).setEnabled(false);
-            findViewById(R.id.stopVpn).setEnabled(true);
+            enableVpnComponents(false);
         }
     }
 
     private void stopVpn() {
         Intent intent = new Intent(Config.STOP_SIGNAL);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        protocolSelector.setEnabled(true);
-        seekBar.setEnabled(true);
-        findViewById(R.id.startVpn).setEnabled(true);
-        findViewById(R.id.stopVpn).setEnabled(false);
+        enableVpnComponents(true);
     }
 
     public void startVpn(View view) {
