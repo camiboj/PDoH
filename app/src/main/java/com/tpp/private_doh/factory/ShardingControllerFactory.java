@@ -19,13 +19,13 @@ import java.util.List;
 
 public class ShardingControllerFactory {
     private static final List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
+    private static PingController PING_CONTROLLER;
     private static ProtocolId PROTOCOL_ID;
     private static int RACING_AMOUNT;
     private final String TAG = this.getClass().getSimpleName();
     private final ShardingController shardingController;
-    ;
 
-    public ShardingControllerFactory(PingController pingController) {
+    public ShardingControllerFactory() {
         Log.i(TAG, "protocolId: " + PROTOCOL_ID);
         switch (PROTOCOL_ID) {
             case DOH:
@@ -34,12 +34,12 @@ public class ShardingControllerFactory {
                 break;
             case DNS:
                 Log.i(TAG, "DNS");
-                this.shardingController = new DnsShardingController(pingController);
+                this.shardingController = new DnsShardingController(PING_CONTROLLER);
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
-                this.shardingController = new HybridDnsShardingController(pingController);
-                pingController.addDohRequesters();
+                this.shardingController = new HybridDnsShardingController(PING_CONTROLLER);
+                PING_CONTROLLER.addDohRequesters();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + PROTOCOL_ID);
@@ -54,6 +54,11 @@ public class ShardingControllerFactory {
     public static void setRacingAmount(int n) {
         // must be call only once and before creating any instance of PDoHVpnService
         RACING_AMOUNT = n;
+    }
+
+    public static void setPingController(PingController pingController) {
+        // must be call only once and before creating any instance of PDoHVpnService
+        PING_CONTROLLER = pingController;
     }
 
     public static int getAvailableRequesterAmount(ProtocolId protocolId) {

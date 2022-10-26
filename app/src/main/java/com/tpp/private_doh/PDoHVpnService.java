@@ -10,7 +10,6 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.tpp.private_doh.config.Config;
-import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.handler.DnsDownWorker;
 import com.tpp.private_doh.handler.TcpPacketHandler;
@@ -29,7 +28,6 @@ public class PDoHVpnService extends VpnService {
     private static final String TAG = PDoHVpnService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
-    private static PingController PING_CONTROLLER;
     private ParcelFileDescriptor vpnInterface = null;
 
     private PendingIntent pendingIntent;
@@ -39,11 +37,6 @@ public class PDoHVpnService extends VpnService {
     private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService executorService;
-
-    static public void setPingController(PingController pingController) {
-        // must be call only once and before creating any instance of PDoHVpnService
-        PING_CONTROLLER = pingController;
-    }
 
     @Override
     public void onCreate() {
@@ -60,7 +53,7 @@ public class PDoHVpnService extends VpnService {
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
         executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
         executorService.submit(new NetworkManager(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, PING_CONTROLLER));
+                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue));
     }
 
     private void setupVPN() {

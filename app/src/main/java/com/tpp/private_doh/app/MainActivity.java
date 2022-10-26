@@ -115,9 +115,9 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             pingController.setNSharders(racingAmount);
-            PDoHVpnService.setPingController(pingController);
             ShardingControllerFactory.setProtocolId(protocol);
             ShardingControllerFactory.setRacingAmount(racingAmount);
+            ShardingControllerFactory.setPingController(pingController);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
