@@ -14,8 +14,7 @@ import java.util.Map;
 public class ProtocolSelector extends RadioGroup {
 
     private final String TAG = this.getClass().getSimpleName();
-    Map<Integer, ProtocolId> RbIDtoProtocolID = new HashMap<Integer, ProtocolId>()
-    {
+    Map<Integer, ProtocolId> RbIDtoProtocolID = new HashMap<Integer, ProtocolId>() {
         {
             put(R.id.rbDoH, ProtocolId.DOH);
             put(R.id.rbDNS, ProtocolId.DNS);
@@ -31,7 +30,7 @@ public class ProtocolSelector extends RadioGroup {
     public void setEnabled(boolean enabled) {
         Log.i(TAG, String.format("this.getChildCount(): %s", this.getChildCount()));
         super.setEnabled(enabled);
-        for(int i = 0; i < getChildCount(); i++){
+        for (int i = 0; i < getChildCount(); i++) {
             getChildAt(i).setEnabled(enabled);
         }
     }

@@ -12,10 +12,10 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShardingControllerTest {
+public class DohShardingControllerTest {
 
     @Test
-    public void testShardingControllerWorksOk() {
+    public void testDohShardingControllerWorksOk() {
         Requester requester = mock(Requester.class);
         Requester otherRequester = mock(Requester.class);
 
@@ -26,7 +26,7 @@ public class ShardingControllerTest {
         requesters.add(requester);
         requesters.add(otherRequester);
 
-        ShardingController shardingController = new ShardingController(requesters, 1);
+        ShardingController shardingController = new DohShardingController(requesters, 1);
         shardingController.executeRequest(name, type);
 
         verify(requester).executeRequest(name, type);

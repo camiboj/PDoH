@@ -49,12 +49,6 @@ public class PublicDnsRequester implements Requester {
         return resolverName;
     }
 
-    private Response processResponse(Message message) {
-        Response r = PublicDnsToDnsMapper.map(message);
-        r.setOnWinning(() -> this.count += 1);
-        return PublicDnsToDnsMapper.map(message);
-    }
-
     @Override
     public CompletableFuture<Response> executeRequest(String name, int type) {
         try {
@@ -69,5 +63,27 @@ public class PublicDnsRequester implements Requester {
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }
+    }
+
+    public CompletableFuture<Response> executeRequestWithoutSentinel(String name, int type) {
+        try {
+            String queryName = name + "."; // This is a requirement of dns-java library
+            Record queryRecord = Record.newRecord(Name.fromString(queryName), type, DClass.IN);
+            Message queryMessage = Message.newQuery(queryRecord);
+
+            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
+        } catch (Exception e) {
+            throw new RuntimeException("There was an error executing the request in DnsRequester", e);
+        }
+    }
+
+    private Response processResponse(Message message) {
+        Response r = PublicDnsToDnsMapper.map(message);
+        r.setOnWinning(() -> this.count += 1);
+        return PublicDnsToDnsMapper.map(message);
+    }
+
+    public String getIp() {
+        return this.resolverName;
     }
 }

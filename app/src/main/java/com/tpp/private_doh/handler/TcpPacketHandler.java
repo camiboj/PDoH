@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 public class TcpPacketHandler implements Runnable {
+    private static final String TAG = TcpPacketHandler.class.getSimpleName();
+
     private static int HEADER_SIZE = Packet.IP4_HEADER_SIZE + Packet.TCP_HEADER_SIZE;
     private final BlockingQueue<Packet> queue;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
@@ -386,6 +388,8 @@ public class TcpPacketHandler implements Runnable {
                 handleSockets();
                 Thread.sleep(1);
             }
+        } catch (InterruptedException e) {
+            Log.i(TAG, "The execution was interrupted");
         } catch (Exception e) {
             Log.e(e.getMessage(), "", e);
         }
