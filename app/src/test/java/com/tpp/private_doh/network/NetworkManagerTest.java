@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import android.util.Helper;
 
-import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.protocol.Packet;
 
@@ -51,7 +50,7 @@ public class NetworkManagerTest extends Helper {
         BlockingQueue<ByteBuffer> networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
         this.networkManager = new NetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue,
-                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, 2, ProtocolId.DOH);
+                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
     }
 
     @Test
