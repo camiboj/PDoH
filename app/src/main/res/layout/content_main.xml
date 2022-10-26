@@ -110,8 +110,6 @@
         android:id="@+id/RacingSeekBar"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:max="10"
-        android:min="1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintLeft_toLeftOf="parent"

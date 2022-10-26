@@ -22,17 +22,19 @@ import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
-
+    private static final int RACING_AMOUNT_MIN = 0;
+    private static final int RACING_AMOUNT_OFFSET = 2;
     private static final int VPN_REQUEST_CODE = 0x0F;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
-    private int racing_amount = 2;
+
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
     private PingController pingController;
@@ -50,22 +52,33 @@ public class MainActivity extends AppCompatActivity {
 
         protocolSelector = findViewById(R.id.protocolSelector);
         seekBar = findViewById(R.id.RacingSeekBar);
+        protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
         setSeekBar(findViewById(R.id.progress));
         findViewById(R.id.stopVpn).setEnabled(false);
     }
 
-    private void setSeekBar(TextView t) {
-        seekBar.setProgress(racing_amount);
-        // TODO: when we get the dns/doh servers list
-        // seekBar.setMin();
-        // seekBar.setMax();
+    private void setSeekBarMax() {
+        int current = seekBar.getProgress();
+        try {
+            int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
+            seekBar.setMax(availableRequesterAmount - RACING_AMOUNT_OFFSET);
+        } catch (UnselectedProtocol unselectedProtocol) {
+            Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
+        }
+        seekBar.setProgress(current);
+    }
 
-        t.setText(String.valueOf(racing_amount));
+    private void setSeekBar(TextView t) {
+        seekBar.setProgress(RACING_AMOUNT_MIN);
+        seekBar.setMin(RACING_AMOUNT_MIN);
+        setSeekBarMax();
+
+        t.setText(String.valueOf(RACING_AMOUNT_OFFSET));
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                t.setText(String.valueOf(i));
+                t.setText(String.valueOf(i + RACING_AMOUNT_OFFSET));
             }
 
             @Override
@@ -103,10 +116,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            PDoHVpnService.setRacingAmount(racingAmount);
             pingController.setNSharders(racingAmount);
-            PDoHVpnService.setPingController(pingController);
-            PDoHVpnService.setProtocolId(protocol);
+            ShardingControllerFactory.setProtocolId(protocol);
+            ShardingControllerFactory.setRacingAmount(racingAmount);
+            ShardingControllerFactory.setPingController(pingController);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
@@ -125,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress());
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress() + RACING_AMOUNT_OFFSET);
             protocolSelector.setEnabled(false);
             seekBar.setEnabled(false);
             findViewById(R.id.startVpn).setEnabled(false);

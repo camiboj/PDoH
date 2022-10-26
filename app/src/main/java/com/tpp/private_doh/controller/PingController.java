@@ -15,6 +15,8 @@ import com.tpp.private_doh.util.CombinationUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();

@@ -21,8 +21,8 @@ public class HybridDnsShardingControllerTest {
 
     @Test
     public void testHybridDnsShardingControllerWorksOkWithIps() {
-        List<String> activeIps = Arrays.asList(PublicDnsIps.IPS.get(new Random().nextInt(PublicDnsIps.IPS.size())),
-                PublicDnsIps.IPS.get(new Random().nextInt(PublicDnsIps.IPS.size())));
+        List<String> activeIps = Arrays.asList(PublicDnsIps.GENERIC_IPS.get(new Random().nextInt(PublicDnsIps.GENERIC_IPS.size())),
+                PublicDnsIps.GENERIC_IPS.get(new Random().nextInt(PublicDnsIps.GENERIC_IPS.size())));
 
         PingController pingController = mock(PingController.class);
         when(pingController.getActiveIps()).thenReturn(activeIps);
