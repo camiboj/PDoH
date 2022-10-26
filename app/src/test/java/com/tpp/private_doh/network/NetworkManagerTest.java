@@ -13,6 +13,7 @@ import android.util.Helper;
 import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.dns.DnsPacket;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
 import com.tpp.private_doh.protocol.Packet;
 
 import org.junit.Before;
@@ -54,9 +55,9 @@ public class NetworkManagerTest extends Helper {
         BlockingQueue<DnsPacket> dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
         BlockingQueue<ByteBuffer> networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
+        ShardingControllerFactory.setProtocolId(ProtocolId.DOH);
         this.networkManager = new NetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue,
-        deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, 2,
-                pingController, ProtocolId.DOH);
+                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, pingController);
     }
 
     @Test

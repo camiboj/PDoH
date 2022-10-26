@@ -2,8 +2,6 @@ package com.tpp.private_doh;
 
 
 import static com.tpp.private_doh.config.Config.QUEUE_CAPACITY;
-import static com.tpp.private_doh.config.Config.VPN_ADDRESS;
-import static com.tpp.private_doh.config.Config.VPN_ROUTE;
 
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -13,7 +11,6 @@ import android.util.Log;
 
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.PingController;
-import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.handler.DnsDownWorker;
 import com.tpp.private_doh.handler.TcpPacketHandler;
@@ -30,10 +27,9 @@ import java.util.concurrent.Executors;
 
 public class PDoHVpnService extends VpnService {
     private static final String TAG = PDoHVpnService.class.getSimpleName();
+    private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
+    private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
     private static PingController PING_CONTROLLER;
-    private static Integer RACING_AMOUNT;
-    private static ProtocolId PROTOCOL_ID;
-
     private ParcelFileDescriptor vpnInterface = null;
 
     private PendingIntent pendingIntent;
@@ -44,19 +40,9 @@ public class PDoHVpnService extends VpnService {
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService executorService;
 
-    static public void setRacingAmount(int n) {
-        // must be call only once and before creating any instance of PDoHVpnService
-        RACING_AMOUNT = n;
-    }
-
     static public void setPingController(PingController pingController) {
         // must be call only once and before creating any instance of PDoHVpnService
         PING_CONTROLLER = pingController;
-    }
-
-    public static void setProtocolId(ProtocolId n) {
-        // must be call only once and before creating any instance of PDoHVpnService
-        PROTOCOL_ID = n;
     }
 
     @Override
@@ -74,7 +60,7 @@ public class PDoHVpnService extends VpnService {
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
         executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
         executorService.submit(new NetworkManager(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, RACING_AMOUNT, PING_CONTROLLER, PROTOCOL_ID));
+                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, PING_CONTROLLER));
     }
 
     private void setupVPN() {
