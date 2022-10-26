@@ -18,25 +18,31 @@ import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.ProtocolSelector;
 import com.tpp.private_doh.components.UnselectedProtocol;
+import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
-import com.tpp.private_doh.controller.ShardingControllerFactory;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final int RACING_AMOUNT_MIN = 0;
     private static final int RACING_AMOUNT_OFFSET = 2;
     private static final int VPN_REQUEST_CODE = 0x0F;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
+
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
+    private PingController pingController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        this.pingController = new PingController();
+        Thread t = new Thread(pingController);
+        t.start();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -70,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                t.setText(String.valueOf(i+RACING_AMOUNT_OFFSET));
+                t.setText(String.valueOf(i + RACING_AMOUNT_OFFSET));
             }
 
             @Override
@@ -108,12 +114,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
+            pingController.setNSharders(racingAmount);
             ShardingControllerFactory.setProtocolId(protocol);
             ShardingControllerFactory.setRacingAmount(racingAmount);
+            ShardingControllerFactory.setPingController(pingController);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
-
 
     private void startVpn() {
         ProtocolId protocol = ProtocolId.DOH;

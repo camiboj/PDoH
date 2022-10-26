@@ -1,6 +1,11 @@
-package com.tpp.private_doh.protocol;
+package com.tpp.private_doh.factory;
 
 import com.tpp.private_doh.dns.DnsPacket;
+import com.tpp.private_doh.protocol.IP4Header;
+import com.tpp.private_doh.protocol.Packet;
+import com.tpp.private_doh.protocol.TcpHeader;
+import com.tpp.private_doh.protocol.TransportProtocol;
+import com.tpp.private_doh.protocol.UdpHeader;
 
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;

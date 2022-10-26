@@ -1,4 +1,4 @@
-package com.tpp.private_doh.protocol;
+package com.tpp.private_doh.factory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 import android.util.Helper;
 
 import com.tpp.private_doh.dns.DnsPacket;
+import com.tpp.private_doh.factory.PacketFactory;
+import com.tpp.private_doh.protocol.Packet;
 
 import org.junit.Test;
 

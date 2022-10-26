@@ -1,6 +1,8 @@
 package com.tpp.private_doh;
 
 
+import static com.tpp.private_doh.config.Config.QUEUE_CAPACITY;
+
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.VpnService;
@@ -26,8 +28,6 @@ public class PDoHVpnService extends VpnService {
     private static final String TAG = PDoHVpnService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
-    private static final Integer CAPACITY = 1000;
-
     private ParcelFileDescriptor vpnInterface = null;
 
     private PendingIntent pendingIntent;
@@ -41,11 +41,12 @@ public class PDoHVpnService extends VpnService {
     @Override
     public void onCreate() {
         super.onCreate();
+
         setupVPN();
-        deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(CAPACITY);
-        deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(CAPACITY);
-        dnsResponsesQueue = new ArrayBlockingQueue<>(CAPACITY);
-        networkToDeviceQueue = new ArrayBlockingQueue<>(CAPACITY);
+        deviceToNetworkUDPQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+        deviceToNetworkTCPQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+        dnsResponsesQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
+        networkToDeviceQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
 
         executorService = Executors.newFixedThreadPool(4);
         executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
@@ -61,10 +62,7 @@ public class PDoHVpnService extends VpnService {
                 Builder builder = new Builder();
                 builder.addAddress(VPN_ADDRESS, 32);
                 builder.addRoute(VPN_ROUTE, 0);
-                builder.addDnsServer(Config.dns);
-                if (Config.testLocal) {
-                    builder.addAllowedApplication("com.tpp.private_doh");
-                }
+                builder.addDnsServer(Config.DNS_PROVIDER);
                 vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
             }
         } catch (Exception e) {
