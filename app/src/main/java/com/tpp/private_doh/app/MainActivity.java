@@ -26,14 +26,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int MIN_RACING_AMOUNT = 2;
+    private static final int RACING_AMOUNT_MIN = 0;
+    private static final int RACING_AMOUNT_OFFSET = 2;
     private static final int VPN_REQUEST_CODE = 0x0F;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private void setSeekBarMax() {
         int current = seekBar.getProgress();
         try {
-            seekBar.setMax(ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol()));
+            int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
+            seekBar.setMax(availableRequesterAmount - RACING_AMOUNT_OFFSET);
         } catch (UnselectedProtocol unselectedProtocol) {
             Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
         }
@@ -60,16 +61,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setSeekBar(TextView t) {
-        seekBar.setProgress(MIN_RACING_AMOUNT);
-        seekBar.setMin(MIN_RACING_AMOUNT);
+        seekBar.setProgress(RACING_AMOUNT_MIN);
+        seekBar.setMin(RACING_AMOUNT_MIN);
         setSeekBarMax();
 
-        t.setText(String.valueOf(MIN_RACING_AMOUNT));
+        t.setText(String.valueOf(RACING_AMOUNT_OFFSET));
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                t.setText(String.valueOf(i));
+                t.setText(String.valueOf(i+RACING_AMOUNT_OFFSET));
             }
 
             @Override
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress());
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress() + RACING_AMOUNT_OFFSET);
             protocolSelector.setEnabled(false);
             seekBar.setEnabled(false);
             findViewById(R.id.startVpn).setEnabled(false);
