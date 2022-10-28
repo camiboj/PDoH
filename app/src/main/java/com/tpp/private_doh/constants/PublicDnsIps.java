@@ -1,6 +1,5 @@
 package com.tpp.private_doh.constants;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,9 +17,7 @@ public final class PublicDnsIps {
             "149.112.112.112"
     );
 
-    public static final List<String> GENERIC_IPS = new ArrayList<>();
-
-            /*Arrays.asList(
+    public static final List<String> GENERIC_IPS = Arrays.asList(
             "190.151.144.21",
             "200.69.193.2",
             "200.45.48.233",
@@ -159,7 +156,7 @@ public final class PublicDnsIps {
             "64.76.47.165",
             "216.244.192.3",
             "200.45.184.43",
-            "179.60.235.209");*/
+            "179.60.235.209");
 
     public static final List<String> IPS = Stream.concat(PublicDnsIps.RELIABLE_IPS.stream(), PublicDnsIps.GENERIC_IPS.stream())
             .collect(Collectors.toList());

@@ -25,7 +25,7 @@ public abstract class ShardingController {
     }
 
     public Map<String, Integer> getRequestersMetrics() {
-        Map<String, Integer> metrics = new HashMap<String, Integer>();
+        Map<String, Integer> metrics = new HashMap<>();
 
         for (Requester r : requesters) {
             metrics.put(r.getName(), r.getCount());

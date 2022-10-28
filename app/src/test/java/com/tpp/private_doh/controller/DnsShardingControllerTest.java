@@ -2,7 +2,6 @@ package com.tpp.private_doh.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tpp.private_doh.dns.PublicDnsRequester;
@@ -10,7 +9,6 @@ import com.tpp.private_doh.util.Requester;
 
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
