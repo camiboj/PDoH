@@ -9,7 +9,7 @@ public class DnsShardingController extends ShardingController {
     private final PingController pingController;
 
     public DnsShardingController(PingController pingController) {
-        super(pingController.getRequesters());
+        super(pingController.getDnsRequesters());
         this.pingController = pingController;
     }
 

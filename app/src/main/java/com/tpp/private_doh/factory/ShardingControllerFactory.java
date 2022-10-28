@@ -5,7 +5,6 @@ import android.util.Log;
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.controller.DnsShardingController;
 import com.tpp.private_doh.controller.DohShardingController;
-import com.tpp.private_doh.controller.HybridDnsShardingController;
 import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.controller.ShardingController;
@@ -39,7 +38,7 @@ public class ShardingControllerFactory {
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
-                this.shardingController = new HybridDnsShardingController(PING_CONTROLLER);
+                this.shardingController = new DnsShardingController(PING_CONTROLLER);
                 PING_CONTROLLER.addDohRequesters();
                 break;
             default:

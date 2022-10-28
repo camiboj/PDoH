@@ -14,13 +14,16 @@ import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();
-    private final List<Requester> requesters;
+    private final List<Requester> dnsRequesters;
+    private List<Requester> dohRequesters;
     private int actualIdx;
     private List<String> activeIps;
     private List<List<String>> shardingGroups;
@@ -28,13 +31,14 @@ public class PingController implements Runnable {
 
     public PingController() {
         this.activeIps = new ArrayList<>();
-        this.requesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
+        this.dnsRequesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
+        this.dohRequesters = new ArrayList<>();
         this.actualIdx = 0;
     }
 
-    public List<Requester> getRequesters() {
-        return this.requesters;
+    public List<Requester> getDnsRequesters() {
+        return this.dnsRequesters;
     }
 
     public void setNSharders(int nSharders) {
@@ -43,9 +47,15 @@ public class PingController implements Runnable {
 
     public void addDohRequesters() {
         Log.i(TAG, "Someone called addDohRequesters");
-        this.activeIps.add(GoogleDoHRequester.class.getName());
-        this.activeIps.add(CloudflareDoHRequester.class.getName());
-        this.activeIps.add(Quad9DoHRequester.class.getName());
+
+        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester();
+        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester();
+        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester();
+
+        this.dohRequesters = Arrays.asList(googleDoHRequester, cloudflareDoHRequester, quad9DoHRequester);
+        this.activeIps.add(googleDoHRequester.getName());
+        this.activeIps.add(cloudflareDoHRequester.getName());
+        this.activeIps.add(quad9DoHRequester.getName());
     }
 
     public List<Requester> getActiveRequesters() {
@@ -58,13 +68,17 @@ public class PingController implements Runnable {
         int actualIdx = this.actualIdx;
         this.actualIdx += 1;
         List<String> ips = this.shardingGroups.get(actualIdx);
-        return this.requesters.stream().filter(requester -> ips.contains(requester.getName())).collect(Collectors.toList());
+
+        Stream<Requester> dnsRequesters = this.dnsRequesters.stream().filter(requester -> ips.contains(requester.getName()));
+        Stream<Requester> dohRequesters = this.dohRequesters.stream().filter(requester -> ips.contains(requester.getName()));
+
+        return Stream.concat(dnsRequesters, dohRequesters).collect(Collectors.toList());
     }
 
     @Override
     public void run() {
         while (true) {
-            this.requesters.forEach(this::processIp);
+            this.dnsRequesters.forEach(this::processIp);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

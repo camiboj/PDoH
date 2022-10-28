@@ -19,6 +19,6 @@ public class CloudflareDoHRequester extends DoHRequester {
 
     @Override
     public String getName() {
-        return CloudflareDoHRequester.class.getName();
+        return "Cloudflare Doh";
     }
 }
