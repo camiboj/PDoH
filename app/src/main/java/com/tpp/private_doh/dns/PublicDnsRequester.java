@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.mapper.PublicDnsToDnsMapper;
 import com.tpp.private_doh.util.Requester;
 
@@ -57,19 +58,21 @@ public class PublicDnsRequester implements Requester {
             Message queryMessage = Message.newQuery(queryRecord);
 
             // Sentinel to recognize this packet while capturing
-            queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
-
+            queryMessage.addRecord(Record.newRecord(Name.fromString(Config.SENTINEL + "."), Type.A, DClass.IN), Section.QUESTION);
             return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(this::processResponse);
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }
     }
 
-    public CompletableFuture<Response> executeRequestWithoutSentinel(String name, int type) {
+    public CompletableFuture<Response> executePingRequest(String name, int type) {
         try {
             String queryName = name + "."; // This is a requirement of dns-java library
             Record queryRecord = Record.newRecord(Name.fromString(queryName), type, DClass.IN);
             Message queryMessage = Message.newQuery(queryRecord);
+
+            // Sentinel to recognize this packet while capturing
+            // queryMessage.addRecord(Record.newRecord(Name.fromString(Config.PING_QUESTION), Type.A, DClass.IN), Section.QUESTION);
 
             return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
         } catch (Exception e) {

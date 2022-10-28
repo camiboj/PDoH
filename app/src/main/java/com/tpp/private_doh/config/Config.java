@@ -6,6 +6,10 @@ public class Config {
     public static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
     public static final Integer QUEUE_CAPACITY = 1000;
     public static final String STOP_SIGNAL = "stop_kill";
+    public static final String SENTINEL = "fiubaMap";
+    public static final String PING_QUESTION = "google.com";
+    public static final Integer PING_TIMEOUT = 30;
+    public static final Integer SLEEP_PING = 1000;
 }
 
 

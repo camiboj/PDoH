@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
@@ -80,7 +81,7 @@ public class PingController implements Runnable {
         while (true) {
             this.dnsRequesters.forEach(this::processIp);
             try {
-                Thread.sleep(1000);
+                Thread.sleep(Config.SLEEP_PING);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -91,8 +92,8 @@ public class PingController implements Runnable {
     public void processIp(Requester requester) {
         PublicDnsRequester publicDnsRequester = (PublicDnsRequester) requester;
         try {
-            Response ping = publicDnsRequester.executeRequestWithoutSentinel("google.com", 1).get(30, TimeUnit.SECONDS);
-
+            Response ping = publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1)
+                    .get(Config.PING_TIMEOUT, TimeUnit.SECONDS);
             if (!ping.getAnswers().isEmpty()) {
                 Log.i(TAG, String.format("Active ip: %s", publicDnsRequester.getIp()));
                 this.activeIps.add(publicDnsRequester.getIp());
