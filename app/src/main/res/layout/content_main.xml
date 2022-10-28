@@ -11,7 +11,7 @@
 
 
     <RelativeLayout
-        android:layout_width="332dp"
+        android:layout_width="333dp"
         android:layout_height="416dp"
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -19,6 +19,7 @@
         app:layout_constraintTop_toTopOf="parent" >
 
         <RelativeLayout
+            android:id="@+id/protocolSelectorLayout"
             android:layout_width="match_parent"
             android:layout_height="196dp"
             android:layout_alignParentStart="true"
@@ -46,16 +47,17 @@
 
             <com.tpp.private_doh.components.ProtocolSelector
                 android:id="@+id/protocolSelector"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginStart="129dp"
-                android:layout_marginEnd="129dp"
-                android:layout_marginBottom="1dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="67dp"
                 android:checkedButton="@id/rbDoH"
                 android:gravity="center_vertical|center_horizontal"
+                android:orientation="horizontal"
                 android:text="@string/racing_amount"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
@@ -63,7 +65,7 @@
 
                 <RadioButton
                     android:id="@+id/rbDoH"
-                    android:layout_width="wrap_content"
+                    android:layout_width="111dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="@string/doh"
@@ -71,14 +73,14 @@
 
                 <RadioButton
                     android:id="@+id/rbDNS"
-                    android:layout_width="wrap_content"
+                    android:layout_width="111dp"
                     android:layout_height="wrap_content"
                     android:text="@string/dns"
                     android:textSize="20sp" />
 
                 <RadioButton
                     android:id="@+id/rbBoth"
-                    android:layout_width="wrap_content"
+                    android:layout_width="111dp"
                     android:layout_height="wrap_content"
                     android:text="@string/both"
                     android:textSize="20sp" />
@@ -159,19 +161,19 @@
 
         </RelativeLayout>
 
-    <com.tpp.private_doh.components.StartVPNButton
-        android:id="@+id/startVpn"
-        android:layout_width="132dp"
-        android:layout_height="82dp"
-        android:textSize="18sp"
-        android:gravity="center_vertical|center_horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.113" />
-        
+        <com.tpp.private_doh.components.StartVPNButton
+            android:id="@+id/startVpn"
+            android:layout_width="132dp"
+            android:layout_height="82dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="100dp"
+            android:layout_marginEnd="100dp"
+            android:layout_marginBottom="27dp"
+            android:gravity="center_vertical|center_horizontal"
+            android:textSize="18sp" />
+
 
     </RelativeLayout>
 

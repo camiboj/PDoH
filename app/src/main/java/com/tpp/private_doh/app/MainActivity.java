@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -159,10 +160,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Config.STOP_SIGNAL);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
-    }
-
-    public void startVpn(View view) {
-        this.startVpn();
     }
 
     public void fetchCount(View view) {
