@@ -70,10 +70,6 @@ public class PublicDnsRequester implements Requester {
             String queryName = name + "."; // This is a requirement of dns-java library
             Record queryRecord = Record.newRecord(Name.fromString(queryName), type, DClass.IN);
             Message queryMessage = Message.newQuery(queryRecord);
-
-            // Sentinel to recognize this packet while capturing
-            // queryMessage.addRecord(Record.newRecord(Name.fromString(Config.PING_QUESTION), Type.A, DClass.IN), Section.QUESTION);
-
             return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
