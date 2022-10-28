@@ -26,7 +26,9 @@ import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
     private static final int RACING_AMOUNT_MIN = 0;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBar;
     private TextView countOutput;
     private PingController pingController;
+    private ShardingControllerFactory shardingControllerFactory;
 
     @Override
 
@@ -52,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        countOutput = findViewById(R.id.resolversCountsText);
 
         protocolSelector = findViewById(R.id.protocolSelector);
         seekBar = findViewById(R.id.RacingSeekBar);
@@ -120,9 +125,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             pingController.setNSharders(racingAmount);
-            ShardingControllerFactory.setProtocolId(protocol);
-            ShardingControllerFactory.setRacingAmount(racingAmount);
-            ShardingControllerFactory.setPingController(pingController);
+            shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmount, pingController);
+            PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
@@ -160,10 +164,19 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Config.STOP_SIGNAL);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
+        shardingControllerFactory = null;
     }
 
     public void fetchCount(View view) {
-        // ShardingControllerFactory.getRequestersMetrics();
+        String message = "No running VPN";
+        if (shardingControllerFactory != null) {
+            Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
+            // TODO: agregar padding lindo para que los contadores esten alineados
+            message = map.keySet().stream()
+                    .map(key -> key + ": " + map.get(key))
+                    .collect(Collectors.joining("\n"));
+        }
+        countOutput.setText(message);
     }
     
     @Override
