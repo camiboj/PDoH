@@ -92,14 +92,8 @@ public class PingController implements Runnable {
     public void processIp(Requester requester) {
         PublicDnsRequester publicDnsRequester = (PublicDnsRequester) requester;
         try {
-            Response ping = publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1)
-                    .get(Config.PING_TIMEOUT, TimeUnit.SECONDS);
-            if (!ping.getAnswers().isEmpty()) {
-                Log.i(TAG, String.format("Active ip: %s", publicDnsRequester.getIp()));
-                this.activeIps.add(publicDnsRequester.getIp());
-            } else {
-                this.activeIps.remove(publicDnsRequester.getIp());
-            }
+            publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1).get(Config.PING_TIMEOUT, TimeUnit.SECONDS);
+            this.activeIps.add(publicDnsRequester.getIp());
         } catch (Exception e) {
             Log.i(TAG, String.format("Not active ip: %s", publicDnsRequester.getIp()));
             this.activeIps.remove(publicDnsRequester.getIp());
