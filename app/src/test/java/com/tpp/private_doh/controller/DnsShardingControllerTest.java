@@ -19,7 +19,7 @@ public class DnsShardingControllerTest {
         List<String> activeIps = Arrays.asList("1.1.1.1", "2.2.2.2");
 
         PingController pingController = mock(PingController.class);
-        when(pingController.getActiveIps()).thenReturn(activeIps);
+        when(pingController.getActiveRequesters()).thenReturn(activeIps);
 
         DnsShardingController shardingController = new DnsShardingController(pingController);
         List<Requester> requesters = shardingController.getRequesters();

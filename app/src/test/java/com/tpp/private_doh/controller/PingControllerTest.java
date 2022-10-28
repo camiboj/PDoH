@@ -43,7 +43,7 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
+        List<String> activeIps = pingController.getActiveRequesters();
         assertEquals(1, activeIps.size());
         assertEquals(ip, activeIps.get(0));
     }
@@ -59,7 +59,7 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
+        List<String> activeIps = pingController.getActiveRequesters();
         assertTrue(activeIps.isEmpty());
     }
 
@@ -76,7 +76,7 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
+        List<String> activeIps = pingController.getActiveRequesters();
         assertTrue(activeIps.isEmpty());
     }
 
@@ -99,13 +99,13 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
+        List<String> activeIps = pingController.getActiveRequesters();
         assertEquals(1, activeIps.size());
         assertEquals(ip, activeIps.get(0));
 
         pingController.processIp(publicDnsRequester2);
 
-        List<String> activeIps2 = pingController.getActiveIps();
+        List<String> activeIps2 = pingController.getActiveRequesters();
         assertEquals(1, activeIps2.size());
         assertEquals(ip2, activeIps2.get(0));
     }

@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
         setSeekBar(findViewById(R.id.progress));
         countOutput = findViewById(R.id.resolversCountsText);
-        findViewById(R.id.stopVpn).setEnabled(false);
+        //findViewById(R.id.stopVpn).setEnabled(false);
     }
 
     private void setSeekBarMax() {
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         protocolSelector.setEnabled(enabled);
         seekBar.setEnabled(enabled);
         findViewById(R.id.startVpn).setEnabled(enabled);
-        findViewById(R.id.stopVpn).setEnabled(!enabled);
+        //findViewById(R.id.stopVpn).setEnabled(!enabled);
     }
 
     private void startVpn() {

@@ -11,15 +11,16 @@ import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
 import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.util.CombinationUtils;
+import com.tpp.private_doh.util.Requester;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();
+    private final List<Requester> requesters;
     private int actualIdx;
     private List<String> activeIps;
     private List<List<String>> shardingGroups;
@@ -27,8 +28,13 @@ public class PingController implements Runnable {
 
     public PingController() {
         this.activeIps = new ArrayList<>();
+        this.requesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
         this.actualIdx = 0;
+    }
+
+    public List<Requester> getRequesters() {
+        return this.requesters;
     }
 
     public void setNSharders(int nSharders) {
@@ -42,7 +48,7 @@ public class PingController implements Runnable {
         this.activeIps.add(Quad9DoHRequester.class.getName());
     }
 
-    public List<String> getActiveIps() {
+    public List<Requester> getActiveRequesters() {
         if (shardingGroups.isEmpty()) {
             return new ArrayList<>();
         }
@@ -51,13 +57,14 @@ public class PingController implements Runnable {
         }
         int actualIdx = this.actualIdx;
         this.actualIdx += 1;
-        return this.shardingGroups.get(actualIdx);
+        List<String> ips = this.shardingGroups.get(actualIdx);
+        return this.requesters.stream().filter(requester -> ips.contains(requester.getName())).collect(Collectors.toList());
     }
 
     @Override
     public void run() {
         while (true) {
-            PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).forEach(this::processIp);
+            this.requesters.forEach(this::processIp);
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -67,7 +74,8 @@ public class PingController implements Runnable {
     }
 
     @VisibleForTesting
-    public void processIp(PublicDnsRequester publicDnsRequester) {
+    public void processIp(Requester requester) {
+        PublicDnsRequester publicDnsRequester = (PublicDnsRequester) requester;
         try {
             Response ping = publicDnsRequester.executeRequestWithoutSentinel("google.com", 1).get(30, TimeUnit.SECONDS);
 

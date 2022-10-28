@@ -25,7 +25,7 @@ public class HybridDnsShardingControllerTest {
                 PublicDnsIps.GENERIC_IPS.get(new Random().nextInt(PublicDnsIps.GENERIC_IPS.size())));
 
         PingController pingController = mock(PingController.class);
-        when(pingController.getActiveIps()).thenReturn(activeIps);
+        when(pingController.getActiveRequesters()).thenReturn(activeIps);
 
         HybridDnsShardingController shardingController = new HybridDnsShardingController(pingController);
         List<Requester> requesters = shardingController.getRequesters();
@@ -38,7 +38,7 @@ public class HybridDnsShardingControllerTest {
                 CloudflareDoHRequester.class.getName(), Quad9DoHRequester.class.getName());
 
         PingController pingController = mock(PingController.class);
-        when(pingController.getActiveIps()).thenReturn(dohRequesters);
+        when(pingController.getActiveRequesters()).thenReturn(dohRequesters);
 
         HybridDnsShardingController shardingController = new HybridDnsShardingController(pingController);
         List<Requester> requesters = shardingController.getRequesters();
@@ -50,7 +50,7 @@ public class HybridDnsShardingControllerTest {
         List<String> activeIps = Collections.singletonList("Non-existent ip");
 
         PingController pingController = mock(PingController.class);
-        when(pingController.getActiveIps()).thenReturn(activeIps);
+        when(pingController.getActiveRequesters()).thenReturn(activeIps);
 
         HybridDnsShardingController shardingController = new HybridDnsShardingController(pingController);
         shardingController.getRequesters();

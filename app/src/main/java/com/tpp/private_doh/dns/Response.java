@@ -14,6 +14,8 @@ public class Response {
                     List<Answer> answers) {
         this.questions = questions;
         this.answers = answers;
+        this.onWinning = () -> {
+        };
     }
 
     @Override
@@ -30,6 +32,14 @@ public class Response {
 
     public List<Answer> getAnswers() {
         return answers;
+    }
+
+    public void setOnWinning(Runnable f) {
+        onWinning = f;
+    }
+
+    public void setAsWinner() {
+        onWinning.run();
     }
 
     static public class Question {
@@ -96,13 +106,5 @@ public class Response {
             sb.append(", data=").append(data);
             return sb.toString();
         }
-    }
-
-    public void setOnWinning(Runnable f) {
-        onWinning = f;
-    }
-
-    public void setAsWinner() {
-        onWinning.run();
     }
 }

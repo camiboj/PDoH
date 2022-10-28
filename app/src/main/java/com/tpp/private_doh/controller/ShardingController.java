@@ -24,7 +24,6 @@ public abstract class ShardingController {
                 .collect(Collectors.toList());
     }
 
-
     public Map<String, Integer> getRequestersMetrics() {
         Map<String, Integer> metrics = new HashMap<String, Integer>();
 
