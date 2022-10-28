@@ -31,8 +31,6 @@ import java.util.concurrent.Executors;
 
 public class PDoHVpnService extends VpnService {
     private static final String TAG = PDoHVpnService.class.getSimpleName();
-    private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
-    private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
     private ParcelFileDescriptor vpnInterface = null;
     private BroadcastReceiver stopVpn = new BroadcastReceiver() {
         @Override
@@ -74,8 +72,8 @@ public class PDoHVpnService extends VpnService {
         try {
             if (vpnInterface == null) {
                 Builder builder = new Builder();
-                builder.addAddress(VPN_ADDRESS, 32);
-                builder.addRoute(VPN_ROUTE, 0);
+                builder.addAddress(Config.VPN_ADDRESS, 32);
+                builder.addRoute(Config.VPN_ROUTE, 0);
                 builder.addDnsServer(Config.DNS_PROVIDER);
                 vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
             }

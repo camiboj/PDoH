@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.app.MainActivity;
+import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
 import com.tpp.private_doh.dns.DnsPacket;
@@ -113,8 +114,10 @@ public class NetworkManager implements Runnable {
             if (packet.isDNS()) {
                 DnsPacket dnsPacket = (DnsPacket) packet;
 
-                // TODO: create a more robust way to find out if we should bypass this packet
-                if (dnsPacket.getLastQuestion().getName().equals("fiubaMap")) {
+                if (dnsPacket.getFirstQuestion().getName().equals(Config.PING_QUESTION)) {
+                    deviceToNetworkUDPQueue.offer(packet);
+                }
+                else if (dnsPacket.getLastQuestion().getName().equals(Config.SENTINEL)) {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
