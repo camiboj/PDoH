@@ -18,6 +18,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.ProtocolSelector;
+import com.tpp.private_doh.components.StartVPNButton;
 import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.PingController;
@@ -56,8 +57,7 @@ public class MainActivity extends AppCompatActivity {
         seekBar = findViewById(R.id.RacingSeekBar);
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
         setSeekBar(findViewById(R.id.progress));
-        countOutput = findViewById(R.id.resolversCountsText);
-        //findViewById(R.id.stopVpn).setEnabled(false);
+        setButtonHandlers();
     }
 
     private void setSeekBarMax() {
@@ -130,10 +130,13 @@ public class MainActivity extends AppCompatActivity {
     private void enableVpnComponents(boolean enabled) {
         protocolSelector.setEnabled(enabled);
         seekBar.setEnabled(enabled);
-        findViewById(R.id.startVpn).setEnabled(enabled);
-        //findViewById(R.id.stopVpn).setEnabled(!enabled);
     }
 
+    private void setButtonHandlers() {
+        StartVPNButton startVpnButton = findViewById(R.id.startVpn);
+        startVpnButton.setOnclick(this::startVpn, this::stopVpn);
+
+    }
     private void startVpn() {
         ProtocolId protocol = ProtocolId.DOH;
         try {
@@ -159,18 +162,10 @@ public class MainActivity extends AppCompatActivity {
         enableVpnComponents(true);
     }
 
-    public void startVpn(View view) {
-        this.startVpn();
-    }
-
     public void fetchCount(View view) {
         // ShardingControllerFactory.getRequestersMetrics();
     }
-
-    public void stopVpn(View view) {
-        this.stopVpn();
-    }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
