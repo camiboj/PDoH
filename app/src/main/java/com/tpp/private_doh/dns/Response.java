@@ -1,15 +1,21 @@
 package com.tpp.private_doh.dns;
 
+import com.tpp.private_doh.util.Requester;
+
 import java.util.List;
 
 public class Response {
     private List<Question> questions;
     private List<Answer> answers;
+    private Requester requester;
+    private Runnable onWinning;
 
     public Response(List<Question> questions,
                     List<Answer> answers) {
         this.questions = questions;
         this.answers = answers;
+        this.onWinning = () -> {
+        };
     }
 
     @Override
@@ -26,6 +32,14 @@ public class Response {
 
     public List<Answer> getAnswers() {
         return answers;
+    }
+
+    public void setOnWinning(Runnable f) {
+        onWinning = f;
+    }
+
+    public void setAsWinner() {
+        onWinning.run();
     }
 
     static public class Question {

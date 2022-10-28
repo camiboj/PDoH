@@ -30,7 +30,9 @@ public class DnsToController {
         List<CompletableFuture<Response>> requesters = shardingController.executeRequest(question.getName(), question.getType());
         CompletableFuture<Response>[] requestersArray = requesters.stream().toArray(CompletableFuture[]::new);
         try {
-            return (Response) CompletableFuture.anyOf(requestersArray).get();
+            Response response = (Response) CompletableFuture.anyOf(requestersArray).get();
+            response.setAsWinner();
+            return response;
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException("Something happened while processing DohRequest");
         }

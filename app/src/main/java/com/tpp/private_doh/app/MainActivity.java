@@ -37,9 +37,11 @@ public class MainActivity extends AppCompatActivity {
 
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
+    private TextView countOutput;
     private PingController pingController;
 
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         this.pingController = new PingController();
         Thread t = new Thread(pingController);
@@ -54,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
         seekBar = findViewById(R.id.RacingSeekBar);
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
         setSeekBar(findViewById(R.id.progress));
-        findViewById(R.id.stopVpn).setEnabled(false);
+        countOutput = findViewById(R.id.resolversCountsText);
+        //findViewById(R.id.stopVpn).setEnabled(false);
     }
 
     private void setSeekBarMax() {
@@ -128,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         protocolSelector.setEnabled(enabled);
         seekBar.setEnabled(enabled);
         findViewById(R.id.startVpn).setEnabled(enabled);
-        findViewById(R.id.stopVpn).setEnabled(!enabled);
+        //findViewById(R.id.stopVpn).setEnabled(!enabled);
     }
 
     private void startVpn() {
@@ -158,6 +161,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void startVpn(View view) {
         this.startVpn();
+    }
+
+    public void fetchCount(View view) {
+        // ShardingControllerFactory.getRequestersMetrics();
     }
 
     public void stopVpn(View view) {

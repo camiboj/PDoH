@@ -5,7 +5,6 @@ import android.util.Log;
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.controller.DnsShardingController;
 import com.tpp.private_doh.controller.DohShardingController;
-import com.tpp.private_doh.controller.HybridDnsShardingController;
 import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.controller.ShardingController;
@@ -16,6 +15,7 @@ import com.tpp.private_doh.util.Requester;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class ShardingControllerFactory {
     private static final List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
@@ -38,7 +38,7 @@ public class ShardingControllerFactory {
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
-                this.shardingController = new HybridDnsShardingController(PING_CONTROLLER);
+                this.shardingController = new DnsShardingController(PING_CONTROLLER);
                 PING_CONTROLLER.addDohRequesters();
                 break;
             default:
@@ -79,5 +79,9 @@ public class ShardingControllerFactory {
 
     public ShardingController getProtocolShardingController() {
         return this.shardingController;
+    }
+
+    public Map<String, Integer> getRequestersMetrics() {
+        return shardingController.getRequestersMetrics();
     }
 }
