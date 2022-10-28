@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class CombinationUtils {
 
-    public static List<List<Requester>> combination(List<Requester> requesters, int k) {
+    public static <T> List<List<T>> combination(List<T> requesters, int k) {
         return Generator.combination(requesters)
                 .simple(k)
                 .stream()

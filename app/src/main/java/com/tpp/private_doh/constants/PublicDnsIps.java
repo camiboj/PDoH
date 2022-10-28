@@ -1,13 +1,26 @@
 package com.tpp.private_doh.constants;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-
-// TODO: this should be a .txt file. Android manages files extremelly weird, I've wasted hours today trying to figure out how to read a file so I ended up doing this
-// TODO: this only contains IPs in Argentina
 public final class PublicDnsIps {
-    public static final List<String> IPS = Arrays.asList(
+    public static final List<String> RELIABLE_IPS = Arrays.asList(
+            "208.67.222.222",
+            "208.67.220.220",
+            "1.1.1.1",
+            "1.0.0.1",
+            "8.8.8.8",
+            "8.8.4.4",
+            "9.9.9.9",
+            "149.112.112.112"
+    );
+
+    public static final List<String> GENERIC_IPS = new ArrayList<>();
+
+            /*Arrays.asList(
             "190.151.144.21",
             "200.69.193.2",
             "200.45.48.233",
@@ -146,8 +159,10 @@ public final class PublicDnsIps {
             "64.76.47.165",
             "216.244.192.3",
             "200.45.184.43",
-            "179.60.235.209");
+            "179.60.235.209");*/
 
+    public static final List<String> IPS = Stream.concat(PublicDnsIps.RELIABLE_IPS.stream(), PublicDnsIps.GENERIC_IPS.stream())
+            .collect(Collectors.toList());
 
     private PublicDnsIps() {
     }

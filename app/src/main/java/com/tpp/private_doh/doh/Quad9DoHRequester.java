@@ -14,6 +14,6 @@ public class Quad9DoHRequester extends DoHRequester {
 
     @Override
     public String getName() {
-        return "Quad 9 DoH";
+        return "Quad9 Doh";
     }
 }

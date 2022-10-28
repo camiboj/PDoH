@@ -7,7 +7,9 @@ public class ResourceUtils {
     public static void closeResources(Closeable... resources) {
         for (Closeable resource : resources) {
             try {
-                resource.close();
+                if (resource != null) {
+                    resource.close();
+                }
             } catch (IOException e) {
                 // Ignore
             }

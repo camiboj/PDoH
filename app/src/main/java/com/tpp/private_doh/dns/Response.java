@@ -14,6 +14,16 @@ public class Response {
                     List<Answer> answers) {
         this.questions = questions;
         this.answers = answers;
+        this.onWinning = () -> {
+        };
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Response{");
+        sb.append("questions=").append(questions);
+        sb.append(", answers=").append(answers);
+        return sb.toString();
     }
 
     public List<Question> getQuestions() {
@@ -22,6 +32,14 @@ public class Response {
 
     public List<Answer> getAnswers() {
         return answers;
+    }
+
+    public void setOnWinning(Runnable f) {
+        onWinning = f;
+    }
+
+    public void setAsWinner() {
+        onWinning.run();
     }
 
     static public class Question {
@@ -39,6 +57,14 @@ public class Response {
 
         public int getType() {
             return type;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Question{");
+            sb.append("name=").append(name);
+            sb.append(", type=").append(type);
+            return sb.toString();
         }
     }
 
@@ -70,13 +96,15 @@ public class Response {
         public String getData() {
             return data;
         }
-    }
 
-    public void setOnWinning(Runnable f) {
-        onWinning = f;
-    }
-
-    public void setAsWinner() {
-        onWinning.run();
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Answer{");
+            sb.append("name=").append(name);
+            sb.append(", type=").append(type);
+            sb.append(", ttl=").append(ttl);
+            sb.append(", data=").append(data);
+            return sb.toString();
+        }
     }
 }

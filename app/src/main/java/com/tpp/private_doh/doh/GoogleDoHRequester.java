@@ -19,6 +19,6 @@ public class GoogleDoHRequester extends DoHRequester {
 
     @Override
     public String getName() {
-        return "Google DoH";
+        return "Google Doh";
     }
 }

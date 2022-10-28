@@ -159,7 +159,6 @@
         </RelativeLayout>
 
 
-
         <Button
             android:id="@+id/startVpn"
             android:layout_width="132dp"
@@ -171,7 +170,7 @@
             android:layout_marginEnd="100dp"
             android:layout_marginBottom="31dp"
             android:gravity="center_vertical|center_horizontal"
-            android:onClick="clickSwitch"
+            android:onClick="startVpn"
             android:text="@string/start_vpn"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"

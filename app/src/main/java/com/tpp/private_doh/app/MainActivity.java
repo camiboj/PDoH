@@ -7,67 +7,64 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.ProtocolSelector;
 import com.tpp.private_doh.components.UnselectedProtocol;
+import com.tpp.private_doh.config.Config;
+import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
-import com.tpp.private_doh.controller.ShardingControllerFactory;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends AppCompatActivity {
-
-    private static final int MIN_RACING_AMOUNT = 2;
-    private final String TAG = this.getClass().getSimpleName();
+    private static final int RACING_AMOUNT_MIN = 0;
+    private static final int RACING_AMOUNT_OFFSET = 2;
     private static final int VPN_REQUEST_CODE = 0x0F;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
+    private final String TAG = this.getClass().getSimpleName();
+
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
     private TextView countOutput;
+    private PingController pingController;
 
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
+        this.pingController = new PingController();
+        Thread t = new Thread(pingController);
+        t.start();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show());
-
-
-        seekBar = findViewById(R.id.RacingSeekBar);
         protocolSelector = findViewById(R.id.protocolSelector);
-
-        protocolSelector.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                setSeekBarMax();
-            }
-        });
+        seekBar = findViewById(R.id.RacingSeekBar);
+        protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
         setSeekBar(findViewById(R.id.progress));
-
         countOutput = findViewById(R.id.resolversCountsText);
+        //findViewById(R.id.stopVpn).setEnabled(false);
     }
 
     private void setSeekBarMax() {
         int current = seekBar.getProgress();
         try {
-            seekBar.setMax(ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol()));
+            int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
+            seekBar.setMax(availableRequesterAmount - RACING_AMOUNT_OFFSET);
         } catch (UnselectedProtocol unselectedProtocol) {
             Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
         }
@@ -75,16 +72,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setSeekBar(TextView t) {
-        seekBar.setProgress(MIN_RACING_AMOUNT);
-        seekBar.setMin(MIN_RACING_AMOUNT);
+        seekBar.setProgress(RACING_AMOUNT_MIN);
+        seekBar.setMin(RACING_AMOUNT_MIN);
         setSeekBarMax();
 
-        t.setText(String.valueOf(MIN_RACING_AMOUNT));
+        t.setText(String.valueOf(RACING_AMOUNT_OFFSET));
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                t.setText(String.valueOf(i));
+                t.setText(String.valueOf(i + RACING_AMOUNT_OFFSET));
             }
 
             @Override
@@ -122,12 +119,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
+            pingController.setNSharders(racingAmount);
             ShardingControllerFactory.setProtocolId(protocol);
             ShardingControllerFactory.setRacingAmount(racingAmount);
+            ShardingControllerFactory.setPingController(pingController);
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
 
+    private void enableVpnComponents(boolean enabled) {
+        protocolSelector.setEnabled(enabled);
+        seekBar.setEnabled(enabled);
+        findViewById(R.id.startVpn).setEnabled(enabled);
+        //findViewById(R.id.stopVpn).setEnabled(!enabled);
+    }
 
     private void startVpn() {
         ProtocolId protocol = ProtocolId.DOH;
@@ -143,19 +148,27 @@ public class MainActivity extends AppCompatActivity {
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress());
-            protocolSelector.setEnabled(false);
-            seekBar.setEnabled(false);
-            findViewById(R.id.startVpn).setEnabled(false);
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, seekBar.getProgress() + RACING_AMOUNT_OFFSET);
+            enableVpnComponents(false);
         }
     }
 
-    public void clickSwitch(View view) {
+    private void stopVpn() {
+        Intent intent = new Intent(Config.STOP_SIGNAL);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        enableVpnComponents(true);
+    }
+
+    public void startVpn(View view) {
         this.startVpn();
     }
 
     public void fetchCount(View view) {
         // ShardingControllerFactory.getRequestersMetrics();
+    }
+
+    public void stopVpn(View view) {
+        this.stopVpn();
     }
 
     @Override

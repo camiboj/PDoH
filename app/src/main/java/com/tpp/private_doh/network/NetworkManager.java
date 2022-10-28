@@ -7,10 +7,10 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.controller.DnsResponseProcessor;
 import com.tpp.private_doh.controller.DnsToController;
-import com.tpp.private_doh.controller.ShardingControllerFactory;
 import com.tpp.private_doh.dns.DnsPacket;
+import com.tpp.private_doh.factory.PacketFactory;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
 import com.tpp.private_doh.protocol.Packet;
-import com.tpp.private_doh.protocol.PacketFactory;
 import com.tpp.private_doh.util.ByteBufferPool;
 import com.tpp.private_doh.util.ResourceUtils;
 
@@ -56,8 +56,7 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                          ExecutorService dnsWorkers
-                          ) {
+                          ExecutorService dnsWorkers) {
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
     }
@@ -119,9 +118,8 @@ public class NetworkManager implements Runnable {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
-                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getProtocolController())));
+                    dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getProtocolShardingController())));
                 }
-
             } else if (packet.isUDP()) {
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {

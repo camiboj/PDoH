@@ -1,51 +1,49 @@
-package com.tpp.private_doh.controller;
+package com.tpp.private_doh.factory;
 
 import android.util.Log;
 
-import com.tpp.private_doh.dns.PublicDnsRequester;
+import com.tpp.private_doh.constants.PublicDnsIps;
+import com.tpp.private_doh.controller.DnsShardingController;
+import com.tpp.private_doh.controller.DohShardingController;
+import com.tpp.private_doh.controller.PingController;
+import com.tpp.private_doh.controller.ProtocolId;
+import com.tpp.private_doh.controller.ShardingController;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
 import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.util.Requester;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ShardingControllerFactory {
-
-    private final String TAG = this.getClass().getSimpleName();
+    private static final List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
+    private static PingController PING_CONTROLLER;
     private static ProtocolId PROTOCOL_ID;
     private static int RACING_AMOUNT;
-    private static final List<String> pureDnsResolvers = Arrays.asList("208.67.222.222", "208.67.220.220", "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4", "9.9.9.9", "149.112.112.112");
-
-    private final ShardingController protocolShardingController;
-    private static final List<Requester> doHRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
+    private final String TAG = this.getClass().getSimpleName();
+    private final ShardingController shardingController;
 
     public ShardingControllerFactory() {
-        List<Requester> requesters;
         Log.i(TAG, "protocolId: " + PROTOCOL_ID);
         switch (PROTOCOL_ID) {
             case DOH:
                 Log.i(TAG, "DOH");
-                requesters = doHRequesters;
+                this.shardingController = new DohShardingController(pureDohRequesters, RACING_AMOUNT);
                 break;
             case DNS:
                 Log.i(TAG, "DNS");
-                requesters = pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
+                this.shardingController = new DnsShardingController(PING_CONTROLLER);
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
-                requesters = new ArrayList<>();
-                requesters.addAll(doHRequesters);
-                requesters.addAll(pureDnsResolvers.stream().map(PublicDnsRequester::new).collect(Collectors.toList()));
+                this.shardingController = new DnsShardingController(PING_CONTROLLER);
+                PING_CONTROLLER.addDohRequesters();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + PROTOCOL_ID);
         }
-        this.protocolShardingController = new ShardingController(requesters, RACING_AMOUNT);
     }
 
     public static void setProtocolId(ProtocolId n) {
@@ -58,27 +56,32 @@ public class ShardingControllerFactory {
         RACING_AMOUNT = n;
     }
 
+    public static void setPingController(PingController pingController) {
+        // must be call only once and before creating any instance of PDoHVpnService
+        PING_CONTROLLER = pingController;
+    }
+
     public static int getAvailableRequesterAmount(ProtocolId protocolId) {
         switch (protocolId) {
             case DOH:
                 Log.i("ShardingControllerFactory", "getAvailableRequesterAmount(DOH)");
-                return doHRequesters.size();
+                return pureDohRequesters.size();
             case DNS:
                 Log.i("ShardingControllerFactory", "getAvailableRequesterAmount(DNS)");
-                return pureDnsResolvers.size();
+                return PublicDnsIps.RELIABLE_IPS.size();
             case HYBRID:
                 Log.i("ShardingControllerFactory", "getAvailableRequesterAmount(BOTH)");
-                return doHRequesters.size() + pureDnsResolvers.size();
+                return pureDohRequesters.size() + PublicDnsIps.RELIABLE_IPS.size();
             default:
                 throw new IllegalStateException("Unexpected value: " + protocolId);
         }
     }
 
-    public ShardingController getProtocolController() {
-        return this.protocolShardingController;
+    public ShardingController getProtocolShardingController() {
+        return this.shardingController;
     }
 
     public Map<String, Integer> getRequestersMetrics() {
-        return protocolShardingController.getRequestersMetrics();
+        return shardingController.getRequestersMetrics();
     }
 }
