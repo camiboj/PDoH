@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
+import com.tpp.private_doh.util.Requester;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PingControllerTest {
@@ -43,7 +45,7 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
+        List<String> activeIps = pingController.getActiveRequesters().stream().map(Requester::getName).collect(Collectors.toList());
         assertEquals(1, activeIps.size());
         assertEquals(ip, activeIps.get(0));
     }
@@ -59,8 +61,8 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
-        assertTrue(activeIps.isEmpty());
+        List<Requester> activeRequesters = pingController.getActiveRequesters();
+        assertTrue(activeRequesters.isEmpty());
     }
 
     @Test
@@ -76,8 +78,8 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
-        assertTrue(activeIps.isEmpty());
+        List<Requester> activeRequesters = pingController.getActiveRequesters();
+        assertTrue(activeRequesters.isEmpty());
     }
 
     @Test
@@ -85,7 +87,7 @@ public class PingControllerTest {
         PingController pingController = new PingController();
         pingController.setNSharders(1);
         String ip = "1.1.1.1";
-        String ip2 = "2.2.2.2";
+        String ip2 = "8.8.8.8";
 
         PublicDnsRequester publicDnsRequester2 = mock(PublicDnsRequester.class);
 
@@ -99,13 +101,13 @@ public class PingControllerTest {
 
         pingController.processIp(publicDnsRequester);
 
-        List<String> activeIps = pingController.getActiveIps();
+        List<String> activeIps = pingController.getActiveRequesters().stream().map(Requester::getName).collect(Collectors.toList());
         assertEquals(1, activeIps.size());
         assertEquals(ip, activeIps.get(0));
 
         pingController.processIp(publicDnsRequester2);
 
-        List<String> activeIps2 = pingController.getActiveIps();
+        List<String> activeIps2 = pingController.getActiveRequesters().stream().map(Requester::getName).collect(Collectors.toList());
         assertEquals(1, activeIps2.size());
         assertEquals(ip2, activeIps2.get(0));
     }

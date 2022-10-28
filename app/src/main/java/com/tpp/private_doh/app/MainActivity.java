@@ -37,9 +37,11 @@ public class MainActivity extends AppCompatActivity {
 
     private ProtocolSelector protocolSelector;
     private SeekBar seekBar;
+    private TextView countOutput;
     private PingController pingController;
 
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         this.pingController = new PingController();
         Thread t = new Thread(pingController);
@@ -159,6 +161,14 @@ public class MainActivity extends AppCompatActivity {
         enableVpnComponents(true);
     }
 
+    public void startVpn(View view) {
+        this.startVpn();
+    }
+
+    public void fetchCount(View view) {
+        // ShardingControllerFactory.getRequestersMetrics();
+    }
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();

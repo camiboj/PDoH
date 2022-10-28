@@ -16,4 +16,9 @@ public class GoogleDoHRequester extends DoHRequester {
     public GoogleDoHRequester() {
         super(ENDPOINT, HEADERS);
     }
+
+    @Override
+    public String getName() {
+        return "Google Doh";
+    }
 }

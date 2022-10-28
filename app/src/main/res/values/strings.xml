@@ -8,4 +8,5 @@
     <string name="dns">DNS</string>
     <string name="both">Both</string>
     <string name="select_protocol_title">Select the protocol to use</string>
+    <string name="fetch_resolvers_counts">Fetch resolvers counts</string>
 </resources>

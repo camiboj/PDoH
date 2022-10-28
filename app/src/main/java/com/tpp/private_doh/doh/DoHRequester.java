@@ -29,6 +29,7 @@ public abstract class DoHRequester implements Requester {
 
     private String endpoint;
     private Map<String, List<String>> headers;
+    private int count;
 
     public DoHRequester(String endpoint, Map<String, List<String>> headers) {
         TAG = this.getClass().getSimpleName();
@@ -36,8 +37,18 @@ public abstract class DoHRequester implements Requester {
         this.headers = headers;
     }
 
+    @Override
+    public int getCount() {
+        return count;
+    }
+
+    private Response processResponse(Response r) {
+        r.setOnWinning(() -> this.count += 1);
+        return r;
+    }
+
     public CompletableFuture<Response> executeRequest(String name, int type) {
-        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type)));
+        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type))).thenApply(this::processResponse);
     }
 
     @VisibleForTesting

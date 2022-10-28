@@ -12,6 +12,7 @@ public class DohShardingController extends ShardingController {
     private int actualIdx;
 
     public DohShardingController(List<Requester> requesters, int n) {
+        super(requesters);
         this.requesters = CombinationUtils.combination(requesters, n);
         this.actualIdx = 0;
     }

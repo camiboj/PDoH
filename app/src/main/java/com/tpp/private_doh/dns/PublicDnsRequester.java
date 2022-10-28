@@ -22,20 +22,31 @@ import java.util.concurrent.CompletableFuture;
 public class PublicDnsRequester implements Requester {
     protected final static String TAG = PublicDnsRequester.class.getSimpleName();
     private Resolver resolver;
-    private String ip;
+    private int count;
+    private String resolverName;
 
-    public PublicDnsRequester(String ip) {
+    public PublicDnsRequester(String resolver) {
+        this.resolverName = resolver;
         try {
-            this.ip = ip;
-            this.resolver = new SimpleResolver(ip);
+            this.resolver = new SimpleResolver(resolver);
         } catch (UnknownHostException e) {
-            Log.i(TAG, String.format("Unknown resolver to build DnsRequester: %s", ip));
+            Log.i(TAG, "Unknown resolver to build DnsRequester");
         }
     }
 
     @VisibleForTesting
     public PublicDnsRequester(SimpleResolver resolver) {
         this.resolver = resolver;
+    }
+
+    @Override
+    public int getCount() {
+        return count;
+    }
+
+    @Override
+    public String getName() {
+        return resolverName;
     }
 
     @Override
@@ -48,7 +59,7 @@ public class PublicDnsRequester implements Requester {
             // Sentinel to recognize this packet while capturing
             queryMessage.addRecord(Record.newRecord(Name.fromString("fiubaMap."), Type.A, DClass.IN), Section.QUESTION);
 
-            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(PublicDnsToDnsMapper::map);
+            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(this::processResponse);
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }
@@ -66,7 +77,13 @@ public class PublicDnsRequester implements Requester {
         }
     }
 
+    private Response processResponse(Message message) {
+        Response r = PublicDnsToDnsMapper.map(message);
+        r.setOnWinning(() -> this.count += 1);
+        return PublicDnsToDnsMapper.map(message);
+    }
+
     public String getIp() {
-        return this.ip;
+        return this.resolverName;
     }
 }
