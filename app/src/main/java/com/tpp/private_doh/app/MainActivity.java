@@ -173,8 +173,8 @@ public class MainActivity extends AppCompatActivity {
             Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
             // TODO: agregar padding lindo para que los contadores esten alineados
             message = map.keySet().stream()
-                    .map(key -> key + ": " + map.get(key))
-                    .collect(Collectors.joining("\n"));
+                    .map(key -> map.get(key) + "\n " + key)
+                    .collect(Collectors.joining("\n\n"));
         }
         countOutput.setText(message);
     }

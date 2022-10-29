@@ -42,47 +42,49 @@
                 android:layout_marginEnd="71dp"
                 android:layout_marginBottom="20dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="@string/select_protocol_title" />
+                android:text="@string/select_protocol_title"
+                android:theme="@style/AppTheme.Tittles" />
 
             <com.tpp.private_doh.components.ProtocolSelector
                 android:id="@+id/protocolSelector"
-                android:layout_width="match_parent"
+                android:layout_width="195dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginStart="0dp"
-                android:layout_marginEnd="0dp"
+                android:layout_marginStart="55dp"
+                android:layout_marginEnd="55dp"
                 android:layout_marginBottom="67dp"
                 android:checkedButton="@id/rbDoH"
                 android:gravity="center_vertical|center_horizontal"
                 android:orientation="horizontal"
                 android:text="@string/racing_amount"
+                android:theme="@style/AppTheme.Options"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
                 app:layout_constraintStart_toStartOf="parent">
 
                 <RadioButton
                     android:id="@+id/rbDoH"
-                    android:layout_width="111dp"
+                    android:layout_width="65dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/doh"
-                    android:textSize="20sp"/>
+                    android:buttonTint="@color/colorPrimary"
+                    android:text="@string/doh" />
 
                 <RadioButton
                     android:id="@+id/rbDNS"
-                    android:layout_width="111dp"
+                    android:layout_width="65dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/dns"
-                    android:textSize="20sp" />
+                    android:buttonTint="@color/colorPrimary"
+                    android:text="@string/dns" />
 
                 <RadioButton
                     android:id="@+id/rbBoth"
-                    android:layout_width="111dp"
+                    android:layout_width="65dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/both"
-                    android:textSize="20sp" />
+                    android:buttonTint="@color/colorPrimary"
+                    android:text="@string/both" />
             </com.tpp.private_doh.components.ProtocolSelector>
 
 
@@ -117,7 +119,8 @@
                 app:layout_constraintBottom_toTopOf="@+id/RacingSeekBar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                android:theme="@style/AppTheme.Tittles"/>
 
             <TextView
                 android:id="@+id/progress"
@@ -136,7 +139,8 @@
                 app:layout_constraintBottom_toTopOf="@+id/RacingSeekBar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.498"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                android:theme="@style/AppTheme.Options"/>
 
             <SeekBar
                 android:id="@+id/RacingSeekBar"
@@ -150,6 +154,9 @@
                 android:layout_marginBottom="4dp"
                 android:max="10"
                 android:min="1"
+                android:progressTint="@color/colorPrimaryDark"
+                android:thumbTint="@color/colorPrimary"
+
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.495"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -220,9 +227,10 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="1dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="0dp"
             android:layout_marginBottom="0dp"
+            android:theme="@style/AppTheme.Metrics"
             app:layout_constraintHorizontal_bias="0.546"
             app:layout_constraintVertical_bias="0.768" />
 
