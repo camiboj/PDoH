@@ -41,7 +41,6 @@
                 android:layout_marginTop="36dp"
                 android:layout_marginEnd="71dp"
                 android:layout_marginBottom="20dp"
-                android:autoSizeTextType="uniform"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/select_protocol_title" />
 
@@ -113,7 +112,6 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="83dp"
                 android:layout_marginBottom="42dp"
-                android:autoSizeTextType="uniform"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/racing_amount"
                 app:layout_constraintBottom_toTopOf="@+id/RacingSeekBar"
@@ -164,13 +162,14 @@
         <com.tpp.private_doh.components.StartVPNButton
             android:id="@+id/startVpn"
             android:layout_width="132dp"
-            android:layout_height="82dp"
+            android:layout_height="40dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="100dp"
             android:layout_marginEnd="100dp"
             android:layout_marginBottom="27dp"
+            android:background="@drawable/button"
             android:gravity="center_vertical|center_horizontal"
             android:textSize="18sp" />
 
@@ -189,7 +188,6 @@
         app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
 
 
-
         <Button
             android:id="@+id/resolversCountsButton"
             android:layout_width="match_parent"
@@ -200,6 +198,7 @@
             android:layout_marginStart="0dp"
             android:layout_marginTop="0dp"
             android:layout_marginEnd="0dp"
+            android:background="@drawable/button"
             android:gravity="center_vertical|center_horizontal"
             android:onClick="fetchCount"
             android:text="@string/fetch_resolvers_counts"
