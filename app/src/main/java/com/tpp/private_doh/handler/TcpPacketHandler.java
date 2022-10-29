@@ -410,7 +410,7 @@ public class TcpPacketHandler implements Runnable {
         public int packId = 1;
         public long timestamp = 0L;
         int synCount = 0;
-        private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(8 * 1024);
+        private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(163840);
     }
 }
 
