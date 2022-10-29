@@ -68,7 +68,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="@string/doh"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"/>
 
                 <RadioButton
                     android:id="@+id/rbDNS"
@@ -161,17 +161,18 @@
 
         <com.tpp.private_doh.components.StartVPNButton
             android:id="@+id/startVpn"
-            android:layout_width="132dp"
+            android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginStart="100dp"
-            android:layout_marginEnd="100dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginEnd="120dp"
             android:layout_marginBottom="27dp"
             android:background="@drawable/button"
             android:gravity="center_vertical|center_horizontal"
-            android:textSize="18sp" />
+            android:text="@string/fetch_resolvers_counts"
+            android:theme="@style/AppTheme.Button" />
 
 
     </RelativeLayout>
@@ -190,19 +191,19 @@
 
         <Button
             android:id="@+id/resolversCountsButton"
-            android:layout_width="match_parent"
-            android:layout_height="61dp"
+            android:layout_width="wrap_content"
+            android:layout_height="29dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="0dp"
+            android:layout_marginStart="19dp"
             android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp"
+            android:layout_marginEnd="19dp"
             android:background="@drawable/button"
             android:gravity="center_vertical|center_horizontal"
             android:onClick="fetchCount"
             android:text="@string/fetch_resolvers_counts"
-            android:textSize="14sp"
+            android:theme="@style/AppTheme.Button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintLeft_toLeftOf="parent"
