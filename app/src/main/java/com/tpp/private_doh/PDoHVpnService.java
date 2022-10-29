@@ -16,6 +16,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.dns.DnsPacket;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
 import com.tpp.private_doh.handler.DnsDownWorker;
 import com.tpp.private_doh.handler.TcpPacketHandler;
 import com.tpp.private_doh.handler.UdpPacketHandler;
@@ -113,6 +114,10 @@ public class PDoHVpnService extends VpnService {
     private void cleanup() {
         ResourceUtils.closeResources(vpnInterface);
         this.vpnInterface = null;
+    }
+
+    public static void setShardingControllerFactory(ShardingControllerFactory scd) {
+        NetworkManager.setShardingControllerFactory(scd);
     }
 }
 
