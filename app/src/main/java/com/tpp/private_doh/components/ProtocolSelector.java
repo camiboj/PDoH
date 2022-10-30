@@ -3,7 +3,10 @@ package com.tpp.private_doh.components;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
+
+import androidx.core.content.ContextCompat;
 
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.controller.ProtocolId;
@@ -30,8 +33,11 @@ public class ProtocolSelector extends RadioGroup {
     public void setEnabled(boolean enabled) {
         Log.i(TAG, String.format("this.getChildCount(): %s", this.getChildCount()));
         super.setEnabled(enabled);
+        int color = enabled? R.color.colorPrimary : R.color.colorDisabled;
         for (int i = 0; i < getChildCount(); i++) {
-            getChildAt(i).setEnabled(enabled);
+            RadioButton rb = (RadioButton) getChildAt(i);
+            rb.setEnabled(enabled);
+            rb.setButtonTintList(ContextCompat.getColorStateList(getContext(), color));
         }
     }
 
