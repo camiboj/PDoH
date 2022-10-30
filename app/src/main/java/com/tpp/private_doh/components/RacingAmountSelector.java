@@ -7,7 +7,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-
 import com.tpp.private_doh.R;
 
 public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSeekBar {
