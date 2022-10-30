@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.Requester;
@@ -39,8 +40,7 @@ public class PingControllerTest {
         pingController.setNSharders(1);
         String ip = "1.1.1.1";
 
-        when(response.getAnswers()).thenReturn(Collections.singletonList(mock(Response.Answer.class)));
-        when(publicDnsRequester.executeRequestWithoutSentinel("google.com", 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        when(publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
         when(publicDnsRequester.getIp()).thenReturn(ip);
 
         pingController.processIp(publicDnsRequester);
@@ -51,28 +51,13 @@ public class PingControllerTest {
     }
 
     @Test
-    public void testPingControllerPingActiveIpThatReturnsEmptyAnswer() {
-        PingController pingController = new PingController();
-        pingController.setNSharders(1);
-        String ip = "1.1.1.1";
-
-        when(publicDnsRequester.executeRequestWithoutSentinel("google.com", 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
-        when(publicDnsRequester.getIp()).thenReturn(ip);
-
-        pingController.processIp(publicDnsRequester);
-
-        List<Requester> activeRequesters = pingController.getActiveRequesters();
-        assertTrue(activeRequesters.isEmpty());
-    }
-
-    @Test
     public void testPingControllerPingNonActiveIpThatReturnsEmptyAnswer() throws ExecutionException, InterruptedException, TimeoutException {
         PingController pingController = new PingController();
         pingController.setNSharders(1);
         String ip = "1.1.1.1";
         CompletableFuture completableFuture = mock(CompletableFuture.class);
 
-        when(publicDnsRequester.executeRequestWithoutSentinel("google.com", 1)).thenReturn(completableFuture);
+        when(publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1)).thenReturn(completableFuture);
         when(completableFuture.get(30, TimeUnit.SECONDS)).thenThrow(new TimeoutException());
         when(publicDnsRequester.getIp()).thenReturn(ip);
 
@@ -91,12 +76,10 @@ public class PingControllerTest {
 
         PublicDnsRequester publicDnsRequester2 = mock(PublicDnsRequester.class);
 
-        when(response.getAnswers()).thenReturn(Collections.singletonList(mock(Response.Answer.class)));
-
-        when(publicDnsRequester.executeRequestWithoutSentinel("google.com", 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        when(publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
         when(publicDnsRequester.getIp()).thenReturn(ip);
 
-        when(publicDnsRequester2.executeRequestWithoutSentinel("google.com", 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
+        when(publicDnsRequester2.executePingRequest(Config.PING_QUESTION, 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
         when(publicDnsRequester2.getIp()).thenReturn(ip2);
 
         pingController.processIp(publicDnsRequester);
