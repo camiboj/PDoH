@@ -53,7 +53,6 @@ public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSee
     @Override
     public void setProgress(int i) {
         super.setProgress(i - offset);
-        onChange();
     }
 
     private void onChange() {
