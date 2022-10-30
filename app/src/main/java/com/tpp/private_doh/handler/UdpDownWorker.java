@@ -7,6 +7,7 @@ import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.util.ByteBufferPool;
 
 import java.io.IOException;
+import java.net.PortUnreachableException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
@@ -18,12 +19,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class UdpDownWorker implements Runnable {
+    protected final static String TAG = UdpDownWorker.class.getSimpleName();
     public final AtomicInteger ipId;
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final BlockingQueue<UdpTunnel> tunnelQueue;
     private final Selector selector;
     private final int headerSize;
-    protected final static String TAG = UdpDownWorker.class.getSimpleName();;
+    ;
 
     public UdpDownWorker(Selector selector, BlockingQueue<ByteBuffer> networkToDeviceQueue,
                          BlockingQueue<UdpTunnel> tunnelQueue) {
@@ -80,7 +82,7 @@ public class UdpDownWorker implements Runnable {
                             receiveBuffer.get(data);
                             sendUdpPack((UdpTunnel) key.attachment(), data);
                         } catch (IOException e) {
-                            Log.e(TAG, "error", e);
+                            Log.e(TAG, "Error in UdpDownWorker", e);
                         }
                     }
                 }
@@ -92,10 +94,14 @@ public class UdpDownWorker implements Runnable {
         }
     }
 
-    private ByteBuffer getData(SelectionKey key) throws IOException{
+    private ByteBuffer getData(SelectionKey key) throws IOException {
         DatagramChannel inputChannel = (DatagramChannel) key.channel();
         ByteBuffer receiveBuffer = ByteBufferPool.acquire();
-        inputChannel.read(receiveBuffer);
+        try {
+            inputChannel.read(receiveBuffer);
+        } catch (PortUnreachableException e) {
+            Log.i(TAG, String.format("Ping has failed for: %s", inputChannel.getRemoteAddress().toString()));
+        }
         return receiveBuffer;
     }
 }

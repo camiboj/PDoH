@@ -167,7 +167,6 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private boolean tryFlushWrite(TcpPipe pipe, SocketChannel channel) throws Exception {
-
         ByteBuffer buffer = pipe.remoteOutBuffer;
         if (pipe.remote.socket().isOutputShutdown() && buffer.remaining() != 0) {
             sendTcpPack(pipe, (byte) (TcpHeader.FIN | TcpHeader.ACK), null);
