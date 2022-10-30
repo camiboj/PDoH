@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import com.tpp.private_doh.R;
 
 public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSeekBar {
@@ -74,6 +75,12 @@ public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSee
         });
     }
 
-
-
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        int thumbTint = enabled? R.color.colorPrimary : R.color.colorDisabled;
+        int progressTint = enabled? R.color.colorPrimaryDark : R.color.colorDisabled;
+        setThumbTintList(ContextCompat.getColorStateList(getContext(), thumbTint));
+        setProgressTintList(ContextCompat.getColorStateList(getContext(), progressTint));
+    }
 }

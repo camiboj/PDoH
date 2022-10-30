@@ -7,4 +7,5 @@
     <color name="colorTextWithBackground">#FDFDFD</color>
     <color name="colorTextPrimary">#858080</color>
     <color name="colorTextSecondary">#191818</color>
+    <color name="colorDisabled">#858080</color>
 </resources>
