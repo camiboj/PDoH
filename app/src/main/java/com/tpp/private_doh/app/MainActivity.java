@@ -1,6 +1,7 @@
 package com.tpp.private_doh.app;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.tpp.private_doh.PDoHVpnService;
@@ -53,8 +53,6 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         countOutput = findViewById(R.id.resolversCountsText);
 
@@ -182,5 +180,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    public void bugClicked(View view) {
+        Intent httpIntent = new Intent(Intent.ACTION_VIEW);
+        httpIntent.setData(Uri.parse(Config.BUG_LINK));
+
+        startActivity(httpIntent);
     }
 }
