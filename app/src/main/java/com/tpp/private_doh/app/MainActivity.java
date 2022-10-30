@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         racingAmountSelector = findViewById(R.id.racingAmountSelector);
 
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
-        racingAmountSelector.setMin(Config.MIN_RACING_AMOUNT);
+        racingAmountSelector.setCustomMin(Config.MIN_RACING_AMOUNT);
         setSeekBarMax();
         setButtonHandlers();
     }
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     private void setSeekBarMax() {
         try {
             int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
-            racingAmountSelector.setMax(availableRequesterAmount);
+            racingAmountSelector.setCustomMax(availableRequesterAmount);
         } catch (UnselectedProtocol unselectedProtocol) {
             Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
         }
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
         } else {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getProgress());
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
             enableVpnComponents(false);
         }
     }

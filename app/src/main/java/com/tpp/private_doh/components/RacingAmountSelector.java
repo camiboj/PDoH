@@ -10,7 +10,7 @@ import com.tpp.private_doh.R;
 
 public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSeekBar {
     private static final int RACING_AMOUNT_MIN = 0;
-    private static int offset = 0;
+    private static int offset = 2;
     private int progressOutputId;
 
     public RacingAmountSelector(Context context, AttributeSet attrs) {
@@ -31,34 +31,29 @@ public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSee
     }
 
 
-    @Override
-    public void setMin(int i) {
+    public void setCustomMin(int i) {
         setMax(getMax() + Math.abs(offset-i));
         offset = i;
     }
 
-    @Override
-    public void setMax(int max) {
-        int current = getProgress();
+    public void setCustomMax(int max) {
+        int current = getCustomProgress();
         super.setMax(max - offset);
-        setProgress(current);
+        setCustomProgress(current);
     }
 
-    @Override
-    public int getProgress() {
+    public int getCustomProgress() {
         return super.getProgress() + offset;
     }
 
-
-    @Override
-    public void setProgress(int i) {
+    public void setCustomProgress(int i) {
         super.setProgress(i - offset);
     }
 
     private void onChange() {
         TextView t = getRootView().findViewById(progressOutputId);
         if (t!=null) {
-            t.setText(String.valueOf(getProgress()));
+            t.setText(String.valueOf(getCustomProgress()));
         }
     }
 
