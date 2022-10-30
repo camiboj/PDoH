@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".app.MainActivity"
     tools:showIn="@layout/activity_main">
@@ -106,7 +107,7 @@
                 android:id="@+id/RacingSeekBarText"
                 android:layout_width="153dp"
                 android:layout_height="27dp"
-                android:layout_above="@+id/RacingSeekBar"
+                android:layout_above="@+id/racingAmountSelector"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
@@ -116,7 +117,6 @@
                 android:layout_marginBottom="42dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/racing_amount"
-                app:layout_constraintBottom_toTopOf="@+id/RacingSeekBar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
                 app:layout_constraintStart_toStartOf="parent"
@@ -126,7 +126,7 @@
                 android:id="@+id/progress"
                 android:layout_width="31dp"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/RacingSeekBar"
+                android:layout_above="@+id/racingAmountSelector"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="152dp"
@@ -136,14 +136,14 @@
                 android:autoSizeTextType="uniform"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="2"
-                app:layout_constraintBottom_toTopOf="@+id/RacingSeekBar"
+                android:theme="@style/AppTheme.Options"
+                app:layout_constraintBottom_toTopOf="@+id/racingAmountSelector"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.498"
-                app:layout_constraintStart_toStartOf="parent"
-                android:theme="@style/AppTheme.Options"/>
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <SeekBar
-                android:id="@+id/RacingSeekBar"
+            <com.tpp.private_doh.components.RacingAmountSelector
+                android:id="@+id/racingAmountSelector"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
@@ -152,17 +152,16 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
-                android:max="10"
-                android:min="1"
+                android:min="2"
                 android:progressTint="@color/colorPrimaryDark"
                 android:thumbTint="@color/colorPrimary"
-
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.495"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.404" />
+                app:layout_constraintVertical_bias="0.404"
+                custom:text_id="@+id/progress" />
 
         </RelativeLayout>
 
