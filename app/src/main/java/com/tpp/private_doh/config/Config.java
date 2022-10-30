@@ -13,6 +13,7 @@ public class Config {
     public static final Integer PING_TIMEOUT = 30;
     public static final Integer SLEEP_PING = 1000;
     public static final String BUG_LINK = "https://forms.gle/NgBzJEcUoBJkSfuL6";
+    public static final Integer MIN_RACING_AMOUNT = 2;
 }
 
 
