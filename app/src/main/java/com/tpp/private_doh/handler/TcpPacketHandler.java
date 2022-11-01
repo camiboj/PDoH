@@ -183,11 +183,15 @@ public class TcpPacketHandler implements Runnable {
         }
         while (buffer.hasRemaining()) {
             int n = 0;
-            n = channel.write(buffer);
+            try {
+                n = channel.write(buffer);
+            } catch (Exception e) {
+                Log.e(TAG, "Exception in write:", e);
+            }
             if (n > 4000) {
                 System.currentTimeMillis();
             }
-            if (n <= 0) {
+            if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
                 key.interestOps(ops);
@@ -290,9 +294,11 @@ public class TcpPacketHandler implements Runnable {
             buffer.clear();
             int n = SocketUtils.read(channel, buffer);
             if (n == -1) {
+                Log.e(TAG, "Read -1");
                 quitType = "fin";
                 break;
             } else if (n == 0) {
+                Log.e(TAG, "Read 0");
                 break;
             } else {
                 if (pipe.tcbStatus != TCBStatus.CLOSE_WAIT) {
