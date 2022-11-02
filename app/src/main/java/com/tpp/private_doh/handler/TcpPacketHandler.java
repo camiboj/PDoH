@@ -207,7 +207,6 @@ public class TcpPacketHandler implements Runnable {
         return true;
     }
 
-
     private void closeUpStream(TcpPipe pipe) {
         try {
             if (pipe.remote != null && pipe.remote.isOpen()) {
@@ -286,7 +285,7 @@ public class TcpPacketHandler implements Runnable {
 
     private void doRead(SocketChannel channel) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(4 * 1024);
-        String quitType = "";
+        boolean shouldQuit = false;
 
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(channel, "pipe");
 
@@ -294,11 +293,9 @@ public class TcpPacketHandler implements Runnable {
             buffer.clear();
             int n = SocketUtils.read(channel, buffer);
             if (n == -1) {
-                Log.e(TAG, "Read -1");
-                quitType = "fin";
+                shouldQuit = true;
                 break;
             } else if (n == 0) {
-                Log.e(TAG, "Read 0");
                 break;
             } else {
                 if (pipe.tcbStatus != TCBStatus.CLOSE_WAIT) {
@@ -309,7 +306,7 @@ public class TcpPacketHandler implements Runnable {
                 }
             }
         }
-        if (quitType.equals("fin")) {
+        if (shouldQuit) {
             closeDownStream(pipe);
         }
     }
