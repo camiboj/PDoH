@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".app.MainActivity"
     tools:showIn="@layout/activity_main">
@@ -41,49 +42,50 @@
                 android:layout_marginTop="36dp"
                 android:layout_marginEnd="71dp"
                 android:layout_marginBottom="20dp"
-                android:autoSizeTextType="uniform"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="@string/select_protocol_title" />
+                android:text="@string/select_protocol_title"
+                android:theme="@style/AppTheme.Tittles" />
 
             <com.tpp.private_doh.components.ProtocolSelector
                 android:id="@+id/protocolSelector"
-                android:layout_width="match_parent"
+                android:layout_width="195dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentBottom="true"
-                android:layout_marginStart="0dp"
-                android:layout_marginEnd="0dp"
+                android:layout_marginStart="55dp"
+                android:layout_marginEnd="55dp"
                 android:layout_marginBottom="67dp"
                 android:checkedButton="@id/rbDoH"
                 android:gravity="center_vertical|center_horizontal"
                 android:orientation="horizontal"
                 android:text="@string/racing_amount"
+                android:theme="@style/AppTheme.Options"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
                 app:layout_constraintStart_toStartOf="parent">
 
                 <RadioButton
                     android:id="@+id/rbDoH"
-                    android:layout_width="111dp"
+                    android:layout_width="65dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/doh"
-                    android:textSize="20sp" />
+                    android:buttonTint="@color/colorPrimary"
+                    android:text="@string/doh" />
 
                 <RadioButton
                     android:id="@+id/rbDNS"
-                    android:layout_width="111dp"
+                    android:layout_width="65dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/dns"
-                    android:textSize="20sp" />
+                    android:buttonTint="@color/colorPrimary"
+                    android:text="@string/dns" />
 
                 <RadioButton
                     android:id="@+id/rbBoth"
-                    android:layout_width="111dp"
+                    android:layout_width="65dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/both"
-                    android:textSize="20sp" />
+                    android:buttonTint="@color/colorPrimary"
+                    android:text="@string/both" />
             </com.tpp.private_doh.components.ProtocolSelector>
 
 
@@ -105,7 +107,7 @@
                 android:id="@+id/RacingSeekBarText"
                 android:layout_width="153dp"
                 android:layout_height="27dp"
-                android:layout_above="@+id/RacingSeekBar"
+                android:layout_above="@+id/racingAmountSelector"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
@@ -113,19 +115,18 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="83dp"
                 android:layout_marginBottom="42dp"
-                android:autoSizeTextType="uniform"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/racing_amount"
-                app:layout_constraintBottom_toTopOf="@+id/RacingSeekBar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.501"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                android:theme="@style/AppTheme.Tittles"/>
 
             <TextView
                 android:id="@+id/progress"
                 android:layout_width="31dp"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/RacingSeekBar"
+                android:layout_above="@+id/racingAmountSelector"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginStart="152dp"
@@ -134,14 +135,14 @@
                 android:layout_marginBottom="12dp"
                 android:autoSizeTextType="uniform"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="2"
-                app:layout_constraintBottom_toTopOf="@+id/RacingSeekBar"
+                android:theme="@style/AppTheme.Options"
+                app:layout_constraintBottom_toTopOf="@+id/racingAmountSelector"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <SeekBar
-                android:id="@+id/RacingSeekBar"
+            <com.tpp.private_doh.components.RacingAmountSelector
+                android:id="@+id/racingAmountSelector"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
@@ -150,29 +151,32 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
-                android:max="10"
-                android:min="1"
+                android:progressTint="@color/colorPrimaryDark"
+                android:thumbTint="@color/colorPrimary"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.495"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.404" />
+                app:layout_constraintVertical_bias="0.404"
+                custom:text_id="@+id/progress" />
 
         </RelativeLayout>
 
         <com.tpp.private_doh.components.StartVPNButton
             android:id="@+id/startVpn"
-            android:layout_width="132dp"
-            android:layout_height="82dp"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginStart="100dp"
-            android:layout_marginEnd="100dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginEnd="120dp"
             android:layout_marginBottom="27dp"
+            android:background="@drawable/button"
             android:gravity="center_vertical|center_horizontal"
-            android:textSize="18sp" />
+            android:text="@string/fetch_resolvers_counts"
+            android:theme="@style/AppTheme.Button" />
 
 
     </RelativeLayout>
@@ -189,21 +193,21 @@
         app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
 
 
-
         <Button
             android:id="@+id/resolversCountsButton"
-            android:layout_width="match_parent"
-            android:layout_height="61dp"
+            android:layout_width="wrap_content"
+            android:layout_height="29dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="0dp"
+            android:layout_marginStart="19dp"
             android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp"
+            android:layout_marginEnd="19dp"
+            android:background="@drawable/button"
             android:gravity="center_vertical|center_horizontal"
             android:onClick="fetchCount"
             android:text="@string/fetch_resolvers_counts"
-            android:textSize="14sp"
+            android:theme="@style/AppTheme.Button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -220,9 +224,10 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="1dp"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="0dp"
             android:layout_marginBottom="0dp"
+            android:theme="@style/AppTheme.Metrics"
             app:layout_constraintHorizontal_bias="0.546"
             app:layout_constraintVertical_bias="0.768" />
 

@@ -7,18 +7,39 @@
     tools:context=".app.MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main" />
+
+
+    <TextView
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:gravity="center_vertical"
+        android:text="   PDoH"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorTextWithBackground"
+        app:layout_anchor="@+id/appBarLayout"
+        app:layout_anchorGravity="bottom|center" />
+
+
+    <ImageView
+        android:id="@+id/bugLink"
+        android:layout_width="54dp"
+        android:layout_height="?attr/actionBarSize"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_action_name"
+        app:layout_anchor="@+id/toolbar"
+        app:layout_anchorGravity="end|center"
+        android:autoLink="web"
+        android:onClick="bugClicked"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
