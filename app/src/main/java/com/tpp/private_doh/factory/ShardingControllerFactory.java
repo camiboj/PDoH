@@ -25,6 +25,8 @@ public class ShardingControllerFactory {
 
     public ShardingControllerFactory(ProtocolId protocolId, int racingAmount, PingController pingController) {
         Log.i(TAG, "protocolId: " + protocolId);
+        Thread t = new Thread(pingController);
+
         switch (protocolId) {
             case DOH:
                 Log.i(TAG, "DOH");
@@ -33,10 +35,12 @@ public class ShardingControllerFactory {
             case DNS:
                 Log.i(TAG, "DNS");
                 this.shardingController = new DnsShardingController(pingController);
+                t.start();
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
                 this.shardingController = new DnsShardingController(pingController);
+                t.start();
                 pingController.addDohRequesters();
                 break;
             default:

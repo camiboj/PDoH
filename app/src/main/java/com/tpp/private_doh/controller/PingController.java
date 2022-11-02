@@ -111,8 +111,6 @@ public class PingController implements Runnable {
         List<List<String>> allGroups = CombinationUtils.combination(this.activeIps, this.nSharders);
         allGroups.forEach(group -> {
             if (!shardingGroups.contains(group)) {
-                Log.i(TAG, String.format("Active ips: %s", this.activeIps));
-                Log.i(TAG, String.format("Group: %s", group));
                 shardingGroups.add(group);
             }
         });
