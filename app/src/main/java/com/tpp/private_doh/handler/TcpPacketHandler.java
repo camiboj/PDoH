@@ -3,6 +3,7 @@ package com.tpp.private_doh.handler;
 import android.net.VpnService;
 import android.util.Log;
 
+import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.protocol.IP4Header;
 import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.protocol.Packet;
@@ -13,6 +14,7 @@ import com.tpp.private_doh.util.SocketUtils;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -137,11 +139,27 @@ public class TcpPacketHandler implements Runnable {
         pipe.theirAcknowledgementNum = tcpHeader.getAcknowledgementNumber();
 
         pipe.myAcknowledgementNum += payloadSize;
-        pipe.remoteOutBuffer.put(packet.getBackingBuffer());
+        fillRemoteOutBuffer(pipe, packet.getBackingBuffer());
         pipe.remoteOutBuffer.flip();
         tryFlushWrite(pipe, pipe.remote);
         sendTcpPack(pipe, (byte) TcpHeader.ACK, null);
         System.currentTimeMillis();
+    }
+
+    private void fillRemoteOutBuffer(TcpPipe pipe, ByteBuffer backingBuffer) {
+        boolean filled = false;
+        while (!filled) {
+            try {
+                pipe.remoteOutBuffer.put(backingBuffer);
+                filled = true;
+            } catch (Exception e) {
+                int limit = pipe.remoteOutBuffer.limit();
+                limit *= 2;
+                ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(limit);
+                auxiliaryBuffer.put(pipe.remoteOutBuffer);
+                pipe.remoteOutBuffer = auxiliaryBuffer;
+            }
+        }
     }
 
     private SelectionKey getKey(SocketChannel channel) {
@@ -149,7 +167,6 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private boolean tryFlushWrite(TcpPipe pipe, SocketChannel channel) throws Exception {
-
         ByteBuffer buffer = pipe.remoteOutBuffer;
         if (pipe.remote.socket().isOutputShutdown() && buffer.remaining() != 0) {
             sendTcpPack(pipe, (byte) (TcpHeader.FIN | TcpHeader.ACK), null);
@@ -166,11 +183,15 @@ public class TcpPacketHandler implements Runnable {
         }
         while (buffer.hasRemaining()) {
             int n = 0;
-            n = channel.write(buffer);
+            try {
+                n = channel.write(buffer);
+            } catch (Exception e) {
+                Log.e(TAG, "Exception in write:", e);
+            }
             if (n > 4000) {
                 System.currentTimeMillis();
             }
-            if (n <= 0) {
+            if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
                 key.interestOps(ops);
@@ -185,7 +206,6 @@ public class TcpPacketHandler implements Runnable {
         }
         return true;
     }
-
 
     private void closeUpStream(TcpPipe pipe) {
         try {
@@ -265,7 +285,7 @@ public class TcpPacketHandler implements Runnable {
 
     private void doRead(SocketChannel channel) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(4 * 1024);
-        String quitType = "";
+        boolean shouldQuit = false;
 
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(channel, "pipe");
 
@@ -273,7 +293,7 @@ public class TcpPacketHandler implements Runnable {
             buffer.clear();
             int n = SocketUtils.read(channel, buffer);
             if (n == -1) {
-                quitType = "fin";
+                shouldQuit = true;
                 break;
             } else if (n == 0) {
                 break;
@@ -286,7 +306,7 @@ public class TcpPacketHandler implements Runnable {
                 }
             }
         }
-        if (quitType.equals("fin")) {
+        if (shouldQuit) {
             closeDownStream(pipe);
         }
     }
@@ -410,7 +430,7 @@ public class TcpPacketHandler implements Runnable {
         public int packId = 1;
         public long timestamp = 0L;
         int synCount = 0;
-        private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(8 * 1024);
+        private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(Config.TCP_BUFFER_BYTES);
     }
 }
 

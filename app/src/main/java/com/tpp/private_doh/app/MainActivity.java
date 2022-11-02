@@ -46,9 +46,6 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         this.pingController = new PingController();
-        Thread t = new Thread(pingController);
-        t.start();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
