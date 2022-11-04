@@ -47,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         this.pingController = new PingController();
         super.onCreate(savedInstanceState);
+
+        Intent vpnIntent = VpnService.prepare(this);
+
+        // Ask for permission - dont start VPN
+        if (vpnIntent != null) {
+            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+        }
+
         setContentView(R.layout.activity_main);
 
         countOutput = findViewById(R.id.resolversCountsText);
@@ -112,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
         startVpnButton.setOnclick(this::startVpn, this::stopVpn);
 
     }
+
     private void startVpn() {
         ProtocolId protocol = ProtocolId.DOH;
         try {
@@ -123,12 +132,11 @@ public class MainActivity extends AppCompatActivity {
 
         Intent vpnIntent = VpnService.prepare(this);
 
-        if (vpnIntent != null) {
-            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
-        } else {
+        if (vpnIntent == null) {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
-            enableVpnComponents(false);
         }
+
+        enableVpnComponents(false);
     }
 
     private void stopVpn() {
@@ -149,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         }
         countOutput.setText(message);
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
