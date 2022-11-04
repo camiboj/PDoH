@@ -26,7 +26,9 @@ public class DohShardingControllerTest {
         requesters.add(requester);
         requesters.add(otherRequester);
 
-        ShardingController shardingController = new DohShardingController(requesters, 1);
+        DohRequesterManager dohRequesterManager = new DohRequesterManager(requesters, 1);
+
+        ShardingController shardingController = new DohShardingController(dohRequesterManager);
         shardingController.executeRequest(name, type);
 
         verify(requester).executeRequest(name, type);

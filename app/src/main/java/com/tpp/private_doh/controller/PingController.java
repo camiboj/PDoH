@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();
     private final List<Requester> dnsRequesters;
-    private List<Requester> dohRequesters;
     private int actualIdx;
     private List<String> activeIps;
     private List<List<String>> shardingGroups;
@@ -34,7 +33,6 @@ public class PingController implements Runnable {
         this.activeIps = new ArrayList<>();
         this.dnsRequesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
-        this.dohRequesters = new ArrayList<>();
         this.actualIdx = 0;
     }
 
@@ -44,19 +42,6 @@ public class PingController implements Runnable {
 
     public void setNSharders(int nSharders) {
         this.nSharders = nSharders;
-    }
-
-    public void addDohRequesters() {
-        Log.i(TAG, "Someone called addDohRequesters");
-
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester();
-        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester();
-        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester();
-
-        this.dohRequesters = Arrays.asList(googleDoHRequester, cloudflareDoHRequester, quad9DoHRequester);
-        this.activeIps.add(googleDoHRequester.getName());
-        this.activeIps.add(cloudflareDoHRequester.getName());
-        this.activeIps.add(quad9DoHRequester.getName());
     }
 
     public List<Requester> getActiveRequesters() {
@@ -70,10 +55,9 @@ public class PingController implements Runnable {
         this.actualIdx += 1;
         List<String> ips = this.shardingGroups.get(actualIdx);
 
-        Stream<Requester> dnsRequesters = this.dnsRequesters.stream().filter(requester -> ips.contains(requester.getName()));
-        Stream<Requester> dohRequesters = this.dohRequesters.stream().filter(requester -> ips.contains(requester.getName()));
-
-        return Stream.concat(dnsRequesters, dohRequesters).collect(Collectors.toList());
+        return this.dnsRequesters.stream()
+                .filter(requester -> ips.contains(requester.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override
