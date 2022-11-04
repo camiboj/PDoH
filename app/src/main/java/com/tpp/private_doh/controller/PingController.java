@@ -29,19 +29,16 @@ public class PingController implements Runnable {
     private List<List<String>> shardingGroups;
     private int nSharders;
 
-    public PingController() {
+    public PingController(int nSharders) {
         this.activeIps = new ArrayList<>();
         this.dnsRequesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
         this.actualIdx = 0;
+        this.nSharders = nSharders;
     }
 
     public List<Requester> getDnsRequesters() {
         return this.dnsRequesters;
-    }
-
-    public void setNSharders(int nSharders) {
-        this.nSharders = nSharders;
     }
 
     public List<Requester> getActiveRequesters() {

@@ -55,7 +55,7 @@ public class NetworkManagerTest extends Helper {
         BlockingQueue<DnsPacket> dnsResponsesQueue = new ArrayBlockingQueue<>(1000);
         BlockingQueue<ByteBuffer> networkToDeviceQueue = new ArrayBlockingQueue<>(1000);
 
-        ShardingControllerFactory shardingControllerFactory = new ShardingControllerFactory(ProtocolId.DOH, 1, pingController);
+        ShardingControllerFactory shardingControllerFactory = new ShardingControllerFactory(ProtocolId.DOH, 1);
         NetworkManager.setShardingControllerFactory(shardingControllerFactory);
         this.networkManager = new NetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue,
                 deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);

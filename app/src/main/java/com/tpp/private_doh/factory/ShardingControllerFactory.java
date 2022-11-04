@@ -25,7 +25,8 @@ public class ShardingControllerFactory {
     private final String TAG = this.getClass().getSimpleName();
     private final ShardingController shardingController;
 
-    public ShardingControllerFactory(ProtocolId protocolId, int racingAmount, PingController pingController) {
+    public ShardingControllerFactory(ProtocolId protocolId, int racingAmount) {
+        PingController pingController = new PingController(racingAmount);
         Log.i(TAG, "protocolId: " + protocolId);
         DohRequesterManager dohRequesterManager = new DohRequesterManager(pureDohRequesters, racingAmount);
         Thread t = new Thread(pingController);
