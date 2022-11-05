@@ -140,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean startVpn() {
+        Log.e(TAG, "LLAME A START");
+
         if (!checkInternet()) {
             // TODO: add toast to let the user know there is no internet available
             // TODO: test this when we are connected to roaming instead of wifi
@@ -163,17 +165,20 @@ public class MainActivity extends AppCompatActivity {
         }
         enableVpnComponents(false);
 
-        InternetChecker internetChecker = new InternetChecker(this::checkVpnTraffic);
+        InternetChecker internetChecker = new InternetChecker(this::checkInternet);
         Thread t = new Thread(internetChecker);
         t.start();
         return true;
     }
 
     private void stopVpnInternet() {
-        // TODO: show the user we are stopping the vpn because of a connection issue
         Log.e(TAG, "We need to stop the vpn due to a connectivity issue");
         StartVPNButton startVpnButton = findViewById(R.id.startVpn);
         startVpnButton.closeVpn();
+
+        Toast toast = Toast.makeText(getApplicationContext(), "We detected a connectivity issue\nTry starting the VPN again", Toast.LENGTH_SHORT);
+        toast.show();
+
         stopVpn();
     }
 
@@ -210,12 +215,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean checkInternet() {
-        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        Network[] mWifi = connManager.getAllNetworks();
-        return mWifi.length != 0;
-    }
-
-    public boolean checkVpnTraffic() {
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         Network[] mWifi = connManager.getAllNetworks();
         NetworkCapabilities networkCapabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
