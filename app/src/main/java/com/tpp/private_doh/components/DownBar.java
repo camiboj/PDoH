@@ -2,6 +2,7 @@ package com.tpp.private_doh.components;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
@@ -9,6 +10,8 @@ import android.widget.RelativeLayout;
 public class DownBar extends RelativeLayout {
     private DownBarButton vpnScreenButton;
     private DownBarButton metricsScreenButton;
+    private View vpnScreen;
+    private View metricScreen;
 
     public DownBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -44,12 +47,26 @@ public class DownBar extends RelativeLayout {
 
         vpnScreenButton.setEnabled(true);
         vpnScreenButton.setOnClickListener(v -> {
-            vpnScreenButton.setEnabled(true);
-            metricsScreenButton.setEnabled(false);
+            setVpnClicked(true);
         });
         metricsScreenButton.setOnClickListener(v -> {
-            vpnScreenButton.setEnabled(false);
-            metricsScreenButton.setEnabled(true);
+            setVpnClicked(false);
         });
+    }
+
+    private void setVpnClicked(Boolean isVpnClicked) {
+        int vpnVisibility = isVpnClicked ? VISIBLE : INVISIBLE;
+        int metricsVisibility = isVpnClicked ? INVISIBLE : VISIBLE;
+        vpnScreenButton.setEnabled(isVpnClicked);
+        vpnScreen.setVisibility(vpnVisibility);
+        metricsScreenButton.setEnabled(!isVpnClicked);
+        metricScreen.setVisibility(metricsVisibility);
+    }
+
+    public void setVpnScreen(View vpnScreen) {
+        this.vpnScreen = vpnScreen;
+    }
+    public void setMetricsScreen(View metricScreen) {
+        this.metricScreen = metricScreen;
     }
 }

@@ -44,6 +44,11 @@
         layout="@layout/content_main" />
 
 
+    <include
+        android:id="@+id/include"
+        layout="@layout/metrics" />
+
+
     <RelativeLayout
         android:id="@+id/screen"
         android:layout_width="match_parent"
