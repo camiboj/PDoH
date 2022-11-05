@@ -1,7 +1,9 @@
 package com.tpp.private_doh.app;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -51,6 +53,15 @@ public class MainActivity extends AppCompatActivity {
     private TextView countOutput;
     private ShardingControllerFactory shardingControllerFactory;
 
+    private BroadcastReceiver stopVpnInternet = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Config.STOP_SIGNAL_FOR_INTERNET.equals(intent.getAction())) {
+                stopVpnInternet();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
         racingAmountSelector.setCustomMin(Config.MIN_RACING_AMOUNT);
         setSeekBarMax();
         setButtonHandlers();
+
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        lbm.registerReceiver(stopVpnInternet, new IntentFilter(Config.STOP_SIGNAL_FOR_INTERNET));
     }
 
     @Override
@@ -128,9 +142,9 @@ public class MainActivity extends AppCompatActivity {
     private boolean startVpn() {
         if (!checkInternet()) {
             // TODO: add toast to let the user know there is no internet available
-            // TODO: test this when we are connected to roaming istead of wifi
+            // TODO: test this when we are connected to roaming instead of wifi
             Log.e(TAG, "There is no internet");
-            Toast toast = Toast.makeText(getApplicationContext(), "There is no internet", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getApplicationContext(), "There is no internet\nTry again when you're connected to wifi", Toast.LENGTH_SHORT);
             toast.show();
             return false;
         }
@@ -149,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         }
         enableVpnComponents(false);
 
-        InternetChecker internetChecker = new InternetChecker(this::checkVpnTraffic, this::stopVpnInternet);
+        InternetChecker internetChecker = new InternetChecker(this::checkVpnTraffic);
         Thread t = new Thread(internetChecker);
         t.start();
         return true;
@@ -158,14 +172,8 @@ public class MainActivity extends AppCompatActivity {
     private void stopVpnInternet() {
         // TODO: show the user we are stopping the vpn because of a connection issue
         Log.e(TAG, "We need to stop the vpn due to a connectivity issue");
-        new Handler(Looper.getMainLooper()).postAtFrontOfQueue(() -> {
-            StartVPNButton startVpnButton = findViewById(R.id.startVpn);
-            startVpnButton.closeVpn();
-        });
-        /*runOnUiThread(() -> {
-            StartVPNButton startVpnButton = findViewById(R.id.startVpn);
-            startVpnButton.closeVpn();
-        });*/
+        StartVPNButton startVpnButton = findViewById(R.id.startVpn);
+        startVpnButton.closeVpn();
         stopVpn();
     }
 
