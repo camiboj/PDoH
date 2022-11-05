@@ -129,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
             // TODO: add toast to let the user know there is no internet available
             // TODO: test this when we are connected to roaming istead of wifi
             Log.e(TAG, "There is no internet");
+            Toast toast = Toast.makeText(getApplicationContext(), "There is no internet", Toast.LENGTH_SHORT);
+            toast.show();
             return false;
         }
         ProtocolId protocol = ProtocolId.DOH;
