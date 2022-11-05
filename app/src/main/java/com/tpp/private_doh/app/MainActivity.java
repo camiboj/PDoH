@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ProtocolSelector protocolSelector;
     private RacingAmountSelector racingAmountSelector;
-    private TextView countOutput;
+    // private TextView countOutput;
     private ShardingControllerFactory shardingControllerFactory;
 
     @Override
@@ -55,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        countOutput = findViewById(R.id.resolversCountsText);
+        // countOutput = findViewById(R.id.resolversCountsText);
 
         protocolSelector = findViewById(R.id.protocolSelector);
         racingAmountSelector = findViewById(R.id.racingAmountSelector);
@@ -156,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                     .map(key -> map.get(key) + "\n " + key)
                     .collect(Collectors.joining("\n\n"));
         }
-        countOutput.setText(message);
+        // countOutput.setText(message);
     }
 
     @Override

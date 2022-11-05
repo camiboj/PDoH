@@ -9,9 +9,9 @@ import androidx.core.content.ContextCompat;
 
 import com.tpp.private_doh.R;
 
-public class DownBarButton extends androidx.appcompat.widget.AppCompatButton {
+public class CustomButton extends androidx.appcompat.widget.AppCompatButton {
 
-    public DownBarButton(Context context, String text, ViewGroup.MarginLayoutParams marginLayoutParams) {
+    public CustomButton(Context context, String text, ViewGroup.MarginLayoutParams marginLayoutParams) {
         super(new ContextThemeWrapper(context, R.style.AppTheme_Button), null, R.style.AppTheme_Button);
 
         this.setLayoutParams(marginLayoutParams);
