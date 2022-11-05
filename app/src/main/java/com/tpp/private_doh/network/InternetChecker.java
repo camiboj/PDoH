@@ -24,7 +24,6 @@ public class InternetChecker extends Service implements Runnable {
     public void run() {
         boolean internetOn = checkInternet();
         while (internetOn) {
-            Log.i(TAG, "We have internet!");
             internetOn = checkInternet();
             sleepThread();
         }

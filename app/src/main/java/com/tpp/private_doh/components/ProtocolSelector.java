@@ -31,7 +31,6 @@ public class ProtocolSelector extends RadioGroup {
 
     @Override
     public void setEnabled(boolean enabled) {
-        Log.i(TAG, String.format("this.getChildCount(): %s", this.getChildCount()));
         super.setEnabled(enabled);
         int color = enabled? R.color.colorPrimary : R.color.colorDisabled;
         for (int i = 0; i < getChildCount(); i++) {

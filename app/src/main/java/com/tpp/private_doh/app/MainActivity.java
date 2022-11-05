@@ -140,10 +140,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean startVpn() {
-        Log.e(TAG, "LLAME A START");
-
         if (!checkInternet()) {
-            // TODO: add toast to let the user know there is no internet available
             // TODO: test this when we are connected to roaming instead of wifi
             Log.e(TAG, "There is no internet");
             Toast toast = Toast.makeText(getApplicationContext(), "There is no internet\nTry again when you're connected to wifi", Toast.LENGTH_SHORT);

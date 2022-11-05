@@ -1,14 +1,10 @@
 package com.tpp.private_doh.components;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
 import android.util.AttributeSet;
 import android.util.Log;
 
 import androidx.appcompat.widget.AppCompatButton;
-
-import com.tpp.private_doh.config.Config;
 
 import java.util.concurrent.Callable;
 
@@ -34,7 +30,7 @@ public class StartVPNButton extends AppCompatButton {
             if (vpnOn) {
                 try {
                     Boolean result = onStartVPN.call();
-                    if (! result) {
+                    if (!result) {
                         vpnOn = !vpnOn;
                     }
                 } catch (Exception e) {
@@ -48,6 +44,7 @@ public class StartVPNButton extends AppCompatButton {
     }
 
     public void closeVpn() {
+        vpnOn = false;
         setText(VPN_OFF);
     }
 }
