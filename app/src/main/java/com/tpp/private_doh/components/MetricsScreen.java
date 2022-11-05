@@ -6,6 +6,9 @@ import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
+import com.tpp.private_doh.R;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.HashMap;
@@ -56,20 +59,28 @@ public class MetricsScreen extends LinearLayout {
             put("198.5.23.1", 6);
         }};
 
-        int metricsCount = map.size();
-        // TODO: agregar padding lindo para que los contadores esten alineados
+        int metricsAmount = 0;
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            if (entry.getValue() > 0) {
+                metricsAmount++;
+            }
+        }
+        int count = 0;
         for (Map.Entry<String, Integer> entry : map.entrySet()) {
             String key = entry.getKey();
             int value = entry.getValue();
             if (value > 0) {
-                createMetricLayout(key, value, metricsCount);
+                count++;
+                createMetricLayout(key, value, metricsAmount, count);
             }
         }
     }
 
-    private void createMetricLayout(String requesterName, int metric, int metricsCount) {
-        int metricHeight = getHeight() / metricsCount;
+    private void createMetricLayout(String requesterName, int metric, int metricsAmount, int count) {
+        int color = count%2 == 0 ? R.color.colorMetric1 : R.color.colorMetric2;
+        int metricHeight = getHeight() / metricsAmount;
         RequesterMetric rm = new RequesterMetric(getContext(), requesterName, metric, metricHeight);
-        this.addView(rm);
+        rm.setBackground(ContextCompat.getDrawable(getContext(), color));
+        addView(rm);
     }
 }

@@ -8,13 +8,18 @@ import android.widget.TextView;
 public class RequesterMetric extends LinearLayout {
     public RequesterMetric(Context context, String requesterName, int metric, int metricHeight) {
         super(context);
-        this.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight));
-        this.setOrientation(VERTICAL);
-
-        TextView requester = new TextView(context);
-        requester.setText(requesterName);
-        TextView count = new TextView(context);
-        count.setText(String.valueOf(metric));
+        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight));
+        setOrientation(VERTICAL);
+        TextView requester = new RequesterName(
+                context,
+                requesterName,
+                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight/2)
+        );
+        TextView count = new RequesterCount(
+                context,
+                String.valueOf(metric),
+                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight/2)
+        );
 
         this.addView(requester);
         this.addView(count);

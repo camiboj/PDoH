@@ -57,7 +57,7 @@
         <com.tpp.private_doh.components.DownBar
             android:id="@+id/down_bar"
             android:layout_width="match_parent"
-            android:layout_height="53dp"
+            android:layout_height="?attr/actionBarSize"
             android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true"
             android:layout_marginStart="0dp"
