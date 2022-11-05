@@ -73,5 +73,6 @@ public class DownBar extends RelativeLayout {
     }
     public void setMetricsScreen(View metricScreen) {
         this.metricScreen = metricScreen;
+        metricScreen.setVisibility(INVISIBLE);
     }
 }

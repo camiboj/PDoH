@@ -31,5 +31,4 @@ public class MetricsScreen extends RelativeLayout {
         this.addView(button);
         button.setEnabled(true);
     }
-
 }
