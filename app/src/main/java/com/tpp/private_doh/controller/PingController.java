@@ -16,7 +16,9 @@ import com.tpp.private_doh.util.Requester;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,12 +27,12 @@ public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();
     private final List<Requester> dnsRequesters;
     private int actualIdx;
-    private List<String> activeIps;
+    private LinkedBlockingQueue<String> activeIps;
     private List<List<String>> shardingGroups;
     private int nSharders;
 
     public PingController() {
-        this.activeIps = new ArrayList<>();
+        this.activeIps = new LinkedBlockingQueue<>();
         this.dnsRequesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
         this.actualIdx = 0;
@@ -88,8 +90,12 @@ public class PingController implements Runnable {
 
     private void reprocessIps() {
         // Remove all groups that included a disabled ip
-        shardingGroups.removeIf(shardingGroup ->
-                shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
+        try {
+            shardingGroups.removeIf(shardingGroup ->
+                    shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
+        } catch (ConcurrentModificationException e) {
+            System.currentTimeMillis();
+        }
 
         // Create groups that include active ips
         List<List<String>> allGroups = CombinationUtils.combination(this.activeIps, this.nSharders);
