@@ -87,12 +87,8 @@ public class PingController implements Runnable {
 
     private void reprocessIps() {
         // Remove all groups that included a disabled ip
-        try {
-            shardingGroups.removeIf(shardingGroup ->
-                    shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
-        } catch (ConcurrentModificationException e) {
-            System.currentTimeMillis();
-        }
+        shardingGroups.removeIf(shardingGroup ->
+                shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
 
         // Create groups that include active ips
         List<List<String>> allGroups = CombinationUtils.combination(this.activeIps, this.nSharders);
