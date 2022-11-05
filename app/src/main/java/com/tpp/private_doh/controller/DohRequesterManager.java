@@ -11,6 +11,9 @@ public class DohRequesterManager {
     private int actualIdx;
 
     public DohRequesterManager(List<Requester> requesters, int n) {
+        if (n > requesters.size()) {
+            n = requesters.size();
+        }
         this.combinationRequesters = CombinationUtils.combination(requesters, n);
         this.actualIdx = 0;
         this.requesters = requesters;
