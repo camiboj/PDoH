@@ -16,6 +16,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
+import com.tpp.private_doh.components.DownBar;
 import com.tpp.private_doh.components.ProtocolSelector;
 import com.tpp.private_doh.components.RacingAmountSelector;
 import com.tpp.private_doh.components.StartVPNButton;
@@ -63,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
         racingAmountSelector.setCustomMin(Config.MIN_RACING_AMOUNT);
         setSeekBarMax();
         setButtonHandlers();
+
+        DownBar db = findViewById(R.id.down_bar);
+        db.setVpnScreen(findViewById(R.id.vpn_layout));
+        db.setMetricsScreen(findViewById(R.id.metrics_layout));
     }
 
     @Override
