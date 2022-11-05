@@ -21,7 +21,6 @@ import com.tpp.private_doh.components.RacingAmountSelector;
 import com.tpp.private_doh.components.StartVPNButton;
 import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.config.Config;
-import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 
@@ -39,14 +38,20 @@ public class MainActivity extends AppCompatActivity {
     private ProtocolSelector protocolSelector;
     private RacingAmountSelector racingAmountSelector;
     private TextView countOutput;
-    private PingController pingController;
     private ShardingControllerFactory shardingControllerFactory;
 
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
-        this.pingController = new PingController();
         super.onCreate(savedInstanceState);
+
+        Intent vpnIntent = VpnService.prepare(this);
+
+        // Ask for permission - dont start VPN
+        if (vpnIntent != null) {
+            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+        }
+
         setContentView(R.layout.activity_main);
 
         countOutput = findViewById(R.id.resolversCountsText);
@@ -95,8 +100,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            pingController.setNSharders(racingAmount);
-            shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmount, pingController);
+            shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmount);
             PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
             startService(new Intent(this, PDoHVpnService.class));
         }
@@ -112,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         startVpnButton.setOnclick(this::startVpn, this::stopVpn);
 
     }
+
     private void startVpn() {
         ProtocolId protocol = ProtocolId.DOH;
         try {
@@ -123,12 +128,11 @@ public class MainActivity extends AppCompatActivity {
 
         Intent vpnIntent = VpnService.prepare(this);
 
-        if (vpnIntent != null) {
-            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
-        } else {
+        if (vpnIntent == null) {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
-            enableVpnComponents(false);
         }
+
+        enableVpnComponents(false);
     }
 
     private void stopVpn() {
@@ -149,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         }
         countOutput.setText(message);
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();

@@ -36,8 +36,7 @@ public class PingControllerTest {
 
     @Test
     public void testPingControllerPingsActiveIp() {
-        PingController pingController = new PingController();
-        pingController.setNSharders(1);
+        PingController pingController = new PingController(1);
         String ip = "1.1.1.1";
 
         when(publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1)).thenReturn(CompletableFuture.supplyAsync(() -> response));
@@ -52,13 +51,12 @@ public class PingControllerTest {
 
     @Test
     public void testPingControllerPingNonActiveIpThatReturnsEmptyAnswer() throws ExecutionException, InterruptedException, TimeoutException {
-        PingController pingController = new PingController();
-        pingController.setNSharders(1);
+        PingController pingController = new PingController(1);
         String ip = "1.1.1.1";
         CompletableFuture completableFuture = mock(CompletableFuture.class);
 
         when(publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1)).thenReturn(completableFuture);
-        when(completableFuture.get(30, TimeUnit.SECONDS)).thenThrow(new TimeoutException());
+        when(completableFuture.get(Config.PING_TIMEOUT, TimeUnit.SECONDS)).thenThrow(new TimeoutException());
         when(publicDnsRequester.getIp()).thenReturn(ip);
 
         pingController.processIp(publicDnsRequester);
@@ -69,8 +67,7 @@ public class PingControllerTest {
 
     @Test
     public void testPingControllerReturnsRightIp() {
-        PingController pingController = new PingController();
-        pingController.setNSharders(1);
+        PingController pingController = new PingController(1);
         String ip = "1.1.1.1";
         String ip2 = "8.8.8.8";
 

@@ -31,19 +31,16 @@ public class PingController implements Runnable {
     private List<List<String>> shardingGroups;
     private int nSharders;
 
-    public PingController() {
+    public PingController(int nSharders) {
         this.activeIps = new LinkedBlockingQueue<>();
         this.dnsRequesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
         this.actualIdx = 0;
+        this.nSharders = nSharders;
     }
 
     public List<Requester> getDnsRequesters() {
         return this.dnsRequesters;
-    }
-
-    public void setNSharders(int nSharders) {
-        this.nSharders = nSharders;
     }
 
     public List<Requester> getActiveRequesters() {
@@ -90,12 +87,8 @@ public class PingController implements Runnable {
 
     private void reprocessIps() {
         // Remove all groups that included a disabled ip
-        try {
-            shardingGroups.removeIf(shardingGroup ->
-                    shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
-        } catch (ConcurrentModificationException e) {
-            System.currentTimeMillis();
-        }
+        shardingGroups.removeIf(shardingGroup ->
+                shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
 
         // Create groups that include active ips
         List<List<String>> allGroups = CombinationUtils.combination(this.activeIps, this.nSharders);
