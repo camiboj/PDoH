@@ -1,10 +1,14 @@
 package com.tpp.private_doh.components;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.util.AttributeSet;
 import android.util.Log;
 
 import androidx.appcompat.widget.AppCompatButton;
+
+import com.tpp.private_doh.config.Config;
 
 import java.util.concurrent.Callable;
 
@@ -24,13 +28,13 @@ public class StartVPNButton extends AppCompatButton {
         setText(vpnOn ? VPN_ON : VPN_OFF);
     }
 
-    public void setOnclick(Callable<Boolean> onStartVPN, Runnable onStopVPN) {
+    public void setOnClick(Callable<Boolean> onStartVPN, Runnable onStopVPN) {
         this.setOnClickListener(v -> {
             vpnOn = !vpnOn;
             if (vpnOn) {
                 try {
                     Boolean result = onStartVPN.call();
-                    if (!result) {
+                    if (! result) {
                         vpnOn = !vpnOn;
                     }
                 } catch (Exception e) {
@@ -41,5 +45,9 @@ public class StartVPNButton extends AppCompatButton {
             }
             updateText();
         });
+    }
+
+    public void closeVpn() {
+        setText(VPN_OFF);
     }
 }

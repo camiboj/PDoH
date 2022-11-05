@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
-import android.net.NetworkInfo;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
@@ -27,8 +27,10 @@ import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
+import com.tpp.private_doh.network.InternetChecker;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -38,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
+    private final List<Integer> ACCEPTED_NETWORK_CAPABILITIES = Arrays.asList(
+            NetworkCapabilities.TRANSPORT_CELLULAR, NetworkCapabilities.TRANSPORT_WIFI,
+            NetworkCapabilities.TRANSPORT_ETHERNET);
+
 
     private ProtocolSelector protocolSelector;
     private RacingAmountSelector racingAmountSelector;
@@ -45,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     private ShardingControllerFactory shardingControllerFactory;
 
     @Override
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -91,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     private void setSeekBarMax() {
         try {
             int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
@@ -117,15 +121,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void setButtonHandlers() {
         StartVPNButton startVpnButton = findViewById(R.id.startVpn);
-        startVpnButton.setOnclick(this::startVpn, this::stopVpn);
-
+        startVpnButton.setOnClick(this::startVpn, this::stopVpn);
     }
 
     private boolean startVpn() {
-        if (! checkWifi()) {
+        if (!checkInternet()) {
             // TODO: add toast to let the user know there is no internet available
             // TODO: test this when we are connected to roaming istead of wifi
-            Log.w(TAG,"There is no internet");
+            Log.e(TAG, "There is no internet");
             return false;
         }
         ProtocolId protocol = ProtocolId.DOH;
@@ -142,7 +145,21 @@ public class MainActivity extends AppCompatActivity {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
         }
         enableVpnComponents(false);
+
+        InternetChecker internetChecker = new InternetChecker(this::checkVpnTraffic, this::stopVpnInternet);
+        Thread t = new Thread(internetChecker);
+        t.start();
         return true;
+    }
+
+    private void stopVpnInternet() {
+        // TODO: show the user we are stopping the vpn because of a connection issue
+        Log.e(TAG, "We need to stop the vpn due to a connectivity issue");
+        runOnUiThread(() -> {
+            StartVPNButton startVpnButton = findViewById(R.id.startVpn);
+            startVpnButton.closeVpn();
+        });
+        stopVpn();
     }
 
     private void stopVpn() {
@@ -177,9 +194,18 @@ public class MainActivity extends AppCompatActivity {
         startActivity(httpIntent);
     }
 
-    private boolean checkWifi() {
+    public boolean checkInternet() {
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         Network[] mWifi = connManager.getAllNetworks();
         return mWifi.length != 0;
+    }
+
+    public boolean checkVpnTraffic() {
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network[] mWifi = connManager.getAllNetworks();
+        NetworkCapabilities networkCapabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
+        boolean stillConnectedToWifi = networkCapabilities != null
+                && ACCEPTED_NETWORK_CAPABILITIES.stream().anyMatch(networkCapabilities::hasTransport);
+        return stillConnectedToWifi || mWifi.length > 1; // This is because the vpn connection counts as one
     }
 }
