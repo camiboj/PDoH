@@ -12,11 +12,7 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-
     </com.google.android.material.appbar.AppBarLayout>
-
-    <include layout="@layout/content_main" />
-
 
     <TextView
         android:id="@+id/toolbar"
@@ -42,4 +38,30 @@
         app:layout_anchorGravity="end|center"
         android:autoLink="web"
         android:onClick="bugClicked"/>
+
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_main" />
+
+
+    <RelativeLayout
+        android:id="@+id/screen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.tpp.private_doh.components.DownBar
+            android:id="@+id/down_bar"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginBottom="0dp"
+            android:background="@color/colorPrimaryLight">
+
+
+        </com.tpp.private_doh.components.DownBar>
+
+    </RelativeLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
