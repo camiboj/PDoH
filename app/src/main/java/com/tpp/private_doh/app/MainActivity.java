@@ -157,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        stopVpn();
     }
 
     public void bugClicked(View view) {
