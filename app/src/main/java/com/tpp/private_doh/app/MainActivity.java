@@ -1,6 +1,10 @@
 package com.tpp.private_doh.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
@@ -117,7 +121,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void startVpn() {
+    private boolean startVpn() {
+        if (! checkWifi()) {
+            // TODO: add toast to let the user know there is no internet available
+            // TODO: test this when we are connected to roaming istead of wifi
+            Log.w(TAG,"There is no internet");
+            return false;
+        }
         ProtocolId protocol = ProtocolId.DOH;
         try {
             protocol = protocolSelector.getProtocol();
@@ -131,8 +141,8 @@ public class MainActivity extends AppCompatActivity {
         if (vpnIntent == null) {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
         }
-
         enableVpnComponents(false);
+        return true;
     }
 
     private void stopVpn() {
@@ -164,5 +174,11 @@ public class MainActivity extends AppCompatActivity {
         httpIntent.setData(Uri.parse(Config.BUG_LINK));
 
         startActivity(httpIntent);
+    }
+
+    private boolean checkWifi() {
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network[] mWifi = connManager.getAllNetworks();
+        return mWifi.length != 0;
     }
 }
