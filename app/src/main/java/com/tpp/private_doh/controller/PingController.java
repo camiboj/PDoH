@@ -16,7 +16,9 @@ import com.tpp.private_doh.util.Requester;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,17 +26,15 @@ import java.util.stream.Stream;
 public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();
     private final List<Requester> dnsRequesters;
-    private List<Requester> dohRequesters;
     private int actualIdx;
-    private List<String> activeIps;
+    private LinkedBlockingQueue<String> activeIps;
     private List<List<String>> shardingGroups;
     private int nSharders;
 
     public PingController() {
-        this.activeIps = new ArrayList<>();
+        this.activeIps = new LinkedBlockingQueue<>();
         this.dnsRequesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
-        this.dohRequesters = new ArrayList<>();
         this.actualIdx = 0;
     }
 
@@ -44,19 +44,6 @@ public class PingController implements Runnable {
 
     public void setNSharders(int nSharders) {
         this.nSharders = nSharders;
-    }
-
-    public void addDohRequesters() {
-        Log.i(TAG, "Someone called addDohRequesters");
-
-        GoogleDoHRequester googleDoHRequester = new GoogleDoHRequester();
-        CloudflareDoHRequester cloudflareDoHRequester = new CloudflareDoHRequester();
-        Quad9DoHRequester quad9DoHRequester = new Quad9DoHRequester();
-
-        this.dohRequesters = Arrays.asList(googleDoHRequester, cloudflareDoHRequester, quad9DoHRequester);
-        this.activeIps.add(googleDoHRequester.getName());
-        this.activeIps.add(cloudflareDoHRequester.getName());
-        this.activeIps.add(quad9DoHRequester.getName());
     }
 
     public List<Requester> getActiveRequesters() {
@@ -70,10 +57,9 @@ public class PingController implements Runnable {
         this.actualIdx += 1;
         List<String> ips = this.shardingGroups.get(actualIdx);
 
-        Stream<Requester> dnsRequesters = this.dnsRequesters.stream().filter(requester -> ips.contains(requester.getName()));
-        Stream<Requester> dohRequesters = this.dohRequesters.stream().filter(requester -> ips.contains(requester.getName()));
-
-        return Stream.concat(dnsRequesters, dohRequesters).collect(Collectors.toList());
+        return this.dnsRequesters.stream()
+                .filter(requester -> ips.contains(requester.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -104,8 +90,12 @@ public class PingController implements Runnable {
 
     private void reprocessIps() {
         // Remove all groups that included a disabled ip
-        shardingGroups.removeIf(shardingGroup ->
-                shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
+        try {
+            shardingGroups.removeIf(shardingGroup ->
+                    shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
+        } catch (ConcurrentModificationException e) {
+            System.currentTimeMillis();
+        }
 
         // Create groups that include active ips
         List<List<String>> allGroups = CombinationUtils.combination(this.activeIps, this.nSharders);

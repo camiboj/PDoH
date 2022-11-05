@@ -58,6 +58,7 @@ public class PublicDnsRequester implements Requester {
             Message queryMessage = Message.newQuery(queryRecord);
 
             // Sentinel to recognize this packet while capturing
+            Log.i(TAG, "About to process message");
             queryMessage.addRecord(Record.newRecord(Name.fromString(Config.SENTINEL + "."), Type.A, DClass.IN), Section.QUESTION);
             return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply(this::processResponse);
         } catch (Exception e) {

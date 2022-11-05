@@ -4,7 +4,9 @@ import android.util.Log;
 
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.controller.DnsShardingController;
+import com.tpp.private_doh.controller.DohRequesterManager;
 import com.tpp.private_doh.controller.DohShardingController;
+import com.tpp.private_doh.controller.HybridDnsShardingController;
 import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.controller.ShardingController;
@@ -25,12 +27,13 @@ public class ShardingControllerFactory {
 
     public ShardingControllerFactory(ProtocolId protocolId, int racingAmount, PingController pingController) {
         Log.i(TAG, "protocolId: " + protocolId);
+        DohRequesterManager dohRequesterManager = new DohRequesterManager(pureDohRequesters, racingAmount);
         Thread t = new Thread(pingController);
 
         switch (protocolId) {
             case DOH:
                 Log.i(TAG, "DOH");
-                this.shardingController = new DohShardingController(pureDohRequesters, racingAmount);
+                this.shardingController = new DohShardingController(dohRequesterManager);
                 break;
             case DNS:
                 Log.i(TAG, "DNS");
@@ -39,9 +42,8 @@ public class ShardingControllerFactory {
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
-                this.shardingController = new DnsShardingController(pingController);
+                this.shardingController = new HybridDnsShardingController(pingController, dohRequesterManager);
                 t.start();
-                pingController.addDohRequesters();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + protocolId);
