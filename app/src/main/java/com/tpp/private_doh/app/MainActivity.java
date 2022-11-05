@@ -8,6 +8,8 @@ import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     private final List<Integer> ACCEPTED_NETWORK_CAPABILITIES = Arrays.asList(
             NetworkCapabilities.TRANSPORT_CELLULAR, NetworkCapabilities.TRANSPORT_WIFI,
             NetworkCapabilities.TRANSPORT_ETHERNET);
-
 
     private ProtocolSelector protocolSelector;
     private RacingAmountSelector racingAmountSelector;
@@ -157,10 +158,14 @@ public class MainActivity extends AppCompatActivity {
     private void stopVpnInternet() {
         // TODO: show the user we are stopping the vpn because of a connection issue
         Log.e(TAG, "We need to stop the vpn due to a connectivity issue");
-        runOnUiThread(() -> {
+        new Handler(Looper.getMainLooper()).postAtFrontOfQueue(() -> {
             StartVPNButton startVpnButton = findViewById(R.id.startVpn);
             startVpnButton.closeVpn();
         });
+        /*runOnUiThread(() -> {
+            StartVPNButton startVpnButton = findViewById(R.id.startVpn);
+            startVpnButton.closeVpn();
+        });*/
         stopVpn();
     }
 
