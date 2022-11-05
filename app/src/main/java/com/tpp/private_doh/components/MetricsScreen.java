@@ -3,32 +3,73 @@ package com.tpp.private_doh.components;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
-public class MetricsScreen extends RelativeLayout {
+import com.tpp.private_doh.factory.ShardingControllerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class MetricsScreen extends LinearLayout {
     private CustomButton button;
+    private ShardingControllerFactory shardingControllerFactory;
 
     public MetricsScreen(Context context, AttributeSet attrs) {
         super(context, attrs);
-
+        this.setOrientation(VERTICAL);
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                int buttonWidth = getWidth() - getWidth() / 3;
-                int leftRightSpace = getWidth() / 3;
-                int topSpace = getHeight() / 12;
-                int buttonHeight = getHeight() / 12;
-                createButton(leftRightSpace, topSpace, buttonWidth, buttonHeight);
+                int width = getWidth();
+                int height = getHeight();
             }
         });
     }
 
-    private void createButton(int leftRightSpace, int topSpace, int buttonWidth, int buttonHeight) {
-        MarginLayoutParams mlp = new MarginLayoutParams(buttonWidth, buttonHeight);
-        mlp.setMargins(leftRightSpace, topSpace, leftRightSpace, 0);
-        button = new CustomButton(getContext(), "Fetch", mlp);
-        this.addView(button);
-        button.setEnabled(true);
+    @Override
+    public void setVisibility(int visibility) {
+        super.setVisibility(visibility);
+        if (visibility == VISIBLE) {
+            fetchCount();
+        }
+    }
+
+    public void setShardingControllerFactory(ShardingControllerFactory shardingControllerFactory) {
+        this.shardingControllerFactory = shardingControllerFactory;
+    }
+
+    private void fetchCount() {
+
+        if (shardingControllerFactory != null) {
+            Toast.makeText(getContext(), "No running VPN", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
+        Map<String, Integer> map = new HashMap<String, Integer>() {{
+            put("8.8.8.8", 10);
+            put("9.9.9.9", 3);
+            put("198.5.23.15", 6);
+            put("8.8.8.1", 10);
+            put("198.5.2.2", 0);
+            put("9.9.9.1", 3);
+            put("198.5.23.1", 6);
+        }};
+
+        int metricsCount = map.size();
+        // TODO: agregar padding lindo para que los contadores esten alineados
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            String key = entry.getKey();
+            int value = entry.getValue();
+            if (value > 0) {
+                createMetricLayout(key, value, metricsCount);
+            }
+        }
+    }
+
+    private void createMetricLayout(String requesterName, int metric, int metricsCount) {
+        int metricHeight = getHeight() / metricsCount;
+        RequesterMetric rm = new RequesterMetric(getContext(), requesterName, metric, metricHeight);
+        this.addView(rm);
     }
 }
