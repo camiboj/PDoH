@@ -10,7 +10,7 @@
     <string name="select_protocol_title">Select the protocol to use</string>
     <string name="fetch_resolvers_counts">Fetch resolvers counts</string>
     <string name="metrics_screen">Metrics</string>
-    <string name="select_protocol_subtitle">If you choose DoH you could have better performance but the providers available are 3If you choose DNS you could have worst performance but the providers available are more\nIf you choose Both you would be using DoH and DNS combined</string>
+    <string name="select_protocol_subtitle">If you choose DoH you could have better performance but the providers available are 3\nIf you choose DNS you could have worst performance but the providers available are more\nIf you choose Both you would be using DoH and DNS combined</string>
     <string name="racing_amount_subtitle">Consider that the greater the number of providers, more information you are sharing with the providers but performance could be improved.</string>
     <string name="empty"></string>
 </resources>
