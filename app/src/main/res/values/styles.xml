@@ -34,6 +34,7 @@
         <item name="android:textColor">@color/colorTextPrimary</item>
         <item name="android:textStyle">bold</item>
         <item name="android:gravity">center</item>
+        <item name="android:paddingBottom">15sp</item>
     </style>
 
     <style name="AppTheme.Subtitle">
@@ -43,6 +44,7 @@
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:paddingEnd">15sp</item>
         <item name="android:paddingStart">15sp</item>
+        <item name="android:paddingBottom">15sp</item>
     </style>
 
 

@@ -27,30 +27,34 @@
         <com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout
             android:id="@+id/protocolSelectorLayout"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="300dp"
             android:orientation="vertical"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:layout_weight="1"
+            />
 
 
         <com.tpp.private_doh.components.racing_amount_selector.RacingAmountSelectorLayout
             android:id="@+id/racingAmountLayout"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="300dp"
             android:orientation="vertical"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:layout_weight="2"/>
 
         <LinearLayout
             android:id="@+id/startVpnLayout"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center_horizontal|clip_vertical"
+            android:layout_weight="3">
             <com.tpp.private_doh.components.StartVPNButton
                 android:id="@+id/startVpn"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:background="@drawable/button"
-                android:gravity="center_vertical|center_horizontal"
+                android:gravity="center"
                 android:theme="@style/AppTheme.Button"
                 />
         </LinearLayout>
