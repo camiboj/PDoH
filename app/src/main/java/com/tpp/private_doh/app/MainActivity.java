@@ -10,8 +10,6 @@ import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private final List<Integer> ACCEPTED_NETWORK_CAPABILITIES = Arrays.asList(
             NetworkCapabilities.TRANSPORT_CELLULAR, NetworkCapabilities.TRANSPORT_WIFI,
             NetworkCapabilities.TRANSPORT_ETHERNET);
+    private int actualTransport = -1;
 
     private ProtocolSelector protocolSelector;
     private RacingAmountSelector racingAmountSelector;
@@ -151,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
             toast.show();
             return false;
         }
+
         ProtocolId protocol = ProtocolId.DOH;
         try {
             protocol = protocolSelector.getProtocol();
@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
         shardingControllerFactory = null;
+        actualTransport = -1;
     }
 
     public void fetchCount(View view) {
@@ -219,8 +220,19 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         Network[] mWifi = connManager.getAllNetworks();
         NetworkCapabilities networkCapabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
-        boolean stillConnectedToWifi = networkCapabilities != null
-                && ACCEPTED_NETWORK_CAPABILITIES.stream().anyMatch(networkCapabilities::hasTransport);
-        return stillConnectedToWifi || mWifi.length > 1; // This is because the vpn connection counts as one
+
+        if (this.actualTransport == -1) {
+            if (networkCapabilities != null && networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                this.actualTransport = NetworkCapabilities.TRANSPORT_WIFI;
+            } else if (networkCapabilities != null && networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                this.actualTransport = NetworkCapabilities.TRANSPORT_CELLULAR;
+            }
+        }
+
+        boolean stillConnectedToWifi = networkCapabilities != null && networkCapabilities.hasTransport(this.actualTransport);
+        boolean onlyVpn = networkCapabilities != null && !networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                && !networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+
+        return stillConnectedToWifi || (mWifi.length > 1 && onlyVpn); // This is because the vpn connection counts as one
     }
 }
