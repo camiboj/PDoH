@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 
 public class CustomLinearLayout extends LinearLayout {
+    private int height;
 
     public CustomLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -27,7 +28,11 @@ public class CustomLinearLayout extends LinearLayout {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                onHeightChange(getHeight());
+                if (height != getHeight() ) {
+                    return;
+                }
+                height = getHeight();
+                onHeightChange(height);
             }
         });
     }
