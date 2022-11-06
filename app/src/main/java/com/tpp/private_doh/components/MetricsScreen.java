@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class MetricsScreen extends LinearLayout {
@@ -35,6 +34,8 @@ public class MetricsScreen extends LinearLayout {
         super.setVisibility(visibility);
         if (visibility == VISIBLE) {
             fetchCount();
+        } else {
+            removeAllViews();
         }
     }
 
@@ -43,21 +44,11 @@ public class MetricsScreen extends LinearLayout {
     }
 
     private void fetchCount() {
-
-        if (shardingControllerFactory != null) {
+        if (shardingControllerFactory == null) {
             Toast.makeText(getContext(), "No running VPN", Toast.LENGTH_LONG).show();
             return;
         }
-        // Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
-        Map<String, Integer> map = new HashMap<String, Integer>() {{
-            put("8.8.8.8", 10);
-            put("9.9.9.9", 3);
-            put("198.5.23.15", 6);
-            put("8.8.8.1", 10);
-            put("198.5.2.2", 0);
-            put("9.9.9.1", 3);
-            put("198.5.23.1", 6);
-        }};
+        Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
 
         int metricsAmount = 0;
         for (Map.Entry<String, Integer> entry : map.entrySet()) {

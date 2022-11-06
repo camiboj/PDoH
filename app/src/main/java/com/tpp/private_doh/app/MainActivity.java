@@ -16,6 +16,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.DownBar;
+import com.tpp.private_doh.components.MetricsScreen;
 import com.tpp.private_doh.components.ProtocolSelector;
 import com.tpp.private_doh.components.RacingAmountSelector;
 import com.tpp.private_doh.components.StartVPNButton;
@@ -25,9 +26,7 @@ import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
     private static final int VPN_REQUEST_CODE = 0x0F;
@@ -106,8 +105,14 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmount);
             PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
+            setMetricsShardingController();
             startService(new Intent(this, PDoHVpnService.class));
         }
+    }
+
+    private void setMetricsShardingController() {
+        MetricsScreen ms = findViewById(R.id.metrics_layout);
+        ms.setShardingControllerFactory(shardingControllerFactory);
     }
 
     private void enableVpnComponents(boolean enabled) {
@@ -144,18 +149,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
         shardingControllerFactory = null;
-    }
-
-    public void fetchCount(View view) {
-        String message = "No running VPN";
-        if (shardingControllerFactory != null) {
-            Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
-            // TODO: agregar padding lindo para que los contadores esten alineados
-            message = map.keySet().stream()
-                    .map(key -> map.get(key) + "\n " + key)
-                    .collect(Collectors.joining("\n\n"));
-        }
-        // countOutput.setText(message);
+        setMetricsShardingController();
     }
 
     @Override
