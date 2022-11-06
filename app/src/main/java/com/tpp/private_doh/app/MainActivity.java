@@ -1,6 +1,7 @@
 package com.tpp.private_doh.app;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
@@ -52,8 +53,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-
         // countOutput = findViewById(R.id.resolversCountsText);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
         protocolSelector = findViewById(R.id.ProtocolSelectorLayout);
         racingAmountSelector = findViewById(R.id.racingAmountSelector);
