@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         // countOutput = findViewById(R.id.resolversCountsText);
 
-        protocolSelector = findViewById(R.id.protocolSelector);
+        protocolSelector = findViewById(R.id.ProtocolSelectorLayout);
         racingAmountSelector = findViewById(R.id.racingAmountSelector);
 
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());

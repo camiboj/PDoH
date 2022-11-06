@@ -10,7 +10,7 @@
     tools:showIn="@layout/activity_main">
 
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/vpn_layout"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -19,168 +19,96 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/protocolSelectorLayout"
             android:layout_width="match_parent"
-            android:layout_height="196dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="0dp">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_vertical|center_horizontal">
 
             <TextView
                 android:id="@+id/protocolSelectorTitle"
-                android:layout_width="190dp"
+                android:layout_width="match_parent"
                 android:layout_height="43dp"
-                android:layout_above="@+id/protocolSelector"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="71dp"
-                android:layout_marginTop="36dp"
-                android:layout_marginEnd="71dp"
-                android:layout_marginBottom="20dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/select_protocol_title"
-                android:theme="@style/AppTheme.Tittles" />
-
-            <com.tpp.private_doh.components.ProtocolSelector
-                android:id="@+id/protocolSelector"
-                android:layout_width="195dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="55dp"
-                android:layout_marginEnd="55dp"
-                android:layout_marginBottom="67dp"
-                android:checkedButton="@id/rbDoH"
-                android:gravity="center_vertical|center_horizontal"
-                android:orientation="horizontal"
-                android:text="@string/racing_amount"
-                android:theme="@style/AppTheme.Options"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.501"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <RadioButton
-                    android:id="@+id/rbDoH"
-                    android:layout_width="65dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:buttonTint="@color/colorPrimary"
-                    android:text="@string/doh" />
-
-                <RadioButton
-                    android:id="@+id/rbDNS"
-                    android:layout_width="65dp"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/colorPrimary"
-                    android:text="@string/dns" />
-
-                <RadioButton
-                    android:id="@+id/rbBoth"
-                    android:layout_width="65dp"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/colorPrimary"
-                    android:text="@string/both" />
-            </com.tpp.private_doh.components.ProtocolSelector>
-
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="331dp"
-            android:layout_height="99dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="1dp"
-            android:layout_marginTop="196dp"
-            android:layout_marginEnd="0dp"
-            android:layout_marginBottom="121dp">
+                android:theme="@style/AppTheme.Title" />
 
             <TextView
-                android:id="@+id/RacingSeekBarText"
-                android:layout_width="153dp"
+                android:id="@+id/protocolSelectorSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="43dp"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="@string/protocol_selector_explanation"
+                android:theme="@style/AppTheme.Subtitle" />
+
+
+            <com.tpp.private_doh.components.ProtocolSelector
+                android:id="@+id/ProtocolSelectorLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|center_horizontal"
+                android:orientation="horizontal"
+                android:theme="@style/AppTheme.Options">
+            </com.tpp.private_doh.components.ProtocolSelector>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/RacingSeekBarTitle"
+                android:layout_width="match_parent"
                 android:layout_height="27dp"
-                android:layout_above="@+id/racingAmountSelector"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="83dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="83dp"
-                android:layout_marginBottom="42dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/racing_amount"
-                android:theme="@style/AppTheme.Tittles"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.501"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:theme="@style/AppTheme.Title" />
+
+            <TextView
+                android:id="@+id/RacingSeekBarSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="Consider that the greater the number of providers, more information you are sharing with the providers but performance could be improved. "
+                android:theme="@style/AppTheme.Subtitle" />
 
             <TextView
                 android:id="@+id/progress"
-                android:layout_width="31dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/racingAmountSelector"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="152dp"
-                android:layout_marginTop="-160dp"
-                android:layout_marginEnd="149dp"
-                android:layout_marginBottom="12dp"
                 android:autoSizeTextType="uniform"
                 android:gravity="center_vertical|center_horizontal"
                 android:theme="@style/AppTheme.Options"
                 app:layout_constraintBottom_toTopOf="@+id/racingAmountSelector"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
-                app:layout_constraintStart_toStartOf="parent" />
+                />
 
             <com.tpp.private_doh.components.RacingAmountSelector
                 android:id="@+id/racingAmountSelector"
-                android:layout_width="300dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="4dp"
                 android:progressTint="@color/colorPrimaryDark"
                 android:thumbTint="@color/colorPrimary"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintHorizontal_bias="0.495"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.404"
                 custom:text_id="@+id/progress" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
         <com.tpp.private_doh.components.StartVPNButton
             android:id="@+id/startVpn"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="120dp"
-            android:layout_marginEnd="120dp"
-            android:layout_marginBottom="27dp"
             android:background="@drawable/button"
+            android:layout_marginTop="20dp"
             android:gravity="center_vertical|center_horizontal"
-            android:text="@string/fetch_resolvers_counts"
             android:theme="@style/AppTheme.Button" />
 
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
