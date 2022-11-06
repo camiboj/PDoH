@@ -21,37 +21,41 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:weightSum="3">
 
         <LinearLayout
             android:id="@+id/protocolSelectorLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center_vertical|center_horizontal">
+            android:gravity="center"
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/protocolSelectorTitle"
                 android:layout_width="match_parent"
-                android:layout_height="43dp"
+                android:layout_height="40dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/select_protocol_title"
-                android:theme="@style/AppTheme.Title" />
+                android:theme="@style/AppTheme.Title"
+                />
 
             <TextView
                 android:id="@+id/protocolSelectorSubtitle"
                 android:layout_width="match_parent"
-                android:layout_height="43dp"
+                android:layout_height="40dp"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="@string/protocol_selector_explanation"
-                android:theme="@style/AppTheme.Subtitle" />
+                android:theme="@style/AppTheme.Subtitle"
+                />
 
 
             <com.tpp.private_doh.components.ProtocolSelector
                 android:id="@+id/ProtocolSelectorLayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|center_horizontal"
+                android:layout_height="40dp"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:theme="@style/AppTheme.Options">
             </com.tpp.private_doh.components.ProtocolSelector>
@@ -60,42 +64,42 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_weight="2">
 
             <TextView
                 android:id="@+id/RacingSeekBarTitle"
                 android:layout_width="match_parent"
-                android:layout_height="27dp"
-                android:gravity="center_vertical|center_horizontal"
+                android:layout_height="40dp"
+                android:gravity="center"
                 android:text="@string/racing_amount"
                 android:theme="@style/AppTheme.Title" />
 
             <TextView
                 android:id="@+id/RacingSeekBarSubtitle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical|center_horizontal"
-                android:text="Consider that the greater the number of providers, more information you are sharing with the providers but performance could be improved. "
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="@string/racing_seekbar_subtitle"
                 android:theme="@style/AppTheme.Subtitle" />
 
             <TextView
                 android:id="@+id/progress"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/racingAmountSelector"
-                android:autoSizeTextType="uniform"
+                android:layout_height="40dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:theme="@style/AppTheme.Options"
+                android:theme="@style/AppTheme.Progress"
                 app:layout_constraintBottom_toTopOf="@+id/racingAmountSelector"
                 />
 
             <com.tpp.private_doh.components.RacingAmountSelector
                 android:id="@+id/racingAmountSelector"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:progressTint="@color/colorPrimaryDark"
                 android:thumbTint="@color/colorPrimary"
-                custom:text_id="@+id/progress" />
+                custom:text_id="@+id/progress"/>
 
         </LinearLayout>
 
@@ -104,9 +108,10 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:background="@drawable/button"
-            android:layout_marginTop="20dp"
+            android:layout_marginBottom="40dp"
             android:gravity="center_vertical|center_horizontal"
-            android:theme="@style/AppTheme.Button" />
+            android:theme="@style/AppTheme.Button"
+            android:layout_weight="3"/>
 
 
     </LinearLayout>

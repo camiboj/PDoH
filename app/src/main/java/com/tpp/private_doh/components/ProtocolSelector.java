@@ -5,6 +5,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.RadioGroup;
 
+import androidx.core.content.ContextCompat;
+
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.controller.ProtocolId;
 
@@ -27,6 +29,7 @@ public class ProtocolSelector extends RadioGroup {
 
         for (ProtocolSelectorButton button : RbIDtoProtocolID) {
             addView(button);
+            button.setButtonTintList(ContextCompat.getColorStateList(getContext(), R.color.colorPrimary));
         }
         RbIDtoProtocolID.get(0).setChecked(true);
     }

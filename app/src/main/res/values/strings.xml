@@ -11,4 +11,5 @@
     <string name="fetch_resolvers_counts">Fetch resolvers counts</string>
     <string name="metrics_screen">Metrics</string>
     <string name="protocol_selector_explanation">protocol selector explanation</string>
+    <string name="racing_seekbar_subtitle">Consider that the greater the number of providers, more information you are sharing with the providers but performance could be improved.</string>
 </resources>
