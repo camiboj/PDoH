@@ -80,7 +80,7 @@ public class PublicDnsRequester implements Requester {
     private Response processResponse(Message message) {
         Response r = PublicDnsToDnsMapper.map(message);
         r.setOnWinning(() -> this.count += 1);
-        return PublicDnsToDnsMapper.map(message);
+        return r;
     }
 
     public String getIp() {

@@ -28,6 +28,7 @@ public class ShardingControllerFactory {
     public ShardingControllerFactory(ProtocolId protocolId, int racingAmount) {
         PingController pingController = new PingController(racingAmount);
         Log.i(TAG, "protocolId: " + protocolId);
+        // pureDohRequesters.forEach(dohRequester -> ((DoHRequester) dohRequester).restartCount());
         DohRequesterManager dohRequesterManager = new DohRequesterManager(pureDohRequesters, racingAmount);
         Thread t = new Thread(pingController);
 
