@@ -21,7 +21,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:weightSum="3">
 
         <LinearLayout
