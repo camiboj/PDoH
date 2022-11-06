@@ -21,7 +21,7 @@
 
 
     <style name="AppTheme.Button">
-        <item name="android:textSize">10sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">@color/colorTextWithBackground</item>
         <item name="android:textStyle">bold</item>
