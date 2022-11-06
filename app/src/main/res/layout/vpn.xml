@@ -24,42 +24,14 @@
         android:gravity="center"
         android:weightSum="3">
 
-        <LinearLayout
+        <com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout
             android:id="@+id/protocolSelectorLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
             android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/protocolSelectorTitle"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center_vertical|center_horizontal"
-                android:text="@string/select_protocol_title"
-                android:theme="@style/AppTheme.Title"
-                />
-
-            <TextView
-                android:id="@+id/protocolSelectorSubtitle"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center_vertical|center_horizontal"
-                android:text="@string/protocol_selector_explanation"
-                android:theme="@style/AppTheme.Subtitle"
-                />
-
-
-            <com.tpp.private_doh.components.ProtocolSelector
-                android:id="@+id/ProtocolSelectorLayout"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:theme="@style/AppTheme.Options">
-            </com.tpp.private_doh.components.ProtocolSelector>
-        </LinearLayout>
+        </com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -81,7 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:gravity="center"
-                android:text="@string/racing_seekbar_subtitle"
+                android:text="@string/racing_amount_subtitle"
                 android:theme="@style/AppTheme.Subtitle" />
 
             <TextView

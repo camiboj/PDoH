@@ -1,25 +1,31 @@
-package com.tpp.private_doh.components;
+package com.tpp.private_doh.components.protocol_selector;
 
 import android.content.Context;
-import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.Gravity;
+import android.view.ViewGroup;
 import android.widget.RadioGroup;
 
 import androidx.core.content.ContextCompat;
 
 import com.tpp.private_doh.R;
+import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.controller.ProtocolId;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ProtocolSelector extends RadioGroup {
+public class ProtocolSelectorRadioGroup extends RadioGroup {
 
     private final String TAG = this.getClass().getSimpleName();
     ArrayList<ProtocolSelectorButton> RbIDtoProtocolID;
 
-    public ProtocolSelector(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    public ProtocolSelectorRadioGroup(Context context) {
+        super(new ContextThemeWrapper(context, R.style.AppTheme_Button));
+        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        setGravity(Gravity.CENTER);
+        setOrientation(HORIZONTAL);
 
         RbIDtoProtocolID = new ArrayList<>(Arrays.asList(
                 new ProtocolSelectorButton(context, ProtocolId.DOH, R.string.doh),

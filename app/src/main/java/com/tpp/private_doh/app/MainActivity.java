@@ -18,7 +18,8 @@ import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.DownBar;
 import com.tpp.private_doh.components.MetricsScreen;
-import com.tpp.private_doh.components.ProtocolSelector;
+import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout;
+import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorRadioGroup;
 import com.tpp.private_doh.components.RacingAmountSelector;
 import com.tpp.private_doh.components.StartVPNButton;
 import com.tpp.private_doh.components.UnselectedProtocol;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
 
-    private ProtocolSelector protocolSelector;
+    private ProtocolSelectorRadioGroup protocolSelector;
     private RacingAmountSelector racingAmountSelector;
     // private TextView countOutput;
     private ShardingControllerFactory shardingControllerFactory;
@@ -56,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
         // countOutput = findViewById(R.id.resolversCountsText);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
-        protocolSelector = findViewById(R.id.ProtocolSelectorLayout);
+        ProtocolSelectorLayout protocolSelectorLayout = findViewById(R.id.protocolSelectorLayout);
+        protocolSelector = protocolSelectorLayout.getProtocolSelectorRadioGroup();
         racingAmountSelector = findViewById(R.id.racingAmountSelector);
 
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());

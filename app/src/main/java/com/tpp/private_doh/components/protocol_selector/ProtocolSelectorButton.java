@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components;
+package com.tpp.private_doh.components.protocol_selector;
 
 import android.content.Context;
 import android.view.ViewGroup;
