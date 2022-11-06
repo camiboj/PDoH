@@ -9,8 +9,8 @@ import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.CustomText;
 
 public class ProgressOutput extends CustomText {
-    public ProgressOutput(@NonNull Context context, int textId) {
-        super(context, textId, R.style.AppTheme_ProgressOutput);
+    public ProgressOutput(@NonNull Context context) {
+        super(context, R.string.empty, R.style.AppTheme_ProgressOutput);
     }
 
     @Override

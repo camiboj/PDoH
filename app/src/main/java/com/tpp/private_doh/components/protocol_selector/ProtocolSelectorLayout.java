@@ -19,14 +19,20 @@ public class ProtocolSelectorLayout extends CustomLinearLayout {
     public ProtocolSelectorLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
-        title = new Title(context, R.string.racing_amount_title);
-        subtitle = new Subtitle(context, R.string.racing_amount_subtitle);
+        title = new Title(context, R.string.select_protocol_title);
+        subtitle = new Subtitle(context, R.string.select_protocol_subtitle);
         rg = new ProtocolSelectorRadioGroup(context);
         addView(title);
         addView(subtitle);
         addView(rg);
     }
 
+    @Override
+    protected void onHeightChange(int height) {
+        int sections = 6;
+        setChildHeight(title, height/sections);
+        setChildHeight(rg, height/sections);
+    }
 
     public ProtocolSelectorRadioGroup getProtocolSelectorRadioGroup() {
         return rg;

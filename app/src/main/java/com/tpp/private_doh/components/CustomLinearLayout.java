@@ -9,13 +9,15 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+
 public class CustomLinearLayout extends LinearLayout {
+
     public CustomLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         setChildrenHeight();
     }
 
-    private void setChildHeight(View view, int height) {
+    protected void setChildHeight(View view, int height) {
         ViewGroup.LayoutParams lp = view.getLayoutParams();
         lp.height = height;
         view.requestLayout();
@@ -25,14 +27,11 @@ public class CustomLinearLayout extends LinearLayout {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                int childCount = getChildCount();
-                int height = getHeight()/(childCount+1);
-                for(int index = 0; index < getChildCount(); index++) {
-                    View child = getChildAt(index);
-                    setChildHeight(child, height);
-
-                }
+                onHeightChange(getHeight());
             }
         });
+    }
+
+    protected void onHeightChange(int height) {
     }
 }
