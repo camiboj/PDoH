@@ -14,14 +14,14 @@ public class ProtocolSelectorLayout extends CustomLinearLayout {
 
     private final Title title;
     private final Subtitle subtitle;
-    private ProtocolSelectorRadioGroup rg;
+    private final ProtocolSelectorRadioGroup rg;
 
     public ProtocolSelectorLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
+        title = new Title(context, R.string.racing_amount_title);
+        subtitle = new Subtitle(context, R.string.racing_amount_subtitle);
         rg = new ProtocolSelectorRadioGroup(context);
-        title = new Title(context, R.string.select_protocol_title);
-        subtitle = new Subtitle(context, R.string.select_protocol_subtitle);
         addView(title);
         addView(subtitle);
         addView(rg);

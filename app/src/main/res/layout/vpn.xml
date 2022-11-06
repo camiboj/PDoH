@@ -27,64 +27,33 @@
         <com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout
             android:id="@+id/protocolSelectorLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="250dp"
             android:orientation="vertical"
-            android:gravity="center"
-            android:layout_weight="1">
-        </com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout>
+            android:gravity="center"/>
+
+
+        <com.tpp.private_doh.components.racing_amount_selector.RacingAmountSelectorLayout
+            android:id="@+id/racingAmountLayout"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:orientation="vertical"
+            android:gravity="center"/>
 
         <LinearLayout
+            android:id="@+id/startVpnLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="150dp"
             android:orientation="vertical"
-            android:gravity="center"
-            android:layout_weight="2">
-
-            <TextView
-                android:id="@+id/RacingSeekBarTitle"
-                android:layout_width="match_parent"
+            android:gravity="center">
+            <com.tpp.private_doh.components.StartVPNButton
+                android:id="@+id/startVpn"
+                android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:gravity="center"
-                android:text="@string/racing_amount"
-                android:theme="@style/AppTheme.Title" />
-
-            <TextView
-                android:id="@+id/RacingSeekBarSubtitle"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center"
-                android:text="@string/racing_amount_subtitle"
-                android:theme="@style/AppTheme.Subtitle" />
-
-            <TextView
-                android:id="@+id/progress"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:background="@drawable/button"
                 android:gravity="center_vertical|center_horizontal"
-                android:theme="@style/AppTheme.Progress"
-                app:layout_constraintBottom_toTopOf="@+id/racingAmountSelector"
+                android:theme="@style/AppTheme.Button"
                 />
-
-            <com.tpp.private_doh.components.RacingAmountSelector
-                android:id="@+id/racingAmountSelector"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:progressTint="@color/colorPrimaryDark"
-                android:thumbTint="@color/colorPrimary"
-                custom:text_id="@+id/progress"/>
-
         </LinearLayout>
-
-        <com.tpp.private_doh.components.StartVPNButton
-            android:id="@+id/startVpn"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:background="@drawable/button"
-            android:layout_marginBottom="40dp"
-            android:gravity="center_vertical|center_horizontal"
-            android:theme="@style/AppTheme.Button"
-            android:layout_weight="3"/>
-
 
     </LinearLayout>
 

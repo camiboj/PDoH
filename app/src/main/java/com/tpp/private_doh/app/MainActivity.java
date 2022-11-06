@@ -20,9 +20,10 @@ import com.tpp.private_doh.components.DownBar;
 import com.tpp.private_doh.components.MetricsScreen;
 import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout;
 import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorRadioGroup;
-import com.tpp.private_doh.components.RacingAmountSelector;
+import com.tpp.private_doh.components.racing_amount_selector.RacingAmountBar;
 import com.tpp.private_doh.components.StartVPNButton;
 import com.tpp.private_doh.components.UnselectedProtocol;
+import com.tpp.private_doh.components.racing_amount_selector.RacingAmountSelectorLayout;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = this.getClass().getSimpleName();
 
     private ProtocolSelectorRadioGroup protocolSelector;
-    private RacingAmountSelector racingAmountSelector;
+    private RacingAmountBar racingAmountBar;
     // private TextView countOutput;
     private ShardingControllerFactory shardingControllerFactory;
 
@@ -59,10 +60,10 @@ public class MainActivity extends AppCompatActivity {
 
         ProtocolSelectorLayout protocolSelectorLayout = findViewById(R.id.protocolSelectorLayout);
         protocolSelector = protocolSelectorLayout.getProtocolSelectorRadioGroup();
-        racingAmountSelector = findViewById(R.id.racingAmountSelector);
-
+        RacingAmountSelectorLayout racingAmountLayout = findViewById(R.id.racingAmountLayout);
+        racingAmountBar = racingAmountLayout.getBar();
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
-        racingAmountSelector.setCustomMin(Config.MIN_RACING_AMOUNT);
+        racingAmountBar.setCustomMin(Config.MIN_RACING_AMOUNT);
         setSeekBarMax();
         setButtonHandlers();
 
@@ -97,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
     private void setSeekBarMax() {
         try {
             int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
-            racingAmountSelector.setCustomMax(availableRequesterAmount);
+            racingAmountBar.setCustomMax(availableRequesterAmount);
         } catch (UnselectedProtocol unselectedProtocol) {
             Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
         }
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void enableVpnComponents(boolean enabled) {
         protocolSelector.setEnabled(enabled);
-        racingAmountSelector.setEnabled(enabled);
+        racingAmountBar.setEnabled(enabled);
     }
 
     private void setButtonHandlers() {
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         Intent vpnIntent = VpnService.prepare(this);
 
         if (vpnIntent == null) {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountBar.getCustomProgress());
         }
 
         enableVpnComponents(false);

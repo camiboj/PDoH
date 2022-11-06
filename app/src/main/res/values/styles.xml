@@ -41,6 +41,14 @@
         <item name="android:textColor">@color/colorTextPrimary</item>
     </style>
 
+    <style name="AppTheme.ProgressBar">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
+        <item name="android:progressTint">@color/colorPrimaryDark</item>
+        <item name="android:thumbTint">@color/colorPrimary</item>
+    </style>
+
     <style name="AppTheme.Options">
         <item name="android:textSize">13sp</item>
         <item name="android:textAllCaps">false</item>
@@ -48,7 +56,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="AppTheme.Progress">
+    <style name="AppTheme.ProgressOutput">
         <item name="android:textSize">15sp</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textStyle">bold</item>

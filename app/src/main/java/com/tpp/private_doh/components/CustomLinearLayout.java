@@ -25,7 +25,8 @@ public class CustomLinearLayout extends LinearLayout {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                int height = getHeight()/4;
+                int childCount = getChildCount();
+                int height = getHeight()/(childCount+1);
                 for(int index = 0; index < getChildCount(); index++) {
                     View child = getChildAt(index);
                     setChildHeight(child, height);
