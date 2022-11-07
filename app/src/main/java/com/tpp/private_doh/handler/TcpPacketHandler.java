@@ -75,9 +75,6 @@ public class TcpPacketHandler implements Runnable {
         ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
         byteBuffer.position(HEADER_SIZE);
         if (data != null) {
-            if (byteBuffer.remaining() < data.length) {
-                System.currentTimeMillis();
-            }
             byteBuffer.put(data);
         }
         packet.updateTCPBuffer(byteBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
@@ -143,7 +140,6 @@ public class TcpPacketHandler implements Runnable {
         pipe.remoteOutBuffer.flip();
         tryFlushWrite(pipe, pipe.remote);
         sendTcpPack(pipe, (byte) TcpHeader.ACK, null);
-        System.currentTimeMillis();
     }
 
     private void fillRemoteOutBuffer(TcpPipe pipe, ByteBuffer backingBuffer) {
@@ -177,25 +173,15 @@ public class TcpPacketHandler implements Runnable {
             SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
             int ops = key.interestOps() | SelectionKey.OP_WRITE;
             key.interestOps(ops);
-            System.currentTimeMillis();
             buffer.compact();
             return false;
         }
         while (buffer.hasRemaining()) {
-            int n = 0;
-            try {
-                n = channel.write(buffer);
-            } catch (Exception e) {
-                Log.e(TAG, "Exception in write:", e);
-            }
-            if (n > 4000) {
-                System.currentTimeMillis();
-            }
+            int n = channel.write(buffer);
             if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
                 key.interestOps(ops);
-                System.currentTimeMillis();
                 buffer.compact();
                 return false;
             }
@@ -275,7 +261,6 @@ public class TcpPacketHandler implements Runnable {
             }
             TcpPipe pipe = pipes.get(ipAndPort);
             handlePacket(pipe, currentPacket);
-            System.currentTimeMillis();
         }
     }
 
@@ -384,10 +369,8 @@ public class TcpPacketHandler implements Runnable {
                             doRead((SocketChannel) key.channel());
                         } else if (key.isConnectable()) {
                             doConnect((SocketChannel) key.channel());
-                            System.currentTimeMillis();
                         } else if (key.isWritable()) {
                             doWrite((SocketChannel) key.channel());
-                            System.currentTimeMillis();
                         }
                     } catch (Exception e) {
                         if (pipe != null) {
