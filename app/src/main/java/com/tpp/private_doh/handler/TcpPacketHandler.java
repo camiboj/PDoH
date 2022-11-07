@@ -12,9 +12,9 @@ import com.tpp.private_doh.protocol.TcpHeader;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -23,6 +23,7 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
 public class TcpPacketHandler implements Runnable {
@@ -138,7 +139,7 @@ public class TcpPacketHandler implements Runnable {
         pipe.myAcknowledgementNum += payloadSize;
         fillRemoteOutBuffer(pipe, packet.getBackingBuffer());
         pipe.remoteOutBuffer.flip();
-        tryFlushWrite(pipe, pipe.remote);
+        tryFlushWrite(pipe, pipe.remote, false);
         sendTcpPack(pipe, (byte) TcpHeader.ACK, null);
     }
 
@@ -162,7 +163,7 @@ public class TcpPacketHandler implements Runnable {
         return (SelectionKey) objAttrUtil.getAttr(channel, "key");
     }
 
-    private boolean tryFlushWrite(TcpPipe pipe, SocketChannel channel) throws Exception {
+    private boolean tryFlushWrite(TcpPipe pipe, SocketChannel channel, boolean throwException) throws Exception {
         ByteBuffer buffer = pipe.remoteOutBuffer;
         if (pipe.remote.socket().isOutputShutdown() && buffer.remaining() != 0) {
             sendTcpPack(pipe, (byte) (TcpHeader.FIN | TcpHeader.ACK), null);
@@ -177,7 +178,13 @@ public class TcpPacketHandler implements Runnable {
             return false;
         }
         while (buffer.hasRemaining()) {
-            int n = channel.write(buffer);
+            int n = 0;
+            if (new Random().nextBoolean() && throwException) {
+                Log.e(TAG, "Throwing exception");
+                throw new IOException("hola");
+            } else {
+                n = channel.write(buffer);
+            }
             if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
@@ -241,27 +248,26 @@ public class TcpPacketHandler implements Runnable {
 
     }
 
-    private void handleReadFromVpn() throws Exception {
-        while (true) {
-            Packet currentPacket = queue.poll();
-            if (currentPacket == null) {
-                return;
-            }
-            InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
-            TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
-            int destinationPort = tcpHeader.getDestinationPort();
-            int sourcePort = tcpHeader.getSourcePort();
-            String ipAndPort = destinationAddress.getHostAddress() + ":" +
-                    destinationPort + ":" + sourcePort;
-
-            if (!pipes.containsKey(ipAndPort)) {
-                TcpPipe tcpTunnel = initPipe(currentPacket);
-                tcpTunnel.tunnelKey = ipAndPort;
-                pipes.put(ipAndPort, tcpTunnel);
-            }
-            TcpPipe pipe = pipes.get(ipAndPort);
-            handlePacket(pipe, currentPacket);
+    private Packet handleReadFromVpn() throws Exception {
+        Packet currentPacket = queue.poll();
+        if (currentPacket == null) {
+            return null;
         }
+        InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
+        TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
+        int destinationPort = tcpHeader.getDestinationPort();
+        int sourcePort = tcpHeader.getSourcePort();
+        String ipAndPort = destinationAddress.getHostAddress() + ":" +
+                destinationPort + ":" + sourcePort;
+
+        if (!pipes.containsKey(ipAndPort)) {
+            TcpPipe tcpTunnel = initPipe(currentPacket);
+            tcpTunnel.tunnelKey = ipAndPort;
+            pipes.put(ipAndPort, tcpTunnel);
+        }
+        TcpPipe pipe = pipes.get(ipAndPort);
+        handlePacket(pipe, currentPacket);
+        return currentPacket;
     }
 
     private void doAccept(ServerSocketChannel serverChannel) throws Exception {
@@ -347,7 +353,7 @@ public class TcpPacketHandler implements Runnable {
 
     private void doWrite(SocketChannel socketChannel) throws Exception {
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(socketChannel, "pipe");
-        boolean flushed = tryFlushWrite(pipe, socketChannel);
+        boolean flushed = tryFlushWrite(pipe, socketChannel, true);
         if (flushed) {
             SelectionKey key1 = (SelectionKey) objAttrUtil.getAttr(socketChannel, "key");
             key1.interestOps(SelectionKey.OP_READ);
@@ -355,7 +361,7 @@ public class TcpPacketHandler implements Runnable {
     }
 
 
-    private void handleSockets() throws Exception {
+    private void handleSockets(Packet packet) throws Exception {
         while (selector.selectNow() > 0) {
             for (Iterator<SelectionKey> it = selector.selectedKeys().iterator(); it.hasNext(); ) {
                 SelectionKey key = it.next();
@@ -376,6 +382,8 @@ public class TcpPacketHandler implements Runnable {
                         if (pipe != null) {
                             closeRst(pipe);
                         }
+                        initPipe(packet);
+                        queue.put(packet);
                     }
                 }
             }
@@ -387,9 +395,13 @@ public class TcpPacketHandler implements Runnable {
         try {
             selector = Selector.open();
             while (true) {
-                handleReadFromVpn();
-                handleSockets();
-                Thread.sleep(1);
+                Packet currentPacket = handleReadFromVpn();
+                if (currentPacket == null) continue;
+                try {
+                    handleSockets(currentPacket);
+                } catch (Exception e) {
+                    Log.e(TAG, "Caught exception..", e);
+                }
             }
         } catch (InterruptedException e) {
             Log.i(TAG, "The execution was interrupted");
