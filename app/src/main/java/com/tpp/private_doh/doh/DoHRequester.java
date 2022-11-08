@@ -42,6 +42,10 @@ public abstract class DoHRequester implements Requester {
         return count;
     }
 
+    public void restartCount() {
+        count = 0;
+    }
+
     private Response processResponse(Response r) {
         r.setOnWinning(() -> this.count += 1);
         return r;

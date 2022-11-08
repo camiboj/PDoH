@@ -1,30 +1,23 @@
-package com.tpp.private_doh.components;
+package com.tpp.private_doh.components.racing_amount_selector;
 
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
+import android.view.ViewGroup;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+
 import com.tpp.private_doh.R;
 
-public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSeekBar {
+public class RacingAmountBar extends androidx.appcompat.widget.AppCompatSeekBar {
     private static final int RACING_AMOUNT_MIN = 0;
     private static int offset = 2;
-    private int progressOutputId;
+    private ProgressOutput progressOutput;
 
-    public RacingAmountSelector(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RacingAmountSelector );
-        final int N = a.getIndexCount();
-        for (int i = 0; i < N; ++i) {
-            int attr = a.getIndex(i);
-            if (attr == R.styleable.RacingAmountSelector_text_id) {
-                progressOutputId = a.getResourceId(attr, 0);
-            }
-        }
-        a.recycle();
+    public RacingAmountBar(Context context, ProgressOutput progressOutput) {
+        super(new ContextThemeWrapper(context, R.style.AppTheme_ProgressBar));
+        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        this.progressOutput = progressOutput;
 
         setMin(RACING_AMOUNT_MIN);
 
@@ -52,9 +45,8 @@ public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSee
     }
 
     private void onChange() {
-        TextView t = getRootView().findViewById(progressOutputId);
-        if (t!=null) {
-            t.setText(String.valueOf(getCustomProgress()));
+        if (progressOutput!=null) {
+            progressOutput.setText(String.valueOf(getCustomProgress()));
         }
     }
 
@@ -82,5 +74,6 @@ public class RacingAmountSelector extends androidx.appcompat.widget.AppCompatSee
         int progressTint = enabled? R.color.colorPrimaryDark : R.color.colorDisabled;
         setThumbTintList(ContextCompat.getColorStateList(getContext(), thumbTint));
         setProgressTintList(ContextCompat.getColorStateList(getContext(), progressTint));
+        progressOutput.setEnabled(enabled);
     }
 }

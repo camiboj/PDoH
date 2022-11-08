@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -23,34 +24,31 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.DownBar;
-import com.tpp.private_doh.components.ProtocolSelector;
-import com.tpp.private_doh.components.RacingAmountSelector;
+import com.tpp.private_doh.components.MetricsScreen;
 import com.tpp.private_doh.components.StartVPNButton;
 import com.tpp.private_doh.components.UnselectedProtocol;
+import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout;
+import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorRadioGroup;
+import com.tpp.private_doh.components.racing_amount_selector.RacingAmountBar;
+import com.tpp.private_doh.components.racing_amount_selector.RacingAmountSelectorLayout;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 import com.tpp.private_doh.network.InternetChecker;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
     private static final int VPN_REQUEST_CODE = 0x0F;
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
-    private final List<Integer> ACCEPTED_NETWORK_CAPABILITIES = Arrays.asList(
-            NetworkCapabilities.TRANSPORT_CELLULAR, NetworkCapabilities.TRANSPORT_WIFI,
-            NetworkCapabilities.TRANSPORT_ETHERNET);
     private int actualTransport = -1;
 
-    private ProtocolSelector protocolSelector;
-    private RacingAmountSelector racingAmountSelector;
-    private TextView countOutput;
+    private ProtocolSelectorRadioGroup protocolSelector;
+    private RacingAmountBar racingAmountBar;
+    // private TextView countOutput;
     private ShardingControllerFactory shardingControllerFactory;
 
     private BroadcastReceiver stopVpnInternet = new BroadcastReceiver() {
@@ -74,14 +72,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
+        // countOutput = findViewById(R.id.resolversCountsText);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
 
-        countOutput = findViewById(R.id.resolversCountsText);
-
-        protocolSelector = findViewById(R.id.protocolSelector);
-        racingAmountSelector = findViewById(R.id.racingAmountSelector);
-
+        ProtocolSelectorLayout protocolSelectorLayout = findViewById(R.id.protocolSelectorLayout);
+        protocolSelector = protocolSelectorLayout.getProtocolSelectorRadioGroup();
+        RacingAmountSelectorLayout racingAmountLayout = findViewById(R.id.racingAmountLayout);
+        racingAmountBar = racingAmountLayout.getBar();
         protocolSelector.setOnCheckedChangeListener((group, checkedId) -> setSeekBarMax());
-        racingAmountSelector.setCustomMin(Config.MIN_RACING_AMOUNT);
+        racingAmountBar.setCustomMin(Config.MIN_RACING_AMOUNT);
         setSeekBarMax();
         setButtonHandlers();
 
@@ -117,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     private void setSeekBarMax() {
         try {
             int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
-            racingAmountSelector.setCustomMax(availableRequesterAmount);
+            racingAmountBar.setCustomMax(availableRequesterAmount);
         } catch (UnselectedProtocol unselectedProtocol) {
             Log.e(TAG, Arrays.toString(unselectedProtocol.getStackTrace()));
         }
@@ -128,13 +127,19 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmount);
             PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
+            setMetricsShardingController();
             startService(new Intent(this, PDoHVpnService.class));
         }
     }
 
+    private void setMetricsShardingController() {
+        MetricsScreen ms = findViewById(R.id.metrics_layout);
+        ms.setShardingControllerFactory(shardingControllerFactory);
+    }
+
     private void enableVpnComponents(boolean enabled) {
         protocolSelector.setEnabled(enabled);
-        racingAmountSelector.setEnabled(enabled);
+        racingAmountBar.setEnabled(enabled);
     }
 
     private void setButtonHandlers() {
@@ -150,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
             toast.show();
             return false;
         }
+        setInternetErrorMessage(false);
 
         ProtocolId protocol = ProtocolId.DOH;
         try {
@@ -162,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         Intent vpnIntent = VpnService.prepare(this);
 
         if (vpnIntent == null) {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountBar.getCustomProgress());
         }
         enableVpnComponents(false);
 
@@ -172,13 +178,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void setInternetErrorMessage(boolean isError) {
+        TextView output = findViewById(R.id.internetErrorOutput);
+        output.setText(isError ? R.string.internet_error : R.string.empty);
+    }
+
     private void stopVpnInternet() {
         Log.e(TAG, "We need to stop the vpn due to a connectivity issue");
+        setInternetErrorMessage(true);
         StartVPNButton startVpnButton = findViewById(R.id.startVpn);
         startVpnButton.closeVpn();
-
-        Toast toast = Toast.makeText(getApplicationContext(), "We detected a connectivity issue\nTry starting the VPN again", Toast.LENGTH_SHORT);
-        toast.show();
 
         stopVpn();
     }
@@ -188,19 +197,8 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
         shardingControllerFactory = null;
+        setMetricsShardingController();
         actualTransport = -1;
-    }
-
-    public void fetchCount(View view) {
-        String message = "No running VPN";
-        if (shardingControllerFactory != null) {
-            Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
-            // TODO: agregar padding lindo para que los contadores esten alineados
-            message = map.keySet().stream()
-                    .map(key -> map.get(key) + "\n " + key)
-                    .collect(Collectors.joining("\n\n"));
-        }
-        countOutput.setText(message);
     }
 
     @Override
