@@ -8,8 +8,8 @@ import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
 public class DownBar extends RelativeLayout {
-    private DownBarButton vpnScreenButton;
-    private DownBarButton metricsScreenButton;
+    private CustomButton vpnScreenButton;
+    private CustomButton metricsScreenButton;
     private View vpnScreen;
     private View metricScreen;
 
@@ -39,8 +39,8 @@ public class DownBar extends RelativeLayout {
         MarginLayoutParams vpnScreenButtonMlp = getMarginLayoutParams(buttonWidth, spacesToClosestSize, spacesToFarthestSize);
         MarginLayoutParams metricsScreenButtonMlp = getMarginLayoutParams(buttonWidth, spacesToFarthestSize, spacesToClosestSize);
 
-        vpnScreenButton = new DownBarButton(getContext(), "VPN", vpnScreenButtonMlp);
-        metricsScreenButton = new DownBarButton(getContext(), "Metrics", metricsScreenButtonMlp);
+        vpnScreenButton = new CustomButton(getContext(), "VPN", vpnScreenButtonMlp);
+        metricsScreenButton = new CustomButton(getContext(), "Metrics", metricsScreenButtonMlp);
 
         this.addView(metricsScreenButton);
         this.addView(vpnScreenButton);
@@ -50,9 +50,14 @@ public class DownBar extends RelativeLayout {
             setVpnClicked(true);
         });
         metricsScreenButton.setOnClickListener(v -> {
-            setVpnClicked(false);
+            setMetricsClicked(true);
         });
     }
+
+    private void setMetricsClicked(boolean isMetricsClicked) {
+        setVpnClicked(!isMetricsClicked);
+    }
+
 
     private void setVpnClicked(Boolean isVpnClicked) {
         int vpnVisibility = isVpnClicked ? VISIBLE : INVISIBLE;
@@ -68,5 +73,6 @@ public class DownBar extends RelativeLayout {
     }
     public void setMetricsScreen(View metricScreen) {
         this.metricScreen = metricScreen;
+        metricScreen.setVisibility(INVISIBLE);
     }
 }
