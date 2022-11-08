@@ -20,12 +20,13 @@ import java.util.List;
 import java.util.Map;
 
 public class ShardingControllerFactory {
-    private static final List<Requester> pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
-
+    private final List<Requester> pureDohRequesters;
     private final String TAG = this.getClass().getSimpleName();
     private final ShardingController shardingController;
+    private static final Integer N_DOH_REQUESTERS = 3; // TODO if we add a new DohRequester we should change this number
 
     public ShardingControllerFactory(ProtocolId protocolId, int racingAmount) {
+        this.pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
         PingController pingController = new PingController(racingAmount);
         Log.i(TAG, "protocolId: " + protocolId);
         // pureDohRequesters.forEach(dohRequester -> ((DoHRequester) dohRequester).restartCount());
@@ -56,13 +57,13 @@ public class ShardingControllerFactory {
         switch (protocolId) {
             case DOH:
                 Log.i("ShardingControllerFactory", "getAvailableRequesterAmount(DOH)");
-                return pureDohRequesters.size();
+                return N_DOH_REQUESTERS;
             case DNS:
                 Log.i("ShardingControllerFactory", "getAvailableRequesterAmount(DNS)");
                 return PublicDnsIps.RELIABLE_IPS.size();
             case HYBRID:
                 Log.i("ShardingControllerFactory", "getAvailableRequesterAmount(BOTH)");
-                return pureDohRequesters.size() + PublicDnsIps.RELIABLE_IPS.size();
+                return N_DOH_REQUESTERS + PublicDnsIps.RELIABLE_IPS.size();
             default:
                 throw new IllegalStateException("Unexpected value: " + protocolId);
         }
