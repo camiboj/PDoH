@@ -2,6 +2,7 @@ package com.tpp.private_doh.handler;
 
 import android.net.VpnService;
 import android.util.Log;
+import android.util.Pair;
 
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.protocol.IP4Header;
@@ -12,7 +13,6 @@ import com.tpp.private_doh.protocol.TcpHeader;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -23,7 +23,6 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 
 public class TcpPacketHandler implements Runnable {
@@ -139,7 +138,7 @@ public class TcpPacketHandler implements Runnable {
         pipe.myAcknowledgementNum += payloadSize;
         fillRemoteOutBuffer(pipe, packet.getBackingBuffer());
         pipe.remoteOutBuffer.flip();
-        tryFlushWrite(pipe, pipe.remote, false);
+        tryFlushWrite(pipe, pipe.remote);
         sendTcpPack(pipe, (byte) TcpHeader.ACK, null);
     }
 
@@ -163,7 +162,7 @@ public class TcpPacketHandler implements Runnable {
         return (SelectionKey) objAttrUtil.getAttr(channel, "key");
     }
 
-    private boolean tryFlushWrite(TcpPipe pipe, SocketChannel channel, boolean throwException) throws Exception {
+    private boolean tryFlushWrite(TcpPipe pipe, SocketChannel channel) throws Exception {
         ByteBuffer buffer = pipe.remoteOutBuffer;
         if (pipe.remote.socket().isOutputShutdown() && buffer.remaining() != 0) {
             sendTcpPack(pipe, (byte) (TcpHeader.FIN | TcpHeader.ACK), null);
@@ -178,13 +177,7 @@ public class TcpPacketHandler implements Runnable {
             return false;
         }
         while (buffer.hasRemaining()) {
-            int n = 0;
-            if (new Random().nextBoolean() && throwException) {
-                Log.e(TAG, "Throwing exception");
-                throw new IOException("hola");
-            } else {
-                n = channel.write(buffer);
-            }
+            int n = channel.write(buffer);
             if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
@@ -248,7 +241,7 @@ public class TcpPacketHandler implements Runnable {
 
     }
 
-    private Packet handleReadFromVpn() throws Exception {
+    private Pair<Packet, TcpPipe> handleReadFromVpn() throws Exception {
         Packet currentPacket = queue.poll();
         if (currentPacket == null) {
             return null;
@@ -266,8 +259,7 @@ public class TcpPacketHandler implements Runnable {
             pipes.put(ipAndPort, tcpTunnel);
         }
         TcpPipe pipe = pipes.get(ipAndPort);
-        handlePacket(pipe, currentPacket);
-        return currentPacket;
+        return Pair.create(currentPacket, pipe);
     }
 
     private void doAccept(ServerSocketChannel serverChannel) throws Exception {
@@ -353,7 +345,7 @@ public class TcpPacketHandler implements Runnable {
 
     private void doWrite(SocketChannel socketChannel) throws Exception {
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(socketChannel, "pipe");
-        boolean flushed = tryFlushWrite(pipe, socketChannel, true);
+        boolean flushed = tryFlushWrite(pipe, socketChannel);
         if (flushed) {
             SelectionKey key1 = (SelectionKey) objAttrUtil.getAttr(socketChannel, "key");
             key1.interestOps(SelectionKey.OP_READ);
@@ -392,15 +384,21 @@ public class TcpPacketHandler implements Runnable {
 
     @Override
     public void run() {
+        Packet currentPacket = null;
         try {
             selector = Selector.open();
             while (true) {
-                Packet currentPacket = handleReadFromVpn();
-                if (currentPacket == null) continue;
+                Pair<Packet, TcpPipe> currentPair = handleReadFromVpn();
+                if (currentPair == null) continue;
                 try {
+                    currentPacket = currentPair.first;
+                    TcpPipe pipe = currentPair.second;
+                    if (currentPacket == null) continue;
+                    handlePacket(pipe, currentPacket);
                     handleSockets(currentPacket);
                 } catch (Exception e) {
                     Log.e(TAG, "Caught exception..", e);
+                    queue.put(currentPacket);
                 }
             }
         } catch (InterruptedException e) {
