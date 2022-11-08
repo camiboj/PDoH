@@ -2,6 +2,7 @@ package com.tpp.private_doh.handler;
 
 import android.net.VpnService;
 import android.util.Log;
+import android.util.Pair;
 
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.protocol.IP4Header;
@@ -14,7 +15,6 @@ import com.tpp.private_doh.util.SocketUtils;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -75,9 +75,6 @@ public class TcpPacketHandler implements Runnable {
         ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
         byteBuffer.position(HEADER_SIZE);
         if (data != null) {
-            if (byteBuffer.remaining() < data.length) {
-                System.currentTimeMillis();
-            }
             byteBuffer.put(data);
         }
         packet.updateTCPBuffer(byteBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
@@ -143,7 +140,6 @@ public class TcpPacketHandler implements Runnable {
         pipe.remoteOutBuffer.flip();
         tryFlushWrite(pipe, pipe.remote);
         sendTcpPack(pipe, (byte) TcpHeader.ACK, null);
-        System.currentTimeMillis();
     }
 
     private void fillRemoteOutBuffer(TcpPipe pipe, ByteBuffer backingBuffer) {
@@ -177,25 +173,15 @@ public class TcpPacketHandler implements Runnable {
             SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
             int ops = key.interestOps() | SelectionKey.OP_WRITE;
             key.interestOps(ops);
-            System.currentTimeMillis();
             buffer.compact();
             return false;
         }
         while (buffer.hasRemaining()) {
-            int n = 0;
-            try {
-                n = channel.write(buffer);
-            } catch (Exception e) {
-                Log.e(TAG, "Exception in write:", e);
-            }
-            if (n > 4000) {
-                System.currentTimeMillis();
-            }
+            int n = channel.write(buffer);
             if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
                 key.interestOps(ops);
-                System.currentTimeMillis();
                 buffer.compact();
                 return false;
             }
@@ -255,28 +241,25 @@ public class TcpPacketHandler implements Runnable {
 
     }
 
-    private void handleReadFromVpn() throws Exception {
-        while (true) {
-            Packet currentPacket = queue.poll();
-            if (currentPacket == null) {
-                return;
-            }
-            InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
-            TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
-            int destinationPort = tcpHeader.getDestinationPort();
-            int sourcePort = tcpHeader.getSourcePort();
-            String ipAndPort = destinationAddress.getHostAddress() + ":" +
-                    destinationPort + ":" + sourcePort;
-
-            if (!pipes.containsKey(ipAndPort)) {
-                TcpPipe tcpTunnel = initPipe(currentPacket);
-                tcpTunnel.tunnelKey = ipAndPort;
-                pipes.put(ipAndPort, tcpTunnel);
-            }
-            TcpPipe pipe = pipes.get(ipAndPort);
-            handlePacket(pipe, currentPacket);
-            System.currentTimeMillis();
+    private Pair<Packet, TcpPipe> handleReadFromVpn() throws Exception {
+        Packet currentPacket = queue.poll();
+        if (currentPacket == null) {
+            return null;
         }
+        InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
+        TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
+        int destinationPort = tcpHeader.getDestinationPort();
+        int sourcePort = tcpHeader.getSourcePort();
+        String ipAndPort = destinationAddress.getHostAddress() + ":" +
+                destinationPort + ":" + sourcePort;
+
+        if (!pipes.containsKey(ipAndPort)) {
+            TcpPipe tcpTunnel = initPipe(currentPacket);
+            tcpTunnel.tunnelKey = ipAndPort;
+            pipes.put(ipAndPort, tcpTunnel);
+        }
+        TcpPipe pipe = pipes.get(ipAndPort);
+        return Pair.create(currentPacket, pipe);
     }
 
     private void doAccept(ServerSocketChannel serverChannel) throws Exception {
@@ -370,7 +353,7 @@ public class TcpPacketHandler implements Runnable {
     }
 
 
-    private void handleSockets() throws Exception {
+    private void handleSockets(Packet packet) throws Exception {
         while (selector.selectNow() > 0) {
             for (Iterator<SelectionKey> it = selector.selectedKeys().iterator(); it.hasNext(); ) {
                 SelectionKey key = it.next();
@@ -384,15 +367,15 @@ public class TcpPacketHandler implements Runnable {
                             doRead((SocketChannel) key.channel());
                         } else if (key.isConnectable()) {
                             doConnect((SocketChannel) key.channel());
-                            System.currentTimeMillis();
                         } else if (key.isWritable()) {
                             doWrite((SocketChannel) key.channel());
-                            System.currentTimeMillis();
                         }
                     } catch (Exception e) {
                         if (pipe != null) {
                             closeRst(pipe);
                         }
+                        initPipe(packet);
+                        queue.put(packet);
                     }
                 }
             }
@@ -401,12 +384,22 @@ public class TcpPacketHandler implements Runnable {
 
     @Override
     public void run() {
+        Packet currentPacket = null;
         try {
             selector = Selector.open();
             while (true) {
-                handleReadFromVpn();
-                handleSockets();
-                Thread.sleep(1);
+                Pair<Packet, TcpPipe> currentPair = handleReadFromVpn();
+                if (currentPair == null) continue;
+                try {
+                    currentPacket = currentPair.first;
+                    TcpPipe pipe = currentPair.second;
+                    if (currentPacket == null) continue;
+                    handlePacket(pipe, currentPacket);
+                    handleSockets(currentPacket);
+                } catch (Exception e) {
+                    Log.e(TAG, "Caught exception..", e);
+                    queue.put(currentPacket);
+                }
             }
         } catch (InterruptedException e) {
             Log.i(TAG, "The execution was interrupted");
