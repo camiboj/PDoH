@@ -1,6 +1,12 @@
 package com.tpp.private_doh.app;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
@@ -24,8 +30,10 @@ import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
+import com.tpp.private_doh.network.InternetChecker;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -35,14 +43,26 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong downByte = new AtomicLong(0);
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
+    private final List<Integer> ACCEPTED_NETWORK_CAPABILITIES = Arrays.asList(
+            NetworkCapabilities.TRANSPORT_CELLULAR, NetworkCapabilities.TRANSPORT_WIFI,
+            NetworkCapabilities.TRANSPORT_ETHERNET);
+    private int actualTransport = -1;
 
     private ProtocolSelector protocolSelector;
     private RacingAmountSelector racingAmountSelector;
     private TextView countOutput;
     private ShardingControllerFactory shardingControllerFactory;
 
-    @Override
+    private BroadcastReceiver stopVpnInternet = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Config.STOP_SIGNAL_FOR_INTERNET.equals(intent.getAction())) {
+                stopVpnInternet();
+            }
+        }
+    };
 
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -65,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
         setSeekBarMax();
         setButtonHandlers();
 
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        lbm.registerReceiver(stopVpnInternet, new IntentFilter(Config.STOP_SIGNAL_FOR_INTERNET));
         DownBar db = findViewById(R.id.down_bar);
         db.setVpnScreen(findViewById(R.id.vpn_layout));
         db.setMetricsScreen(findViewById(R.id.metrics_layout));
@@ -92,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
     private void setSeekBarMax() {
         try {
             int availableRequesterAmount = ShardingControllerFactory.getAvailableRequesterAmount(protocolSelector.getProtocol());
@@ -118,11 +139,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void setButtonHandlers() {
         StartVPNButton startVpnButton = findViewById(R.id.startVpn);
-        startVpnButton.setOnclick(this::startVpn, this::stopVpn);
-
+        startVpnButton.setOnClick(this::startVpn, this::stopVpn);
     }
 
-    private void startVpn() {
+    private boolean startVpn() {
+        if (!checkInternet()) {
+            // TODO: test this when we are connected to roaming instead of wifi
+            Log.e(TAG, "There is no internet");
+            Toast toast = Toast.makeText(getApplicationContext(), "There is no internet\nTry again when you're connected to wifi", Toast.LENGTH_SHORT);
+            toast.show();
+            return false;
+        }
+
         ProtocolId protocol = ProtocolId.DOH;
         try {
             protocol = protocolSelector.getProtocol();
@@ -136,8 +164,23 @@ public class MainActivity extends AppCompatActivity {
         if (vpnIntent == null) {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountSelector.getCustomProgress());
         }
-
         enableVpnComponents(false);
+
+        InternetChecker internetChecker = new InternetChecker(this::checkInternet);
+        Thread t = new Thread(internetChecker);
+        t.start();
+        return true;
+    }
+
+    private void stopVpnInternet() {
+        Log.e(TAG, "We need to stop the vpn due to a connectivity issue");
+        StartVPNButton startVpnButton = findViewById(R.id.startVpn);
+        startVpnButton.closeVpn();
+
+        Toast toast = Toast.makeText(getApplicationContext(), "We detected a connectivity issue\nTry starting the VPN again", Toast.LENGTH_SHORT);
+        toast.show();
+
+        stopVpn();
     }
 
     private void stopVpn() {
@@ -145,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
         shardingControllerFactory = null;
+        actualTransport = -1;
     }
 
     public void fetchCount(View view) {
@@ -170,5 +214,25 @@ public class MainActivity extends AppCompatActivity {
         httpIntent.setData(Uri.parse(Config.BUG_LINK));
 
         startActivity(httpIntent);
+    }
+
+    public boolean checkInternet() {
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network[] mWifi = connManager.getAllNetworks();
+        NetworkCapabilities networkCapabilities = connManager.getNetworkCapabilities(connManager.getActiveNetwork());
+
+        if (this.actualTransport == -1) {
+            if (networkCapabilities != null && networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                this.actualTransport = NetworkCapabilities.TRANSPORT_WIFI;
+            } else if (networkCapabilities != null && networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                this.actualTransport = NetworkCapabilities.TRANSPORT_CELLULAR;
+            }
+        }
+
+        boolean stillConnectedToWifi = networkCapabilities != null && networkCapabilities.hasTransport(this.actualTransport);
+        boolean onlyVpn = networkCapabilities != null && !networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                && !networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI);
+
+        return stillConnectedToWifi || (mWifi.length > 1 && onlyVpn); // This is because the vpn connection counts as one
     }
 }
