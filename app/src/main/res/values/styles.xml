@@ -56,6 +56,16 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="AppTheme.InternetErrorOutput">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/colorError</item>
+        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:paddingEnd">15sp</item>
+        <item name="android:paddingStart">15sp</item>
+        <item name="android:paddingBottom">15sp</item>
+    </style>
+
     <style name="AppTheme.ProgressBar">
         <item name="android:textSize">15sp</item>
         <item name="android:textAllCaps">false</item>

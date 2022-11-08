@@ -8,6 +8,7 @@
     <color name="colorMetric2">#A6C8ECE7</color>
     <color name="colorTextWithBackground">#FDFDFD</color>
     <color name="colorTextPrimary">#0E0E0E</color>
+    <color name="colorError">#94FF0000</color>
     <color name="colorTextSecondary">#191818</color>
     <color name="colorDisabled">#858080</color>
 </resources>

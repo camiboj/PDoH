@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -154,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
             toast.show();
             return false;
         }
+        setInternetErrorMessage(false);
 
         ProtocolId protocol = ProtocolId.DOH;
         try {
@@ -176,13 +178,16 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void setInternetErrorMessage(boolean isError) {
+        TextView output = findViewById(R.id.internetErrorOutput);
+        output.setText(isError ? R.string.internet_error : R.string.empty);
+    }
+
     private void stopVpnInternet() {
         Log.e(TAG, "We need to stop the vpn due to a connectivity issue");
+        setInternetErrorMessage(true);
         StartVPNButton startVpnButton = findViewById(R.id.startVpn);
         startVpnButton.closeVpn();
-
-        Toast toast = Toast.makeText(getApplicationContext(), "We detected a connectivity issue\nTry starting the VPN again", Toast.LENGTH_SHORT);
-        toast.show();
 
         stopVpn();
     }
