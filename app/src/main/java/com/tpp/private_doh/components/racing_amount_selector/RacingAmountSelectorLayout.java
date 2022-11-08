@@ -20,14 +20,21 @@ public class RacingAmountSelectorLayout extends CustomLinearLayout {
     public RacingAmountSelectorLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
-        title = new Title(context, R.string.select_protocol_title);
-        subtitle = new Subtitle(context, R.string.select_protocol_subtitle);
-        progressOutput = new ProgressOutput(context, R.string.select_protocol_subtitle);
+        title = new Title(context, R.string.racing_amount_title);
+        subtitle = new Subtitle(context, R.string.racing_amount_subtitle);
+        progressOutput = new ProgressOutput(context);
         bar = new RacingAmountBar(context, progressOutput);
         addView(title);
         addView(subtitle);
         addView(progressOutput);
         addView(bar);
+    }
+
+    @Override
+    protected void onHeightChange(int height) {
+        int sections = 6;
+        setChildHeight(title, height/sections);
+        setChildHeight(bar, height/sections);
     }
 
     public RacingAmountBar getBar() {

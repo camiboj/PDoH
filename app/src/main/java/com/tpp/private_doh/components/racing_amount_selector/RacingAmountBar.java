@@ -74,5 +74,6 @@ public class RacingAmountBar extends androidx.appcompat.widget.AppCompatSeekBar 
         int progressTint = enabled? R.color.colorPrimaryDark : R.color.colorDisabled;
         setThumbTintList(ContextCompat.getColorStateList(getContext(), thumbTint));
         setProgressTintList(ContextCompat.getColorStateList(getContext(), progressTint));
+        progressOutput.setEnabled(enabled);
     }
 }
