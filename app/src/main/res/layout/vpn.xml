@@ -26,6 +26,7 @@
 
         <com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout
             android:id="@+id/protocolSelectorLayout"
+            android:padding="20dp"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:orientation="vertical"
@@ -36,6 +37,7 @@
 
         <com.tpp.private_doh.components.racing_amount_selector.RacingAmountSelectorLayout
             android:id="@+id/racingAmountLayout"
+            android:padding="20dp"
             android:layout_width="match_parent"
             android:layout_height="350dp"
             android:orientation="vertical"

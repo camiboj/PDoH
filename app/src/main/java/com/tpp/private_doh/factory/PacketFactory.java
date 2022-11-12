@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class PacketFactory {
-    public static Packet createPacket(ByteBuffer buffer) throws UnknownHostException {
+    public static Packet createPacket(ByteBuffer buffer) {
         IP4Header ip4Header = new IP4Header(buffer);
         if (ip4Header.getProtocol() == TransportProtocol.TCP) {
             TcpHeader tcpHeader = new TcpHeader(buffer);

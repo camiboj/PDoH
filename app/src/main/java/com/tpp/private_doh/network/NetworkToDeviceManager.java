@@ -37,6 +37,8 @@ public class NetworkToDeviceManager implements Runnable {
                     MainActivity.downByte.addAndGet(w);
                 }
             }
+
+            bufferFromNetwork = null;
         } catch (Exception e) {
             Log.i(TAG, "WriteVpnThread fail", e);
         }
