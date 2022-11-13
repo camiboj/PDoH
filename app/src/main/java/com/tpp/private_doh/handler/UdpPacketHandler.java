@@ -92,7 +92,6 @@ public class UdpPacketHandler implements Runnable {
             Log.i(TAG, "The execution was interrupted");
         } catch (Exception e) {
             Log.e(TAG, "Error in BioUdpHandler", e);
-            System.exit(0);
         }
     }
 }
