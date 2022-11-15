@@ -202,5 +202,9 @@ public class Packet {
     public void setBackingBuffer(ByteBuffer byteBuffer) {
         this.backingBuffer = byteBuffer;
     }
+
+    public void clean() {
+        this.backingBuffer = null;
+    }
 }
 
