@@ -12,9 +12,9 @@ import com.tpp.private_doh.protocol.TcpHeader;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -35,6 +35,7 @@ public class TcpPacketHandler implements Runnable {
     private final ObjAttrUtil objAttrUtil;
     private Selector selector;
     private Map<String, TcpPipe> pipes;
+    private boolean firstIteration;
 
     public TcpPacketHandler(BlockingQueue<Packet> queue,
                             BlockingQueue<ByteBuffer> networkToDeviceQueue,
@@ -44,6 +45,7 @@ public class TcpPacketHandler implements Runnable {
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.objAttrUtil = new ObjAttrUtil();
         this.pipes = new HashMap<>();
+        this.firstIteration = true;
     }
 
     private TcpPipe initPipe(Packet packet) throws Exception {
@@ -177,7 +179,13 @@ public class TcpPacketHandler implements Runnable {
             return false;
         }
         while (buffer.hasRemaining()) {
-            int n = channel.write(buffer);
+            int n = 1;
+            if (firstIteration) {
+                firstIteration = false;
+                throw new IOException("EXPECTED");
+            } else {
+                n = channel.write(buffer);
+            }
             if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
@@ -387,8 +395,16 @@ public class TcpPacketHandler implements Runnable {
         try {
             selector = Selector.open();
             while (true) {
-                handleReadFromVpn();
-                handleSockets();
+                try {
+                    handleReadFromVpn();
+                } catch (IOException e) {
+                    Log.e(TAG, "There was an error in socketHandling", e);
+                }
+                try {
+                    handleSockets();
+                } catch (IOException e) {
+                    Log.e(TAG, "There was an error in socketHandling", e);
+                }
                 Thread.sleep(1);
             }
         } catch (InterruptedException e) {
