@@ -10,6 +10,7 @@ import com.tpp.private_doh.controller.HybridDnsShardingController;
 import com.tpp.private_doh.controller.PingController;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.controller.ShardingController;
+import com.tpp.private_doh.dns.RTT;
 import com.tpp.private_doh.doh.CloudflareDoHRequester;
 import com.tpp.private_doh.doh.GoogleDoHRequester;
 import com.tpp.private_doh.doh.Quad9DoHRequester;
@@ -73,7 +74,11 @@ public class ShardingControllerFactory {
         return this.shardingController;
     }
 
-    public Map<String, Integer> getRequestersMetrics() {
-        return shardingController.getRequestersMetrics();
+    public Map<String, Integer> getRequestersWinningMetrics() {
+        return shardingController.getRequestersWinningMetrics();
+    }
+
+    public Map<String, RTT> getRequestersTimesMetrics() {
+        return shardingController.getRequestersTimesMetrics();
     }
 }

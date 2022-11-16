@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 
 import com.tpp.private_doh.R;
+import com.tpp.private_doh.dns.RTT;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.Map;
@@ -33,7 +34,7 @@ public class MetricsScreen extends LinearLayout {
     public void setVisibility(int visibility) {
         super.setVisibility(visibility);
         if (visibility == VISIBLE) {
-            fetchCount();
+            fetchMetrics();
         } else {
             removeAllViews();
         }
@@ -43,34 +44,39 @@ public class MetricsScreen extends LinearLayout {
         this.shardingControllerFactory = shardingControllerFactory;
     }
 
-    private void fetchCount() {
-        if (shardingControllerFactory == null) {
-            Toast.makeText(getContext(), "No running VPN", Toast.LENGTH_LONG).show();
-            return;
-        }
-        Map<String, Integer> map = shardingControllerFactory.getRequestersMetrics();
-
+    private int getWinnersCount(Map<String, Integer> counts) {
         int metricsAmount = 0;
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
             if (entry.getValue() > 0) {
                 metricsAmount++;
             }
         }
+        return metricsAmount;
+    }
+    private void fetchMetrics() {
+        if (shardingControllerFactory == null) {
+            Toast.makeText(getContext(), "No running VPN", Toast.LENGTH_LONG).show();
+            return;
+        }
+        Map<String, Integer> counts = shardingControllerFactory.getRequestersWinningMetrics();
+        Map<String, RTT> times = shardingControllerFactory.getRequestersTimesMetrics();
+
+        int metricsAmount = getWinnersCount(counts);
         int count = 0;
-        for (Map.Entry<String, Integer> entry : map.entrySet()) {
-            String key = entry.getKey();
-            int value = entry.getValue();
-            if (value > 0) {
+        for (String requesterName : counts.keySet()) {
+            int requesterCount = counts.get(requesterName);
+            RTT requesterTime = times.get(requesterName);
+            if (requesterCount > 0) {
                 count++;
-                createMetricLayout(key, value, metricsAmount, count);
+                createMetricLayout(requesterName, requesterCount, requesterTime, metricsAmount, count);
             }
         }
     }
 
-    private void createMetricLayout(String requesterName, int metric, int metricsAmount, int count) {
+    private void createMetricLayout(String requesterName, int countMetric, RTT timeMetric, int metricsAmount, int count) {
         int color = count%2 == 0 ? R.color.colorMetric1 : R.color.colorMetric2;
         int metricHeight = getHeight() / metricsAmount;
-        RequesterMetric rm = new RequesterMetric(getContext(), requesterName, metric, metricHeight);
+        RequesterMetric rm = new RequesterMetric(getContext(), requesterName, countMetric, timeMetric, metricHeight);
         rm.setBackground(ContextCompat.getDrawable(getContext(), color));
         addView(rm);
     }

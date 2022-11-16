@@ -1,5 +1,6 @@
 package com.tpp.private_doh.util;
 
+import com.tpp.private_doh.dns.RTT;
 import com.tpp.private_doh.dns.Response;
 
 import java.util.concurrent.CompletableFuture;
@@ -10,4 +11,6 @@ public interface Requester {
     int getCount();
 
     String getName();
+
+    RTT getAvgResponseTime();
 }
