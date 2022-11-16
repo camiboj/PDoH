@@ -7,7 +7,7 @@ import com.tpp.private_doh.R;
 
 public class RequesterCount extends RequesterOutput {
 
-    public RequesterCount(Context context, String text, LinearLayout.LayoutParams layoutParams) {
-        super(context, text, layoutParams, R.style.AppTheme_MetricsHeadLine2);
+    public RequesterCount(Context context, int count, LinearLayout.LayoutParams layoutParams) {
+        super(context, "Winning count: " + count, layoutParams, R.style.AppTheme_MetricsHeadLine2);
     }
 }

@@ -21,13 +21,13 @@ public class RequesterMetric extends LinearLayout {
         );
         TextView count = new RequesterCount(
                 context,
-                String.valueOf(countMetric),
+                countMetric,
                 new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight/LINES)
         );
 
-        TextView time = new RequesterCount(
+        TextView time = new RequesterTime(
                 context,
-                String.valueOf(timeMetric),
+                timeMetric,
                 new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight/LINES)
         );
 
