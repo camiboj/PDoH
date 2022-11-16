@@ -20,12 +20,10 @@ import org.xbill.DNS.Type;
 import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 
-public class PublicDnsRequester implements Requester {
+public class PublicDnsRequester extends Requester {
     protected final static String TAG = PublicDnsRequester.class.getSimpleName();
     private Resolver resolver;
-    private int count;
     private String resolverName;
-    private RTT avgResponseTime = new RTT();
 
     public PublicDnsRequester(String resolver) {
         this.resolverName = resolver;
@@ -41,20 +39,12 @@ public class PublicDnsRequester implements Requester {
         this.resolver = resolver;
     }
 
-    @Override
-    public int getCount() {
-        return count;
-    }
 
     @Override
     public String getName() {
         return resolverName;
     }
 
-    @Override
-    public RTT getAvgResponseTime() {
-        return avgResponseTime;
-    }
 
     @Override
     public CompletableFuture<Response> executeRequest(String name, int type) {
@@ -66,7 +56,7 @@ public class PublicDnsRequester implements Requester {
             // Sentinel to recognize this packet while capturing
             Log.i(TAG, "About to process message");
             queryMessage.addRecord(Record.newRecord(Name.fromString(Config.SENTINEL + "."), Type.A, DClass.IN), Section.QUESTION);
-            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply((msg) -> this.processResponse(msg, System.currentTimeMillis()));
+            return resolver.sendAsync(queryMessage).toCompletableFuture().thenApply((msg) -> this.processMessage(msg, System.nanoTime()));
         } catch (Exception e) {
             throw new RuntimeException("There was an error executing the request in DnsRequester", e);
         }
@@ -83,22 +73,6 @@ public class PublicDnsRequester implements Requester {
         }
     }
 
-    private void increaseCount() {
-        count ++;
-    }
-
-    private void updateAvgResponseTime(float new_measure) {
-        avgResponseTime.update(new_measure);
-    }
-
-    private Response processResponse(Message message, float rtt_0) {
-        Response r = PublicDnsToDnsMapper.map(message);
-        r.setOnWinning(() -> {
-            this.increaseCount();
-            this.updateAvgResponseTime(rtt_0 - System.currentTimeMillis());
-        });
-        return r;
-    }
 
     public String getIp() {
         return this.resolverName;

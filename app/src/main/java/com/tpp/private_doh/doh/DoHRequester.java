@@ -6,7 +6,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tpp.private_doh.dns.RTT;
 import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.mapper.DoHToDnsMapper;
 import com.tpp.private_doh.util.Requester;
@@ -25,13 +24,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 
-public abstract class DoHRequester implements Requester {
+public abstract class DoHRequester extends Requester {
     protected String TAG;
 
     private String endpoint;
     private Map<String, List<String>> headers;
-    private int count;
-    private RTT avgResponseTime = new RTT();
 
     public DoHRequester(String endpoint, Map<String, List<String>> headers) {
         TAG = this.getClass().getSimpleName();
@@ -39,35 +36,8 @@ public abstract class DoHRequester implements Requester {
         this.headers = headers;
     }
 
-    @Override
-    public int getCount() {
-        return count;
-    }
-
-    @Override
-    public RTT getAvgResponseTime() {
-        return avgResponseTime;
-    }
-
-
-    private void increaseCount() {
-        count ++;
-    }
-
-    private void updateAvgResponseTime(float new_measure) {
-        avgResponseTime.update(new_measure);
-    }
-
-    private Response processResponse(Response r, float rtt_0) {
-        r.setOnWinning(() -> {
-            this.increaseCount();
-            this.updateAvgResponseTime(rtt_0 - System.currentTimeMillis());
-        });
-        return r;
-    }
-
     public CompletableFuture<Response> executeRequest(String name, int type) {
-        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type))).thenApply((msg) -> this.processResponse(msg, System.currentTimeMillis()));
+        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type))).thenApply((response) -> this.processResponse(response, System.nanoTime()));
     }
 
     @VisibleForTesting
