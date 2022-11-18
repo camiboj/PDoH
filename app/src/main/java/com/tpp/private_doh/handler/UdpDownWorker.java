@@ -25,7 +25,6 @@ public class UdpDownWorker implements Runnable {
     private final BlockingQueue<UdpTunnel> tunnelQueue;
     private final Selector selector;
     private final int headerSize;
-    private final ByteBuffer byteBuffer;
     ;
 
     public UdpDownWorker(Selector selector, BlockingQueue<ByteBuffer> networkToDeviceQueue,
@@ -35,14 +34,13 @@ public class UdpDownWorker implements Runnable {
         this.selector = selector;
         this.ipId = new AtomicInteger();
         this.headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
-        this.byteBuffer = ByteBufferPool.acquire();
     }
 
     private void sendUdpPack(UdpTunnel tunnel, byte[] data) throws IOException {
         int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
         Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
 
-        byteBuffer.clear();
+        ByteBuffer byteBuffer = ByteBufferPool.acquire();
 
         byteBuffer.position(this.headerSize);
         Optional.ofNullable(data).ifPresent(byteBuffer::put);

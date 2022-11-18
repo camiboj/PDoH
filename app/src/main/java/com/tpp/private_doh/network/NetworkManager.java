@@ -109,7 +109,7 @@ public class NetworkManager implements Runnable {
         if (readBytes > 0) {
             bufferToNetwork.flip();
             Packet packet = PacketFactory.createPacket(bufferToNetwork);
-            if (packet.isDNS()) {
+            /*if (packet.isDNS()) {
                 DnsPacket dnsPacket = (DnsPacket) packet;
 
                 if (dnsPacket.getFirstQuestion().getName().equals(Config.PING_QUESTION)) {
@@ -121,7 +121,9 @@ public class NetworkManager implements Runnable {
                 } else {
                     dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getProtocolShardingController())));
                 }
-            } else if (packet.isUDP()) {
+            }*/
+            if (packet.isUDP()) {
+                Log.i(TAG, "Udp packet");
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {
                 deviceToNetworkTCPQueue.offer(packet);

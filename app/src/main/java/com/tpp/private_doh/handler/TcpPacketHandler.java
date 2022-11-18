@@ -173,7 +173,7 @@ public class TcpPacketHandler implements Runnable {
                 pipe.remoteOutBuffer.put(backingBuffer);
                 filled = true;
             } catch (Exception e) {
-                Log.i(TAG, "Creating another buffer");
+                Log.e(TAG, "Creating another buffer");
                 int limit = pipe.remoteOutBuffer.limit();
                 limit *= 2;
                 ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(limit);
