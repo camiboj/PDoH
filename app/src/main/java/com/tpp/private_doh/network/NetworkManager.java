@@ -27,7 +27,6 @@ import java.util.concurrent.Executors;
 
 public class NetworkManager implements Runnable {
     private static final String TAG = NetworkManager.class.getSimpleName();
-    private static final int N_DNS_WORKERS = 50;
     private static ShardingControllerFactory shardingControllerFactory;
 
     private FileChannel vpnInput;
@@ -38,15 +37,14 @@ public class NetworkManager implements Runnable {
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private ExecutorService dnsWorkers;
 
-
     public NetworkManager(FileDescriptor vpnFileDescriptor,
                           BlockingQueue<Packet> deviceToNetworkUDPQueue,
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
-                          BlockingQueue<ByteBuffer> networkToDeviceQueue) {
+                          BlockingQueue<ByteBuffer> networkToDeviceQueue,
+                          ExecutorService dnsWorkers,
+                          FileChannel vpnOutput) {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
-        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
-        ExecutorService dnsWorkers = Executors.newFixedThreadPool(N_DNS_WORKERS);
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
     }
@@ -138,6 +136,10 @@ public class NetworkManager implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void destroy() {
+        this.dnsWorkers.shutdown();
     }
 
     public static void setShardingControllerFactory(ShardingControllerFactory scd) {

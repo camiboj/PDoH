@@ -20,6 +20,11 @@ public class StartVPNButton extends AppCompatButton {
         updateText();
     }
 
+    public void update(boolean vpnOn) {
+        this.vpnOn = vpnOn;
+        updateText();
+    }
+
     private void updateText() {
         setText(vpnOn ? VPN_ON : VPN_OFF);
     }

@@ -3,12 +3,15 @@ package com.tpp.private_doh.handler;
 import android.net.VpnService;
 import android.util.Log;
 
+import com.tpp.private_doh.PDoHVpnService;
+import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.protocol.IP4Header;
 import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.TCBStatus;
 import com.tpp.private_doh.protocol.TcpHeader;
+import com.tpp.private_doh.util.NetworkUtils;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
@@ -16,6 +19,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -33,19 +37,25 @@ public class TcpPacketHandler implements Runnable {
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final VpnService vpnService;
     private final ObjAttrUtil objAttrUtil;
+    private final FileChannel vpnOutput;
     private Selector selector;
     private Map<String, TcpPipe> pipes;
     private boolean firstIteration;
+    private ByteBuffer readBuffer;
+    private ByteBuffer allocatedBuffer;
 
     public TcpPacketHandler(BlockingQueue<Packet> queue,
                             BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                            VpnService vpnService) {
+                            VpnService vpnService, FileChannel vpnOutput) {
         this.queue = queue;
         this.vpnService = vpnService;
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.objAttrUtil = new ObjAttrUtil();
         this.pipes = new HashMap<>();
         this.firstIteration = true;
+        this.readBuffer = ByteBuffer.allocate(Config.READ_BUFFER_SIZE);
+        this.allocatedBuffer = ByteBuffer.allocate(Config.READ_BUFFER_SIZE*4);
+        this.vpnOutput = vpnOutput;
     }
 
     private TcpPipe initPipe(Packet packet) throws Exception {
@@ -74,14 +84,26 @@ public class TcpPacketHandler implements Runnable {
         Packet packet = IpUtil.buildTcpPacket(pipe.destinationAddress, pipe.sourceAddress, flag,
                 pipe.myAcknowledgementNum, pipe.mySequenceNum, pipe.packId);
         pipe.packId += 1;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
-        byteBuffer.position(HEADER_SIZE);
+
+        //ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
+        allocatedBuffer.clear();
+
+        allocatedBuffer.position(HEADER_SIZE);
         if (data != null) {
-            byteBuffer.put(data);
+            allocatedBuffer.put(data);
         }
-        packet.updateTCPBuffer(byteBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
-        byteBuffer.position(HEADER_SIZE + dataLen);
-        networkToDeviceQueue.offer(byteBuffer);
+
+        data = null;
+        System.gc();
+
+        packet.updateTCPBuffer(allocatedBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
+        allocatedBuffer.position(HEADER_SIZE + dataLen);
+
+        //Log.i(TAG, String.format("Bytebuffer is size: %d", byteBuffer.limit()));
+        //networkToDeviceQueue.offer(allocatedBuffer);
+
+        NetworkUtils.handleBytes(vpnOutput, allocatedBuffer);
+
         if ((flag & (byte) TcpHeader.SYN) != 0) {
             pipe.mySequenceNum += 1;
         }
@@ -151,10 +173,12 @@ public class TcpPacketHandler implements Runnable {
                 pipe.remoteOutBuffer.put(backingBuffer);
                 filled = true;
             } catch (Exception e) {
+                Log.i(TAG, "Creating another buffer");
                 int limit = pipe.remoteOutBuffer.limit();
                 limit *= 2;
                 ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(limit);
                 auxiliaryBuffer.put(pipe.remoteOutBuffer);
+                pipe.remoteOutBuffer = null;
                 pipe.remoteOutBuffer = auxiliaryBuffer;
             }
         }
@@ -179,13 +203,7 @@ public class TcpPacketHandler implements Runnable {
             return false;
         }
         while (buffer.hasRemaining()) {
-            int n = 1;
-            if (firstIteration) {
-                firstIteration = false;
-                throw new IOException("EXPECTED");
-            } else {
-                n = channel.write(buffer);
-            }
+            int n = channel.write(buffer);
             if (n < 0) {
                 SelectionKey key = (SelectionKey) objAttrUtil.getAttr(channel, "key");
                 int ops = key.interestOps() | SelectionKey.OP_WRITE;
@@ -277,14 +295,13 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private void doRead(SocketChannel channel) throws Exception {
-        ByteBuffer buffer = ByteBuffer.allocate(4 * 1024);
         boolean shouldQuit = false;
 
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(channel, "pipe");
 
         while (true) {
-            buffer.clear();
-            int n = SocketUtils.read(channel, buffer);
+            readBuffer.clear();
+            int n = SocketUtils.read(channel, readBuffer);
             if (n == -1) {
                 shouldQuit = true;
                 break;
@@ -292,9 +309,9 @@ public class TcpPacketHandler implements Runnable {
                 break;
             } else {
                 if (pipe.tcbStatus != TCBStatus.CLOSE_WAIT) {
-                    buffer.flip();
-                    byte[] data = new byte[buffer.remaining()];
-                    buffer.get(data);
+                    readBuffer.flip();
+                    byte[] data = new byte[readBuffer.remaining()];
+                    readBuffer.get(data);
                     sendTcpPack(pipe, (byte) (TcpHeader.ACK), data);
                 }
             }
@@ -398,7 +415,7 @@ public class TcpPacketHandler implements Runnable {
                 try {
                     handleReadFromVpn();
                 } catch (IOException e) {
-                    Log.e(TAG, "There was an error in socketHandling", e);
+                    Log.e(TAG, "There was an error reading from VPN", e);
                 }
                 try {
                     handleSockets();

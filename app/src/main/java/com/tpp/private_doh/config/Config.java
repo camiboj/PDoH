@@ -17,6 +17,11 @@ public class Config {
     public static final String BUG_LINK = "https://forms.gle/NgBzJEcUoBJkSfuL6";
     public static final Integer MIN_RACING_AMOUNT = 2;
     public static final Integer TCP_BUFFER_BYTES = 1000 * 1024;
+    public static final Integer NOTIFICATION_ID = 45456;
+    public static final String NOTIFICATION_CHANNEL_ID = "vpn-notifications";
+    public static final Integer EXECUTOR_SERVICE_N = 4;
+    public static final Integer N_DNS_WORKERS = 50;
+    public static final int READ_BUFFER_SIZE = 4 * 1024;
 }
 
 

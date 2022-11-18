@@ -2,7 +2,7 @@ package com.tpp.private_doh.network;
 
 import android.util.Log;
 
-import com.tpp.private_doh.app.MainActivity;
+import com.tpp.private_doh.util.NetworkUtils;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -29,16 +29,7 @@ public class NetworkToDeviceManager implements Runnable {
     public void handleBytes() {
         try {
             ByteBuffer bufferFromNetwork = networkToDeviceQueue.take();
-            bufferFromNetwork.flip();
-
-            while (bufferFromNetwork.hasRemaining()) {
-                int w = vpnOutput.write(bufferFromNetwork);
-                if (w > 0) {
-                    MainActivity.downByte.addAndGet(w);
-                }
-            }
-
-            bufferFromNetwork = null;
+            NetworkUtils.handleBytes(vpnOutput, bufferFromNetwork);
         } catch (Exception e) {
             Log.i(TAG, "WriteVpnThread fail", e);
         }
