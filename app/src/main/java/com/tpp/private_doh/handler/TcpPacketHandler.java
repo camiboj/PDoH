@@ -422,7 +422,7 @@ public class TcpPacketHandler implements Runnable {
                 } catch (IOException e) {
                     Log.e(TAG, "There was an error in socketHandling", e);
                 }
-                Thread.sleep(1);
+                Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
             Log.i(TAG, "The execution was interrupted");
