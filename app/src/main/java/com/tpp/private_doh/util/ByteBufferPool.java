@@ -12,5 +12,9 @@ public class ByteBufferPool {
     public static ByteBuffer acquireWithCapacity(int capacity) {
         return ByteBuffer.allocateDirect(capacity);
     }
+
+    public static void clear(ByteBuffer buffer) {
+        buffer.clear();
+    }
 }
 

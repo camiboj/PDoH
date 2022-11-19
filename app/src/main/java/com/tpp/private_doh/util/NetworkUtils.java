@@ -22,7 +22,9 @@ public class NetworkUtils {
                 }
             }
 
+            bufferFromNetwork.clear();
             bufferFromNetwork = null;
+            System.gc();
         } catch (Exception e) {
             Log.i(TAG, "WriteVpnThread fail", e);
         }
