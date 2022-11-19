@@ -38,7 +38,6 @@ public class DnsAnswer {
 
         // Type 1 -> IP Address
         // Type 5 -> CNAMEs
-        // TODO: map all types, for now I only saw type 1 and type 5 responses
         if (type == 1) {
             try {
                 InetAddress ip = IpUtils.getByName(data);

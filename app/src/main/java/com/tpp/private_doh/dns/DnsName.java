@@ -29,7 +29,7 @@ public class DnsName {
         short labelLength = BitUtils.getUnsignedByte(buffer.get());
         while (labelLength > 0) {
             final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < labelLength; i++) { // TODO: investigate if its possible to get many chars at the same time
+            for (int i = 0; i < labelLength; i++) {
                 char label = (char) buffer.get();
                 sb.append(label);
             }

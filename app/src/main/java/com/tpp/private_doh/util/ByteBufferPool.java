@@ -6,11 +6,11 @@ public class ByteBufferPool {
     private static final int BUFFER_SIZE = 1024;
 
     public static ByteBuffer acquire() {
-        return ByteBuffer.allocateDirect(BUFFER_SIZE);
+        return ByteBuffer.allocate(BUFFER_SIZE);
     }
 
     public static ByteBuffer acquireWithCapacity(int capacity) {
-        return ByteBuffer.allocateDirect(capacity);
+        return ByteBuffer.allocate(capacity);
     }
 
     public static void clear(ByteBuffer buffer) {
