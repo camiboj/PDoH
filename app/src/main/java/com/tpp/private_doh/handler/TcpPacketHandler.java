@@ -3,8 +3,6 @@ package com.tpp.private_doh.handler;
 import android.net.VpnService;
 import android.util.Log;
 
-import com.tpp.private_doh.PDoHVpnService;
-import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.protocol.IP4Header;
 import com.tpp.private_doh.protocol.IpUtil;
@@ -12,7 +10,6 @@ import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.TCBStatus;
 import com.tpp.private_doh.protocol.TcpHeader;
 import com.tpp.private_doh.util.ByteBufferPool;
-import com.tpp.private_doh.util.NetworkUtils;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
@@ -20,7 +17,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -38,25 +34,17 @@ public class TcpPacketHandler implements Runnable {
     private final BlockingQueue<ByteBuffer> networkToDeviceQueue;
     private final VpnService vpnService;
     private final ObjAttrUtil objAttrUtil;
-    private final FileChannel vpnOutput;
     private Selector selector;
     private Map<String, TcpPipe> pipes;
-    private boolean firstIteration;
-    private ByteBuffer readBuffer;
-    private ByteBuffer allocatedBuffer;
 
     public TcpPacketHandler(BlockingQueue<Packet> queue,
                             BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                            VpnService vpnService, FileChannel vpnOutput) {
+                            VpnService vpnService) {
         this.queue = queue;
         this.vpnService = vpnService;
         this.networkToDeviceQueue = networkToDeviceQueue;
         this.objAttrUtil = new ObjAttrUtil();
         this.pipes = new HashMap<>();
-        this.firstIteration = true;
-        this.readBuffer = ByteBufferPool.acquireWithCapacity(Config.READ_BUFFER_SIZE);
-        this.allocatedBuffer = ByteBufferPool.acquireWithCapacity(Config.READ_BUFFER_SIZE*4); //TODO: change this config, it's only for testing
-        this.vpnOutput = vpnOutput;
     }
 
     private TcpPipe initPipe(Packet packet) throws Exception {
@@ -86,24 +74,16 @@ public class TcpPacketHandler implements Runnable {
                 pipe.myAcknowledgementNum, pipe.mySequenceNum, pipe.packId);
         pipe.packId += 1;
 
-        //ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
-        allocatedBuffer.clear();
+        ByteBuffer byteBuffer = ByteBufferPool.acquireWithCapacity(HEADER_SIZE + dataLen);
+        byteBuffer.position(HEADER_SIZE);
 
-        allocatedBuffer.position(HEADER_SIZE);
         if (data != null) {
-            allocatedBuffer.put(data);
+            byteBuffer.put(data);
         }
 
-        data = null;
-        System.gc();
-
-        packet.updateTCPBuffer(allocatedBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
-        allocatedBuffer.position(HEADER_SIZE + dataLen);
-
-        //Log.i(TAG, String.format("Bytebuffer is size: %d", byteBuffer.limit()));
-        //networkToDeviceQueue.offer(allocatedBuffer);
-
-        NetworkUtils.handleBytes(vpnOutput, allocatedBuffer);
+        packet.updateTCPBuffer(byteBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
+        byteBuffer.position(HEADER_SIZE + dataLen);
+        networkToDeviceQueue.offer(byteBuffer);
 
         if ((flag & (byte) TcpHeader.SYN) != 0) {
             pipe.mySequenceNum += 1;
@@ -297,12 +277,12 @@ public class TcpPacketHandler implements Runnable {
 
     private void doRead(SocketChannel channel) throws Exception {
         boolean shouldQuit = false;
+        ByteBuffer buffer = ByteBufferPool.acquireWithCapacity(Config.READ_BUFFER_SIZE);
 
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(channel, "pipe");
 
         while (true) {
-            readBuffer.clear();
-            int n = SocketUtils.read(channel, readBuffer);
+            int n = SocketUtils.read(channel, buffer);
             if (n == -1) {
                 shouldQuit = true;
                 break;
@@ -310,9 +290,9 @@ public class TcpPacketHandler implements Runnable {
                 break;
             } else {
                 if (pipe.tcbStatus != TCBStatus.CLOSE_WAIT) {
-                    readBuffer.flip();
-                    byte[] data = new byte[readBuffer.remaining()];
-                    readBuffer.get(data);
+                    buffer.flip();
+                    byte[] data = new byte[buffer.remaining()];
+                    buffer.get(data);
                     sendTcpPack(pipe, (byte) (TcpHeader.ACK), data);
                 }
             }

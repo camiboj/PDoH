@@ -42,9 +42,9 @@ public class NetworkManager implements Runnable {
                           BlockingQueue<Packet> deviceToNetworkTCPQueue,
                           BlockingQueue<DnsPacket> dnsResponsesQueue,
                           BlockingQueue<ByteBuffer> networkToDeviceQueue,
-                          ExecutorService dnsWorkers,
-                          FileChannel vpnOutput) {
+                          ExecutorService dnsWorkers) {
         FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         buildNetworkManager(vpnInput, vpnOutput, deviceToNetworkUDPQueue, deviceToNetworkTCPQueue,
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
     }

@@ -47,10 +47,6 @@ public class UdpDownWorker implements Runnable {
         packet.updateUDPBuffer(byteBuffer, dataLen);
         byteBuffer.position(this.headerSize + dataLen);
 
-        data = null;
-        System.gc();
-
-        Log.i(TAG, String.format("Bytebuffer is size: %d", byteBuffer.limit()));
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 

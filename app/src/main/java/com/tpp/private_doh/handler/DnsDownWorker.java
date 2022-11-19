@@ -63,10 +63,6 @@ public class DnsDownWorker implements Runnable {
 
         Log.i(TAG, "[dns] About to send dns packet");
 
-        data = null;
-        System.gc();
-
-        Log.i(TAG, String.format("Bytebuffer is size: %d", byteBuffer.limit()));
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 }

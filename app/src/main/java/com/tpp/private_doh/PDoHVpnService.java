@@ -82,12 +82,11 @@ public class PDoHVpnService extends VpnService {
         dnsWorkers = Executors.newFixedThreadPool(Config.N_DNS_WORKERS);
 
         FileDescriptor vpnFileDescriptor = vpnInterface.getFileDescriptor();
-        FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
         executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
-        executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this, vpnOutput));
+        executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
         executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
         executorService.submit(new NetworkManager(vpnFileDescriptor, deviceToNetworkUDPQueue,
-                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers, vpnOutput));
+                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers));
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(stopVpn, new IntentFilter(Config.STOP_SIGNAL));
         showServiceNotification();
