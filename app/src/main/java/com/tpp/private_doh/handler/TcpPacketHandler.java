@@ -11,6 +11,7 @@ import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.TCBStatus;
 import com.tpp.private_doh.protocol.TcpHeader;
+import com.tpp.private_doh.util.ByteBufferPool;
 import com.tpp.private_doh.util.NetworkUtils;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
@@ -53,8 +54,8 @@ public class TcpPacketHandler implements Runnable {
         this.objAttrUtil = new ObjAttrUtil();
         this.pipes = new HashMap<>();
         this.firstIteration = true;
-        this.readBuffer = ByteBuffer.allocate(Config.READ_BUFFER_SIZE);
-        this.allocatedBuffer = ByteBuffer.allocate(Config.READ_BUFFER_SIZE*4);
+        this.readBuffer = ByteBufferPool.acquireWithCapacity(Config.READ_BUFFER_SIZE);
+        this.allocatedBuffer = ByteBufferPool.acquireWithCapacity(Config.READ_BUFFER_SIZE*4); //TODO: change this config, it's only for testing
         this.vpnOutput = vpnOutput;
     }
 
@@ -176,7 +177,7 @@ public class TcpPacketHandler implements Runnable {
                 Log.e(TAG, "Creating another buffer");
                 int limit = pipe.remoteOutBuffer.limit();
                 limit *= 2;
-                ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(limit);
+                ByteBuffer auxiliaryBuffer = ByteBufferPool.acquireWithCapacity(limit);
                 auxiliaryBuffer.put(pipe.remoteOutBuffer);
                 pipe.remoteOutBuffer = null;
                 pipe.remoteOutBuffer = auxiliaryBuffer;
@@ -446,7 +447,7 @@ public class TcpPacketHandler implements Runnable {
         public int packId = 1;
         public long timestamp = 0L;
         int synCount = 0;
-        private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(Config.TCP_BUFFER_BYTES);
+        private ByteBuffer remoteOutBuffer = ByteBufferPool.acquireWithCapacity(Config.TCP_BUFFER_BYTES);
     }
 }
 
