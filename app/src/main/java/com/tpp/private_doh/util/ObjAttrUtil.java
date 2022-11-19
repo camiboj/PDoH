@@ -6,7 +6,7 @@ import java.util.Map;
 public class ObjAttrUtil {
     private Map<Object, Map<String, Object>> objAttrs = new HashMap<>();
 
-    public synchronized Object getAttr(Object obj, String k) {
+    public Object getAttr(Object obj, String k) {
         Map<String, Object> map = objAttrs.get(obj);
         if (map == null) {
             return null;
@@ -14,7 +14,11 @@ public class ObjAttrUtil {
         return map.get(k);
     }
 
-    public synchronized void setAttr(Object obj, String k, Object value) {
+    public void removeAttr(Object obj) {
+        objAttrs.remove(obj);
+    }
+
+    public void setAttr(Object obj, String k, Object value) {
         Map<String, Object> map = objAttrs.get(obj);
         if (map == null) {
             objAttrs.put(obj, new HashMap<>());

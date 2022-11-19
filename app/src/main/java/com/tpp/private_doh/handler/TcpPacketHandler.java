@@ -216,6 +216,7 @@ public class TcpPacketHandler implements Runnable {
         buffer.clear();
         if (!pipe.upActive) {
             pipe.remote.shutdownOutput();
+            objAttrUtil.removeAttr(pipe.remote);
         }
         return true;
     }
@@ -226,10 +227,9 @@ public class TcpPacketHandler implements Runnable {
                 if (pipe.remote.isConnected()) {
                     pipe.remote.shutdownOutput();
                 }
-
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to closeUpStream", e);
         }
         pipe.upActive = false;
 
@@ -328,8 +328,9 @@ public class TcpPacketHandler implements Runnable {
                 pipe.remote.close();
             }
             pipes.remove(pipe.tunnelKey);
+            this.objAttrUtil.removeAttr(pipe.remote);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to cleanPipe", e);
         }
     }
 
@@ -343,6 +344,7 @@ public class TcpPacketHandler implements Runnable {
     private void closeDownStream(TcpPipe pipe) throws Exception {
         if (pipe.remote != null && pipe.remote.isConnected()) {
             pipe.remote.shutdownInput();
+            objAttrUtil.removeAttr(pipe.remote);
             int ops = getKey(pipe.remote).interestOps() & (~SelectionKey.OP_READ);
             getKey(pipe.remote).interestOps(ops);
         }
