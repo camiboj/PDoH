@@ -11,9 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.net.VpnService;
-import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -32,9 +30,7 @@ import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.util.ResourceUtils;
 
 import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +38,7 @@ import java.util.concurrent.Executors;
 
 public class PDoHVpnService extends VpnService {
     private static final String TAG = PDoHVpnService.class.getSimpleName();
+    private static ExecutorService executorService;
     private ParcelFileDescriptor vpnInterface = null;
     private BroadcastReceiver stopVpn = new BroadcastReceiver() {
         @Override
@@ -52,12 +49,10 @@ public class PDoHVpnService extends VpnService {
         }
     };
     private PendingIntent pendingIntent;
-
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
     private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    private static ExecutorService executorService;
     private ExecutorService dnsWorkers;
 
     public static void setShardingControllerFactory(ShardingControllerFactory scd) {
@@ -89,6 +84,7 @@ public class PDoHVpnService extends VpnService {
                 deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers));
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(stopVpn, new IntentFilter(Config.STOP_SIGNAL));
+
         showServiceNotification();
     }
 
@@ -138,48 +134,6 @@ public class PDoHVpnService extends VpnService {
         ResourceUtils.closeResources(vpnInterface);
         vpnInterface = null;
     }
-
-    private void startForeground() {
-        // If the notification supports a direct reply action, use
-        // PendingIntent.FLAG_MUTABLE instead.
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent =
-                PendingIntent.getActivity(this, 0, notificationIntent,
-                        PendingIntent.FLAG_IMMUTABLE);
-
-        String channelId = createNotificationChannel("my_service", "My Background Service");
-
-        Notification notification =
-                new Notification.Builder(this, channelId)
-                        //.setContentTitle(getText(R.string.notification_title))
-                        //.setContentText(getText(R.string.notification_message))
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentIntent(pendingIntent)
-                        //.setTicker(getText(R.string.ticker_text))
-                        .build();
-
-        // Notification ID cannot be 0.
-        startForeground(101, notification);
-    }
-
-    /*private void startForeground() {
-        Notification.Builder notificationBuilder = new Notification.Builder(this, channelId);
-        Notification notification = notificationBuilder.setOngoing(true)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setCategory(Notification.CATEGORY_SERVICE)
-                .build();
-        startForeground(101, notification);
-    }*/
-
-    private String createNotificationChannel(String channelId, String channelName) {
-        NotificationChannel chan = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE);
-        chan.setLightColor(Color.BLUE);
-        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        service.createNotificationChannel(chan);
-        return channelId;
-    }
-
 
     private void showServiceNotification() {
         Intent activityNotificationIntent = new Intent(this, MainActivity.class);

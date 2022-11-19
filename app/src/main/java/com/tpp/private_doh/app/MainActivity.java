@@ -225,18 +225,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        Log.i(TAG, "Calling onPause");
-    }
-
-    @Override
-    public void onLowMemory() {
-        Log.i(TAG, "There's low memory!");
-    }
-
     public void bugClicked(View view) {
         Intent httpIntent = new Intent(Intent.ACTION_VIEW);
         httpIntent.setData(Uri.parse(Config.BUG_LINK));
