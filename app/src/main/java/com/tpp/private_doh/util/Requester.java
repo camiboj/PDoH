@@ -45,7 +45,7 @@ public abstract class Requester {
     protected Response processResponse(Response response, long rtt_0) {
         response.setOnWinning(() -> {
             this.increaseCount();
-            this.updateAvgResponseTime(rtt_0 - System.currentTimeMillis());
+            this.updateAvgResponseTime(System.nanoTime() - rtt_0);
         });
         return response;
     }

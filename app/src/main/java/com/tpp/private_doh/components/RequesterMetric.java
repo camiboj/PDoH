@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.tpp.private_doh.dns.RTT;
 
 public class RequesterMetric extends LinearLayout {
-    private static final int LINES = 3;
+    private static final int LINES = 4;
 
     public RequesterMetric(Context context, String requesterName, int countMetric, RTT timeMetric, int metricHeight) {
         super(context);

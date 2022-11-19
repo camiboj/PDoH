@@ -101,7 +101,7 @@
     <style name="AppTheme.MetricsHeadLine2">
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">20sp</item>
-        <item name="android:gravity">clip_vertical|center_horizontal</item>
+        <item name="android:gravity">bottom|center_horizontal</item>
         <item name="android:textColor">@color/colorTextSecondary</item>
     </style>
 
