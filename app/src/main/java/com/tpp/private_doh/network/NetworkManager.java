@@ -23,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class NetworkManager implements Runnable {
     private static final String TAG = NetworkManager.class.getSimpleName();
@@ -61,6 +60,10 @@ public class NetworkManager implements Runnable {
                 dnsResponsesQueue, networkToDeviceQueue, dnsWorkers);
     }
 
+    public static void setShardingControllerFactory(ShardingControllerFactory scd) {
+        shardingControllerFactory = scd;
+    }
+
     private void buildNetworkManager(FileChannel vpnInput,
                                      FileChannel vpnOutput,
                                      BlockingQueue<Packet> deviceToNetworkUDPQueue,
@@ -91,10 +94,8 @@ public class NetworkManager implements Runnable {
                 ByteBuffer bufferToNetwork = ByteBufferPool.acquire();
                 processPackets(bufferToNetwork);
             }
-        } catch (IOException e) {
-            Log.w(TAG, e.toString(), e);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.w(TAG, e.toString(), e);
         } finally {
             ResourceUtils.closeResources(vpnInput, vpnOutput);
             dnsWorkers.shutdown();
@@ -114,15 +115,13 @@ public class NetworkManager implements Runnable {
 
                 if (dnsPacket.getFirstQuestion().getName().equals(Config.PING_QUESTION)) {
                     deviceToNetworkUDPQueue.offer(packet);
-                }
-                else if (dnsPacket.getLastQuestion().getName().equals(Config.SENTINEL)) {
+                } else if (dnsPacket.getLastQuestion().getName().equals(Config.SENTINEL)) {
                     Log.i(TAG, "Reading sentinel");
                     deviceToNetworkUDPQueue.offer(packet);
                 } else {
                     dnsWorkers.submit(new DnsResponseProcessor(dnsPacket, dnsResponsesQueue, new DnsToController(shardingControllerFactory.getProtocolShardingController())));
                 }
-            }
-            else if (packet.isUDP()) {
+            } else if (packet.isUDP()) {
                 deviceToNetworkUDPQueue.offer(packet);
             } else if (packet.isTCP()) {
                 deviceToNetworkTCPQueue.offer(packet);
@@ -134,17 +133,13 @@ public class NetworkManager implements Runnable {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(TAG, "The thread was interrupted");
             }
         }
     }
 
     private void destroy() {
         this.dnsWorkers.shutdown();
-    }
-
-    public static void setShardingControllerFactory(ShardingControllerFactory scd) {
-        shardingControllerFactory = scd;
     }
 }
 

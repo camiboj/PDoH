@@ -34,8 +34,8 @@ public class DnsDownWorker implements Runnable {
         while (true) {
             try {
                 processPacket();
-            } catch (InterruptedException e) { // We should stop this manually when creating a button to stop
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "The thread was interrupted");
             }
         }
     }

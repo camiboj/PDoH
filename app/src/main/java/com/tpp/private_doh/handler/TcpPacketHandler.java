@@ -159,7 +159,6 @@ public class TcpPacketHandler implements Runnable {
                 limit *= 2;
                 ByteBuffer auxiliaryBuffer = ByteBufferPool.acquireWithCapacity(limit);
                 auxiliaryBuffer.put(pipe.remoteOutBuffer);
-                pipe.remoteOutBuffer = null;
                 pipe.remoteOutBuffer = auxiliaryBuffer;
             }
         }

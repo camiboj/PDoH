@@ -13,8 +13,5 @@ public class ByteBufferPool {
         return ByteBuffer.allocate(capacity);
     }
 
-    public static void clear(ByteBuffer buffer) {
-        buffer.clear();
-    }
 }
 
