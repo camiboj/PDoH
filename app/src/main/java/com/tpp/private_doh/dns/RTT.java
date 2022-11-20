@@ -28,4 +28,11 @@ public class RTT {
         return devRTT/1000000;
     }
 
+    public RTT(float avg, float dev) {
+        avgRTT = avg;
+        devRTT = dev;
+    }
+
+    public RTT() {}
+
 }

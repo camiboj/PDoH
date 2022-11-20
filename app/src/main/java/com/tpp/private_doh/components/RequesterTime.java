@@ -1,7 +1,6 @@
 package com.tpp.private_doh.components;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.dns.RTT;
@@ -24,6 +23,5 @@ public class RequesterTime extends RequesterOutputWithDescription {
                 DESCRIPTIVE_MESSAGE,
                 R.style.AppTheme_MetricsHeadLine2
         );
-        Log.e("DESCRIPTIVE_MESSAGE: ", DESCRIPTIVE_MESSAGE);;
     }
 }
