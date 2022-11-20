@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             Context context = getApplicationContext();
             Intent intent = new Intent(this, PDoHVpnService.class);
-            //intent.setAction(Config.START_FOREGROUND_ACTION);
             context.startForegroundService(intent);
         }
     }
