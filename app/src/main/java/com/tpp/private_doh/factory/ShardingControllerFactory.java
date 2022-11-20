@@ -39,14 +39,14 @@ public class ShardingControllerFactory {
                 break;
             case DNS:
                 Log.i(TAG, "DNS");
-                pingController = new PingController(racingAmount, PublicDnsIps.ALL_IPS);
+                pingController = new PingController(racingAmount);
                 pingControllerThread = new Thread(pingController);
                 this.shardingController = new DnsShardingController(pingController);
                 pingControllerThread.start();
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
-                pingController = new PingController(racingAmount, PublicDnsIps.HYBRID_IPS);
+                pingController = new PingController(racingAmount);
                 pingControllerThread = new Thread(pingController);
                 this.shardingController = new HybridDnsShardingController(pingController, dohRequesterManager);
                 pingControllerThread.start();
@@ -66,7 +66,7 @@ public class ShardingControllerFactory {
                 return PublicDnsIps.RELIABLE_IPS.size();
             case HYBRID:
                 Log.i("ShardingControllerFactory", "getAvailableRequesterAmount(BOTH)");
-                return N_DOH_REQUESTERS + PublicDnsIps.OTHER_RELIABLE_IPS.size();
+                return N_DOH_REQUESTERS + PublicDnsIps.RELIABLE_IPS.size();
             default:
                 throw new IllegalStateException("Unexpected value: " + protocolId);
         }

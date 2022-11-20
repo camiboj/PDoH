@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.VisibleForTesting;
 
 import com.tpp.private_doh.config.Config;
+import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.PublicDnsRequester;
 import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
@@ -24,9 +25,9 @@ public class PingController implements Runnable {
     private int nSharders;
     private boolean shouldRun;
 
-    public PingController(int nSharders, List<String> requesters) {
+    public PingController(int nSharders) {
         this.activeIps = new LinkedBlockingQueue<>();
-        this.dnsRequesters = requesters.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
+        this.dnsRequesters = PublicDnsIps.IPS.stream().map(PublicDnsRequester::new).collect(Collectors.toList());
         this.shardingGroups = new ArrayList<>();
         this.actualIdx = 0;
         this.nSharders = nSharders;
