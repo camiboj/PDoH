@@ -20,18 +20,17 @@ import java.util.List;
 import java.util.Map;
 
 public class ShardingControllerFactory {
+    private static final Integer N_DOH_REQUESTERS = 3; // TODO if we add a new DohRequester we should change this number
     private final List<Requester> pureDohRequesters;
     private final String TAG = this.getClass().getSimpleName();
     private final ShardingController shardingController;
-    private static final Integer N_DOH_REQUESTERS = 3; // TODO if we add a new DohRequester we should change this number
+    private PingController pingController;
 
     public ShardingControllerFactory(ProtocolId protocolId, int racingAmount) {
         this.pureDohRequesters = Arrays.asList(new GoogleDoHRequester(), new CloudflareDoHRequester(), new Quad9DoHRequester());
-        PingController pingController = new PingController(racingAmount);
         Log.i(TAG, "protocolId: " + protocolId);
-        // pureDohRequesters.forEach(dohRequester -> ((DoHRequester) dohRequester).restartCount());
         DohRequesterManager dohRequesterManager = new DohRequesterManager(pureDohRequesters, racingAmount);
-        Thread t = new Thread(pingController);
+        Thread pingControllerThread;
 
         switch (protocolId) {
             case DOH:
@@ -40,13 +39,17 @@ public class ShardingControllerFactory {
                 break;
             case DNS:
                 Log.i(TAG, "DNS");
+                pingController = new PingController(racingAmount);
+                pingControllerThread = new Thread(pingController);
                 this.shardingController = new DnsShardingController(pingController);
-                t.start();
+                pingControllerThread.start();
                 break;
             case HYBRID:
                 Log.i(TAG, "BOTH");
+                pingController = new PingController(racingAmount);
+                pingControllerThread = new Thread(pingController);
                 this.shardingController = new HybridDnsShardingController(pingController, dohRequesterManager);
-                t.start();
+                pingControllerThread.start();
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + protocolId);
@@ -75,5 +78,11 @@ public class ShardingControllerFactory {
 
     public Map<String, Integer> getRequestersMetrics() {
         return shardingController.getRequestersMetrics();
+    }
+
+    public void destroy() {
+        if (this.pingController != null) {
+            this.pingController.stop();
+        }
     }
 }

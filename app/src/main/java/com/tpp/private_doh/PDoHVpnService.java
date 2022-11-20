@@ -106,7 +106,7 @@ public class PDoHVpnService extends VpnService {
     public void stopVpn() {
         try {
             if (vpnInterface != null) {
-                //vpnInterface.close();
+                vpnInterface.close();
                 vpnInterface = null;
             }
         } catch (Exception e) {
@@ -122,6 +122,7 @@ public class PDoHVpnService extends VpnService {
 
     @Override
     public void onDestroy() {
+        Log.e(TAG, "Stop was called");
         super.onDestroy();
         stopVpn();
         cleanup();

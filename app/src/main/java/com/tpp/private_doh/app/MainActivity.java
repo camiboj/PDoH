@@ -122,12 +122,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmount);
-            PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
-            setMetricsShardingController();
             Context context = getApplicationContext();
             Intent intent = new Intent(this, PDoHVpnService.class);
             context.startForegroundService(intent);
@@ -180,8 +177,11 @@ public class MainActivity extends AppCompatActivity {
         Intent vpnIntent = VpnService.prepare(this);
 
         if (vpnIntent == null) {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountBar.getCustomProgress());
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
         }
+        shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmountBar.getCustomProgress());
+        PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
+        setMetricsShardingController();
         enableVpnComponents(false);
 
         InternetChecker internetChecker = new InternetChecker(this::checkInternet);
@@ -208,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Config.STOP_SIGNAL);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
+        shardingControllerFactory.destroy();
         shardingControllerFactory = null;
         setMetricsShardingController();
         actualTransport = -1;
