@@ -215,13 +215,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        Log.i(TAG, "ON DESTROY WAS CALLED");
+        Log.i(TAG, "On destroy was called");
         super.onDestroy();
         if (isFinishing()) {
-            Log.i(TAG, "Is finishing!");
+            Log.i(TAG, "The user is closing the app");
             stopVpn();
         } else {
-            Log.i(TAG, "Is not finishing!");
+            Log.i(TAG, "The OS is closing the app");
         }
     }
 

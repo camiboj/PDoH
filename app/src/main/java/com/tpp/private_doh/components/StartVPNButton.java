@@ -35,6 +35,7 @@ public class StartVPNButton extends AppCompatButton {
             if (vpnOn) {
                 try {
                     Boolean result = onStartVPN.call();
+                    Log.i(TAG, "Starting vpn....");
                     if (!result) {
                         vpnOn = !vpnOn;
                     }
@@ -42,6 +43,7 @@ public class StartVPNButton extends AppCompatButton {
                     Log.e(TAG, "This shouldn't happen");
                 }
             } else {
+                Log.i(TAG, "Stopping vpn....");
                 onStopVPN.run();
             }
             updateText();
