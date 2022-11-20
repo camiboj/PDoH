@@ -2,7 +2,6 @@ package com.tpp.private_doh.components.metrics;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -23,13 +22,6 @@ public class MetricsScreen extends LinearLayout {
     public MetricsScreen(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.setOrientation(VERTICAL);
-        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                int width = getWidth();
-                int height = getHeight();
-            }
-        });
     }
 
     @Override
