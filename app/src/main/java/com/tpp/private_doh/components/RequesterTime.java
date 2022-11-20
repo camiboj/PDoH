@@ -1,7 +1,6 @@
 package com.tpp.private_doh.components;
 
 import android.content.Context;
-import android.text.Html;
 import android.widget.LinearLayout;
 
 import com.tpp.private_doh.R;
@@ -17,16 +16,15 @@ public class RequesterTime extends RequesterOutput {
     }
 
     private static final String FORMULA_MESSAGE = String.format("%s = (1 - &alpha;) * %s + &alpha; * RTT;", getRTTHTML("n"), getRTTHTML("n-1"));
-
+    private static final String DESCRIPTIVE_MESSAGE = "<font size=\"1\"> The average RTT is calculate with the formula used by TCP (RFC 2988)\n%s </font>";
 
     public RequesterTime(Context context, RTT rtt, LinearLayout.LayoutParams layoutParams) {
         super(
                 context,
                 "Winning count (milli sec):\n" + DF.format(rtt.getAvgMilliSecond()) + " +/- " + DF.format(rtt.getDevMilliSecond()),
+                String.format(DESCRIPTIVE_MESSAGE, FORMULA_MESSAGE),
                 layoutParams,
                 R.style.AppTheme_MetricsHeadLine2
         );
-        String descriptive_message = "<font size=\"1\"> The average RTT is calculate with the formula used by TCP (RFC 2988)\n%s </font>";
-        this.setTooltipText(Html.fromHtml(String.format(descriptive_message, FORMULA_MESSAGE), Html.FROM_HTML_MODE_COMPACT));
     }
 }

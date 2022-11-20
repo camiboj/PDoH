@@ -1,34 +1,34 @@
 package com.tpp.private_doh.components;
 
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.tpp.private_doh.dns.RTT;
 
 public class RequesterMetric extends LinearLayout {
     private static final int LINES = 4;
 
-    public RequesterMetric(Context context, String requesterName, int countMetric, RTT timeMetric, int metricHeight) {
+    public RequesterMetric(Context context, String requesterName, int countMetric, RTT timeMetric) {
         super(context);
-        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight));
+        setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         setOrientation(VERTICAL);
-        TextView requester = new RequesterName(
+        View requester = new RequesterName(
                 context,
                 requesterName,
-                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight/LINES)
+                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         );
-        TextView count = new RequesterCount(
+        View count = new RequesterCount(
                 context,
                 countMetric,
-                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight/LINES)
+                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         );
 
-        TextView time = new RequesterTime(
+        View time = new RequesterTime(
                 context,
                 timeMetric,
-                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, metricHeight/LINES)
+                new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         );
 
         this.addView(requester);

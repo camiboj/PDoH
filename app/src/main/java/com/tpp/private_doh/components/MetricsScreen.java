@@ -44,15 +44,6 @@ public class MetricsScreen extends LinearLayout {
         this.shardingControllerFactory = shardingControllerFactory;
     }
 
-    private int getWinnersCount(Map<String, Integer> counts) {
-        int metricsAmount = 0;
-        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
-            if (entry.getValue() > 0) {
-                metricsAmount++;
-            }
-        }
-        return metricsAmount;
-    }
     private void fetchMetrics() {
         if (shardingControllerFactory == null) {
             Toast.makeText(getContext(), "No running VPN", Toast.LENGTH_LONG).show();
@@ -61,22 +52,20 @@ public class MetricsScreen extends LinearLayout {
         Map<String, Integer> counts = shardingControllerFactory.getRequestersWinningMetrics();
         Map<String, RTT> times = shardingControllerFactory.getRequestersTimesMetrics();
 
-        int metricsAmount = getWinnersCount(counts);
         int count = 0;
         for (String requesterName : counts.keySet()) {
             int requesterCount = counts.get(requesterName);
             RTT requesterTime = times.get(requesterName);
             if (requesterCount > 0) {
                 count++;
-                createMetricLayout(requesterName, requesterCount, requesterTime, metricsAmount, count);
+                createMetricLayout(requesterName, requesterCount, requesterTime, count);
             }
         }
     }
 
-    private void createMetricLayout(String requesterName, int countMetric, RTT timeMetric, int metricsAmount, int count) {
+    private void createMetricLayout(String requesterName, int countMetric, RTT timeMetric, int count) {
         int color = count%2 == 0 ? R.color.colorMetric1 : R.color.colorMetric2;
-        int metricHeight = getHeight() / metricsAmount;
-        RequesterMetric rm = new RequesterMetric(getContext(), requesterName, countMetric, timeMetric, metricHeight);
+        RequesterMetric rm = new RequesterMetric(getContext(), requesterName, countMetric, timeMetric);
         rm.setBackground(ContextCompat.getDrawable(getContext(), color));
         addView(rm);
     }

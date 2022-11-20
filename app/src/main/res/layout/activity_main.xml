@@ -35,7 +35,7 @@
         android:layout_width="54dp"
         android:layout_height="?attr/actionBarSize"
         android:scaleType="centerInside"
-        android:src="@drawable/ic_action_name"
+        android:src="@drawable/bug"
         app:layout_anchor="@+id/toolbar"
         app:layout_anchorGravity="end|center"
         android:autoLink="web"

@@ -8,6 +8,6 @@ import com.tpp.private_doh.R;
 public class RequesterName extends RequesterOutput {
 
     public RequesterName(Context context, String text, LinearLayout.LayoutParams layoutParams) {
-        super(context, text, layoutParams, R.style.AppTheme_MetricsHeadLine1);
+        super(context, text, "", layoutParams, R.style.AppTheme_MetricsHeadLine1);
     }
 }

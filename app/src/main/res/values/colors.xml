@@ -11,4 +11,6 @@
     <color name="colorError">#94FF0000</color>
     <color name="colorTextSecondary">#191818</color>
     <color name="colorDisabled">#858080</color>
+    <color name="noColor">#00858080</color>
+    <color name="colorPrimaryOpposite">#85000B</color>
 </resources>
