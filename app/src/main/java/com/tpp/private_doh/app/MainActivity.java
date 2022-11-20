@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,14 +19,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.DownBar;
-import com.tpp.private_doh.components.MetricsScreen;
+import com.tpp.private_doh.components.metrics.MetricsScreen;
 import com.tpp.private_doh.components.StartVPNButton;
 import com.tpp.private_doh.components.UnselectedProtocol;
 import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout;

@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components;
+package com.tpp.private_doh.components.metrics;
 
 import android.content.Context;
 import android.text.Html;
