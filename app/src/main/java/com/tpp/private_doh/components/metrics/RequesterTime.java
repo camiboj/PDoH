@@ -2,7 +2,6 @@ package com.tpp.private_doh.components.metrics;
 
 import android.content.Context;
 
-import com.tpp.private_doh.R;
 import com.tpp.private_doh.dns.RTT;
 
 import java.text.DecimalFormat;
@@ -19,9 +18,8 @@ public class RequesterTime extends RequesterOutputWithDescription {
     public RequesterTime(Context context, RTT rtt) {
         super(
                 context,
-                "Winning count (milli sec)", DF.format(rtt.getAvgMilliSecond()) + " +/- " + DF.format(rtt.getDevMilliSecond()),
-                DESCRIPTIVE_MESSAGE,
-                R.style.AppTheme_MetricsHeadLine2
+                "Response Time (milli sec)", "mean  " + DF.format(rtt.getAvgMilliSecond()) + "\nvariance  " + DF.format(rtt.getDevMilliSecond()),
+                DESCRIPTIVE_MESSAGE
         );
     }
 }

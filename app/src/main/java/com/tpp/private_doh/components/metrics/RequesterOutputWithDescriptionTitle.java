@@ -27,6 +27,7 @@ public class RequesterOutputWithDescriptionTitle extends androidx.appcompat.widg
 
         FloatingActionButton fab = new FloatingActionButton(new ContextThemeWrapper(context, R.style.AppTheme_QuestionMark));
         fab.setTooltipText(Html.fromHtml(descriptiveMessage, Html.FROM_HTML_MODE_COMPACT));
+        fab.setSize(FloatingActionButton.SIZE_MINI);
         fab.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), R.color.noColor));
         addView(fab);
     }
