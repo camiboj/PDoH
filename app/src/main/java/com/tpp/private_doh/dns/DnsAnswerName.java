@@ -13,7 +13,6 @@ public class DnsAnswerName {
     }
 
     public void putOn(ByteBuffer buf, int firstAnswerNamePos) {
-        // TODO: maybe we could implement an actual algorithm that searches pointer instead of passing by parameter the firstAnswerPos
         buf.put(BEGINNING_MARK);
         buf.put((byte) firstAnswerNamePos);
     }

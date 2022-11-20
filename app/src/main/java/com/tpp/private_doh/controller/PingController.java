@@ -7,21 +7,14 @@ import androidx.annotation.VisibleForTesting;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.constants.PublicDnsIps;
 import com.tpp.private_doh.dns.PublicDnsRequester;
-import com.tpp.private_doh.dns.Response;
-import com.tpp.private_doh.doh.CloudflareDoHRequester;
-import com.tpp.private_doh.doh.GoogleDoHRequester;
-import com.tpp.private_doh.doh.Quad9DoHRequester;
 import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PingController implements Runnable {
     private static final String TAG = PingController.class.getSimpleName();
@@ -30,6 +23,7 @@ public class PingController implements Runnable {
     private LinkedBlockingQueue<String> activeIps;
     private List<List<String>> shardingGroups;
     private int nSharders;
+    private boolean shouldRun;
 
     public PingController(int nSharders) {
         this.activeIps = new LinkedBlockingQueue<>();
@@ -37,6 +31,7 @@ public class PingController implements Runnable {
         this.shardingGroups = new ArrayList<>();
         this.actualIdx = 0;
         this.nSharders = nSharders;
+        this.shouldRun = true;
     }
 
     public List<Requester> getDnsRequesters() {
@@ -61,14 +56,20 @@ public class PingController implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            this.dnsRequesters.forEach(this::processIp);
+        while (this.shouldRun) {
+            for (int i = 0; i < this.dnsRequesters.size(); i++) {
+                processIp(this.dnsRequesters.get(i));
+                if (!this.shouldRun) {
+                    break;
+                }
+            }
             try {
                 Thread.sleep(Config.SLEEP_PING);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(TAG, "The thread was interrupted");
             }
         }
+
     }
 
     @VisibleForTesting
@@ -99,5 +100,10 @@ public class PingController implements Runnable {
         });
 
         Log.i(TAG, String.format("Actual idx: %d - Sharding groups: %s", actualIdx, shardingGroups));
+    }
+
+    public void stop() {
+        Log.i(TAG, "Stopped pingController");
+        this.shouldRun = false;
     }
 }

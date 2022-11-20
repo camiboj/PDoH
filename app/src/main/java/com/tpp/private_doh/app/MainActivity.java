@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.tpp.private_doh.PDoHVpnService;
@@ -48,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ProtocolSelectorRadioGroup protocolSelector;
     private RacingAmountBar racingAmountBar;
-    // private TextView countOutput;
     private ShardingControllerFactory shardingControllerFactory;
 
     private BroadcastReceiver stopVpnInternet = new BroadcastReceiver() {
@@ -122,13 +122,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data, ProtocolId protocol, int racingAmount) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmount);
-            PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
-            setMetricsShardingController();
-            startService(new Intent(this, PDoHVpnService.class));
+            Context context = getApplicationContext();
+            Intent intent = new Intent(this, PDoHVpnService.class);
+            context.startForegroundService(intent);
         }
     }
 
@@ -144,17 +143,27 @@ public class MainActivity extends AppCompatActivity {
 
     private void setButtonHandlers() {
         StartVPNButton startVpnButton = findViewById(R.id.startVpn);
+        boolean vpnOn = PDoHVpnService.isRunning();
+        startVpnButton.update(vpnOn);
+        enableVpnComponents(!vpnOn);
         startVpnButton.setOnClick(this::startVpn, this::stopVpn);
     }
 
     private boolean startVpn() {
         if (!checkInternet()) {
-            // TODO: test this when we are connected to roaming instead of wifi
             Log.e(TAG, "There is no internet");
             Toast toast = Toast.makeText(getApplicationContext(), "There is no internet\nTry again when you're connected to wifi", Toast.LENGTH_SHORT);
             toast.show();
             return false;
         }
+
+        if (PDoHVpnService.isRunning()) {
+            Log.e(TAG, "VPN already on");
+            Toast toast = Toast.makeText(getApplicationContext(), "We are trying to close the vpn\nTry again when the logo is off", Toast.LENGTH_SHORT);
+            toast.show();
+            return false;
+        }
+
         setInternetErrorMessage(false);
 
         ProtocolId protocol = ProtocolId.DOH;
@@ -168,8 +177,11 @@ public class MainActivity extends AppCompatActivity {
         Intent vpnIntent = VpnService.prepare(this);
 
         if (vpnIntent == null) {
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null, protocol, racingAmountBar.getCustomProgress());
+            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
         }
+        shardingControllerFactory = new ShardingControllerFactory(protocol, racingAmountBar.getCustomProgress());
+        PDoHVpnService.setShardingControllerFactory(shardingControllerFactory);
+        setMetricsShardingController();
         enableVpnComponents(false);
 
         InternetChecker internetChecker = new InternetChecker(this::checkInternet);
@@ -196,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Config.STOP_SIGNAL);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         enableVpnComponents(true);
+        shardingControllerFactory.destroy();
         shardingControllerFactory = null;
         setMetricsShardingController();
         actualTransport = -1;
@@ -203,8 +216,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.i(TAG, "On destroy was called");
         super.onDestroy();
-        stopVpn();
+        if (isFinishing()) {
+            Log.i(TAG, "The user is closing the app");
+            stopVpn();
+        } else {
+            Log.i(TAG, "The OS is closing the app");
+        }
     }
 
     public void bugClicked(View view) {
