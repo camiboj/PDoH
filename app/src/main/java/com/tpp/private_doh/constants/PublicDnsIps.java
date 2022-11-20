@@ -6,16 +6,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class PublicDnsIps {
-    public static final List<String> RELIABLE_IPS = Arrays.asList(
-            "208.67.222.222",
-            "208.67.220.220",
-            "1.1.1.1",
-            "1.0.0.1",
-            "8.8.8.8",
-            "8.8.4.4",
-            "9.9.9.9",
-            "149.112.112.112"
+    public static final List<String> RELIABLE_POPULAR_IPS = Arrays.asList(
+            "1.1.1.1", // Cloudflare
+            "1.0.0.1", // Cloudflare
+            "8.8.8.8", // Google
+            "8.8.4.4", // Google
+            "9.9.9.9", // Quad9
+            "149.112.112.112" // Quad9
     );
+
+    public static final List<String> OTHER_RELIABLE_IPS = Arrays.asList(
+            "208.67.222.222",
+            "208.67.220.220"
+    );
+
+    public static final List<String> RELIABLE_IPS =  Stream.concat(PublicDnsIps.RELIABLE_POPULAR_IPS.stream(), PublicDnsIps.OTHER_RELIABLE_IPS.stream())
+            .collect(Collectors.toList());
 
     public static final List<String> GENERIC_IPS = Arrays.asList(
             "190.151.144.21",
@@ -158,7 +164,10 @@ public final class PublicDnsIps {
             "200.45.184.43",
             "179.60.235.209");
 
-    public static final List<String> IPS = Stream.concat(PublicDnsIps.RELIABLE_IPS.stream(), PublicDnsIps.GENERIC_IPS.stream())
+    public static final List<String> ALL_IPS = Stream.concat(PublicDnsIps.RELIABLE_IPS.stream(), PublicDnsIps.GENERIC_IPS.stream())
+            .collect(Collectors.toList());
+
+    public static final List<String> HYBRID_IPS = Stream.concat(PublicDnsIps.OTHER_RELIABLE_IPS.stream(), PublicDnsIps.GENERIC_IPS.stream())
             .collect(Collectors.toList());
 
     private PublicDnsIps() {
