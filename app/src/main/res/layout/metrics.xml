@@ -28,7 +28,9 @@
         <com.tpp.private_doh.components.metrics.MetricsScreen
             android:id="@+id/metrics_layout"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"/>
+            android:layout_width="match_parent"
+            android:background="@color/colorMetric1"
+            />
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
