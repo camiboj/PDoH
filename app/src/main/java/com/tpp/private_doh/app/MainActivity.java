@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.DownBar;
@@ -74,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // countOutput = findViewById(R.id.resolversCountsText);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-
         ProtocolSelectorLayout protocolSelectorLayout = findViewById(R.id.protocolSelectorLayout);
         protocolSelector = protocolSelectorLayout.getProtocolSelectorRadioGroup();
         RacingAmountSelectorLayout racingAmountLayout = findViewById(R.id.racingAmountLayout);

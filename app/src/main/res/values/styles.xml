@@ -106,4 +106,12 @@
         <item name="android:textColor">@color/colorTextSecondary</item>
     </style>
 
+    <style name="AppTheme.QuestionMark">
+        <item name="android:layout_width">40sp</item>
+        <item name="android:layout_height">40sp</item>
+        <item name="android:paddingStart">20sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:src">@drawable/question</item>
+        <item name="android:textSize">10sp</item>
+    </style>
 </resources>
