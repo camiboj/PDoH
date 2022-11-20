@@ -22,9 +22,6 @@ public class Config {
     public static final Integer EXECUTOR_SERVICE_N = 4;
     public static final Integer N_DNS_WORKERS = 50;
     public static final int READ_BUFFER_SIZE = 4096;
-    public static final String START_FOREGROUND_ACTION = "START_FOREGROUND_ACTION";
-    public static final String STOP_FOREGROUND_ACTION = "STOP_FOREGROUND_ACTION";
-
 }
 
 

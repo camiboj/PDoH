@@ -212,9 +212,6 @@ public class MainActivity extends AppCompatActivity {
         shardingControllerFactory.destroy();
         shardingControllerFactory = null;
         setMetricsShardingController();
-        Intent serviceIntent = new Intent(this, PDoHVpnService.class);
-        serviceIntent.setAction(Config.STOP_FOREGROUND_ACTION);
-        startService(serviceIntent);
         actualTransport = -1;
     }
 

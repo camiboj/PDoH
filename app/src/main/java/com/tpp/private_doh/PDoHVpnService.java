@@ -117,13 +117,6 @@ public class PDoHVpnService extends VpnService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String action = intent.getAction();
-        if (action != null && action.equals(Config.STOP_FOREGROUND_ACTION)) {
-            Log.e(TAG, "Received Stop Foreground Intent");
-            stopForeground(true);
-            stopSelfResult(startId);
-            this.onDestroy();
-        }
         return START_STICKY;
     }
 
