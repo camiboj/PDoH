@@ -106,7 +106,7 @@ public class PDoHVpnService extends VpnService {
     public void stopVpn() {
         try {
             if (vpnInterface != null) {
-                //vpnInterface.close();
+                vpnInterface.close();
                 vpnInterface = null;
             }
         } catch (Exception e) {
