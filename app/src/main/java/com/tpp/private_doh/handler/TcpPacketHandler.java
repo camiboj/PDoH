@@ -2,7 +2,6 @@ package com.tpp.private_doh.handler;
 
 import android.net.VpnService;
 import android.util.Log;
-import android.util.Pair;
 
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.protocol.IP4Header;
@@ -10,9 +9,11 @@ import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.TCBStatus;
 import com.tpp.private_doh.protocol.TcpHeader;
+import com.tpp.private_doh.util.ByteBufferPool;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -72,14 +73,18 @@ public class TcpPacketHandler implements Runnable {
         Packet packet = IpUtil.buildTcpPacket(pipe.destinationAddress, pipe.sourceAddress, flag,
                 pipe.myAcknowledgementNum, pipe.mySequenceNum, pipe.packId);
         pipe.packId += 1;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
+
+        ByteBuffer byteBuffer = ByteBufferPool.acquireWithCapacity(HEADER_SIZE + dataLen);
         byteBuffer.position(HEADER_SIZE);
+
         if (data != null) {
             byteBuffer.put(data);
         }
+
         packet.updateTCPBuffer(byteBuffer, flag, pipe.mySequenceNum, pipe.myAcknowledgementNum, dataLen);
         byteBuffer.position(HEADER_SIZE + dataLen);
         networkToDeviceQueue.offer(byteBuffer);
+
         if ((flag & (byte) TcpHeader.SYN) != 0) {
             pipe.mySequenceNum += 1;
         }
@@ -149,9 +154,10 @@ public class TcpPacketHandler implements Runnable {
                 pipe.remoteOutBuffer.put(backingBuffer);
                 filled = true;
             } catch (Exception e) {
+                Log.e(TAG, "Creating another buffer");
                 int limit = pipe.remoteOutBuffer.limit();
                 limit *= 2;
-                ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(limit);
+                ByteBuffer auxiliaryBuffer = ByteBufferPool.acquireWithCapacity(limit);
                 auxiliaryBuffer.put(pipe.remoteOutBuffer);
                 pipe.remoteOutBuffer = auxiliaryBuffer;
             }
@@ -189,6 +195,7 @@ public class TcpPacketHandler implements Runnable {
         buffer.clear();
         if (!pipe.upActive) {
             pipe.remote.shutdownOutput();
+            objAttrUtil.removeAttr(pipe.remote);
         }
         return true;
     }
@@ -199,10 +206,9 @@ public class TcpPacketHandler implements Runnable {
                 if (pipe.remote.isConnected()) {
                     pipe.remote.shutdownOutput();
                 }
-
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to closeUpStream", e);
         }
         pipe.upActive = false;
 
@@ -241,25 +247,27 @@ public class TcpPacketHandler implements Runnable {
 
     }
 
-    private Pair<Packet, TcpPipe> handleReadFromVpn() throws Exception {
-        Packet currentPacket = queue.poll();
-        if (currentPacket == null) {
-            return null;
-        }
-        InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
-        TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
-        int destinationPort = tcpHeader.getDestinationPort();
-        int sourcePort = tcpHeader.getSourcePort();
-        String ipAndPort = destinationAddress.getHostAddress() + ":" +
-                destinationPort + ":" + sourcePort;
+    private void handleReadFromVpn() throws Exception {
+        while (true) {
+            Packet currentPacket = queue.poll();
+            if (currentPacket == null) {
+                return;
+            }
+            InetAddress destinationAddress = currentPacket.getIp4Header().getDestinationAddress();
+            TcpHeader tcpHeader = (TcpHeader) currentPacket.getHeader();
+            int destinationPort = tcpHeader.getDestinationPort();
+            int sourcePort = tcpHeader.getSourcePort();
+            String ipAndPort = destinationAddress.getHostAddress() + ":" +
+                    destinationPort + ":" + sourcePort;
 
-        if (!pipes.containsKey(ipAndPort)) {
-            TcpPipe tcpTunnel = initPipe(currentPacket);
-            tcpTunnel.tunnelKey = ipAndPort;
-            pipes.put(ipAndPort, tcpTunnel);
+            if (!pipes.containsKey(ipAndPort)) {
+                TcpPipe tcpTunnel = initPipe(currentPacket);
+                tcpTunnel.tunnelKey = ipAndPort;
+                pipes.put(ipAndPort, tcpTunnel);
+            }
+            TcpPipe pipe = pipes.get(ipAndPort);
+            handlePacket(pipe, currentPacket);
         }
-        TcpPipe pipe = pipes.get(ipAndPort);
-        return Pair.create(currentPacket, pipe);
     }
 
     private void doAccept(ServerSocketChannel serverChannel) throws Exception {
@@ -267,13 +275,12 @@ public class TcpPacketHandler implements Runnable {
     }
 
     private void doRead(SocketChannel channel) throws Exception {
-        ByteBuffer buffer = ByteBuffer.allocate(4 * 1024);
         boolean shouldQuit = false;
+        ByteBuffer buffer = ByteBufferPool.acquireWithCapacity(Config.READ_BUFFER_SIZE);
 
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(channel, "pipe");
 
         while (true) {
-            buffer.clear();
             int n = SocketUtils.read(channel, buffer);
             if (n == -1) {
                 shouldQuit = true;
@@ -300,8 +307,9 @@ public class TcpPacketHandler implements Runnable {
                 pipe.remote.close();
             }
             pipes.remove(pipe.tunnelKey);
+            this.objAttrUtil.removeAttr(pipe.remote);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to cleanPipe", e);
         }
     }
 
@@ -315,6 +323,7 @@ public class TcpPacketHandler implements Runnable {
     private void closeDownStream(TcpPipe pipe) throws Exception {
         if (pipe.remote != null && pipe.remote.isConnected()) {
             pipe.remote.shutdownInput();
+            objAttrUtil.removeAttr(pipe.remote);
             int ops = getKey(pipe.remote).interestOps() & (~SelectionKey.OP_READ);
             getKey(pipe.remote).interestOps(ops);
         }
@@ -353,7 +362,7 @@ public class TcpPacketHandler implements Runnable {
     }
 
 
-    private void handleSockets(Packet packet) throws Exception {
+    private void handleSockets() throws Exception {
         while (selector.selectNow() > 0) {
             for (Iterator<SelectionKey> it = selector.selectedKeys().iterator(); it.hasNext(); ) {
                 SelectionKey key = it.next();
@@ -374,8 +383,6 @@ public class TcpPacketHandler implements Runnable {
                         if (pipe != null) {
                             closeRst(pipe);
                         }
-                        initPipe(packet);
-                        queue.put(packet);
                     }
                 }
             }
@@ -384,22 +391,20 @@ public class TcpPacketHandler implements Runnable {
 
     @Override
     public void run() {
-        Packet currentPacket = null;
         try {
             selector = Selector.open();
             while (true) {
-                Pair<Packet, TcpPipe> currentPair = handleReadFromVpn();
-                if (currentPair == null) continue;
                 try {
-                    currentPacket = currentPair.first;
-                    TcpPipe pipe = currentPair.second;
-                    if (currentPacket == null) continue;
-                    handlePacket(pipe, currentPacket);
-                    handleSockets(currentPacket);
-                } catch (Exception e) {
-                    Log.e(TAG, "Caught exception..", e);
-                    queue.put(currentPacket);
+                    handleReadFromVpn();
+                } catch (IOException e) {
+                    Log.e(TAG, "There was an error reading from VPN", e);
                 }
+                try {
+                    handleSockets();
+                } catch (IOException e) {
+                    Log.e(TAG, "There was an error in socketHandling", e);
+                }
+                Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
             Log.i(TAG, "The execution was interrupted");
@@ -423,8 +428,7 @@ public class TcpPacketHandler implements Runnable {
         public int packId = 1;
         public long timestamp = 0L;
         int synCount = 0;
-        private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(Config.TCP_BUFFER_BYTES);
+        private ByteBuffer remoteOutBuffer = ByteBufferPool.acquireWithCapacity(Config.TCP_BUFFER_BYTES);
     }
 }
-
 

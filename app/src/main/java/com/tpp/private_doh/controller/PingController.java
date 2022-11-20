@@ -66,7 +66,7 @@ public class PingController implements Runnable {
             try {
                 Thread.sleep(Config.SLEEP_PING);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(TAG, "The thread was interrupted");
             }
         }
     }

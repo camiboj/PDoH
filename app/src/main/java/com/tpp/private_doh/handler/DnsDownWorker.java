@@ -34,8 +34,8 @@ public class DnsDownWorker implements Runnable {
         while (true) {
             try {
                 processPacket();
-            } catch (InterruptedException e) { // We should stop this manually when creating a button to stop
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+                Log.e(TAG, "The thread was interrupted");
             }
         }
     }
@@ -55,12 +55,14 @@ public class DnsDownWorker implements Runnable {
         IpUtil.updateIdentificationAndFlagsAndFragmentOffset(dnsResponse, ipId.addAndGet(1));
 
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
+
         dnsResponse.updateUDPBuffer(byteBuffer, dataLen); // Fill udp and ip header
         byteBuffer.position(this.headerSize);
         byteBuffer.put(data); // Fill DNS data
         byteBuffer.position(this.headerSize + dataLen);
 
         Log.i(TAG, "[dns] About to send dns packet");
+
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 }

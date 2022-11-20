@@ -39,11 +39,14 @@ public class UdpDownWorker implements Runnable {
     private void sendUdpPack(UdpTunnel tunnel, byte[] data) throws IOException {
         int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
         Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
+
         ByteBuffer byteBuffer = ByteBufferPool.acquire();
+
         byteBuffer.position(this.headerSize);
         Optional.ofNullable(data).ifPresent(byteBuffer::put);
         packet.updateUDPBuffer(byteBuffer, dataLen);
         byteBuffer.position(this.headerSize + dataLen);
+
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 

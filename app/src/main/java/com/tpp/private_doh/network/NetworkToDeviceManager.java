@@ -10,7 +10,6 @@ import java.util.concurrent.BlockingQueue;
 
 public class NetworkToDeviceManager implements Runnable {
     private static final String TAG = NetworkToDeviceManager.class.getSimpleName();
-
     FileChannel vpnOutput;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
 
@@ -37,8 +36,7 @@ public class NetworkToDeviceManager implements Runnable {
                     MainActivity.downByte.addAndGet(w);
                 }
             }
-
-            bufferFromNetwork = null;
+            bufferFromNetwork.clear();
         } catch (Exception e) {
             Log.i(TAG, "WriteVpnThread fail", e);
         }
