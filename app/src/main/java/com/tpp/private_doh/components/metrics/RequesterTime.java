@@ -18,7 +18,7 @@ public class RequesterTime extends RequesterOutputWithDescription {
     public RequesterTime(Context context, RTT rtt) {
         super(
                 context,
-                "Response Time (milli sec)", "mean  " + DF.format(rtt.getAvgMilliSecond()) + "\nvariance  " + DF.format(rtt.getDevMilliSecond()),
+                "Response Time (milli sec)", "Mean  " + DF.format(rtt.getAvgMilliSecond()) + "\nVariance  " + DF.format(rtt.getDevMilliSecond()),
                 DESCRIPTIVE_MESSAGE
         );
     }
