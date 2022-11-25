@@ -46,15 +46,27 @@ public class MetricsScreen extends LinearLayout {
         Map<String, Integer> counts = shardingControllerFactory.getRequestersWinningMetrics();
         Map<String, RTT> times = shardingControllerFactory.getRequestersTimesMetrics();
 
+        int winnersAmount = getWinnersAmount(counts);
         int count = 0;
         for (String requesterName : counts.keySet()) {
             int requesterCount = counts.get(requesterName);
             RTT requesterTime = times.get(requesterName);
             if (requesterCount > 0) {
                 count++;
-                createMetricLayout(requesterName, requesterCount, requesterTime, count, counts.size());
+                createMetricLayout(requesterName, requesterCount, requesterTime, count, winnersAmount);
             }
         }
+    }
+
+    private int getWinnersAmount(Map<String, Integer> counts) {
+        int amount = 0;
+        for (String requesterName : counts.keySet()) {
+            int requesterCount = counts.get(requesterName);
+            if (requesterCount > 0) {
+                amount++;
+            }
+        }
+        return amount;
     }
 
     private void createMetricLayout(String requesterName, int countMetric, RTT timeMetric, int count, int metricsAmount) {
