@@ -42,9 +42,9 @@ public class MetricsScreen extends LinearLayout {
             Toast.makeText(getContext(), "No running VPN", Toast.LENGTH_LONG).show();
             return;
         }
+
         Map<String, Integer> counts = shardingControllerFactory.getRequestersWinningMetrics();
         Map<String, RTT> times = shardingControllerFactory.getRequestersTimesMetrics();
-
 
         int count = 0;
         for (String requesterName : counts.keySet()) {
@@ -52,14 +52,14 @@ public class MetricsScreen extends LinearLayout {
             RTT requesterTime = times.get(requesterName);
             if (requesterCount > 0) {
                 count++;
-                createMetricLayout(requesterName, requesterCount, requesterTime, count);
+                createMetricLayout(requesterName, requesterCount, requesterTime, count, counts.size());
             }
         }
     }
 
-    private void createMetricLayout(String requesterName, int countMetric, RTT timeMetric, int count) {
+    private void createMetricLayout(String requesterName, int countMetric, RTT timeMetric, int count, int metricsAmount) {
         int color = count%2 == 0 ? R.color.colorMetric1 : R.color.colorMetric2;
-        RequesterMetric rm = new RequesterMetric(getContext(), requesterName, countMetric, timeMetric);
+        RequesterMetric rm = new RequesterMetric(getContext(), requesterName, countMetric, timeMetric, metricsAmount);
         rm.setBackground(ContextCompat.getDrawable(getContext(), color));
         addView(rm);
     }
