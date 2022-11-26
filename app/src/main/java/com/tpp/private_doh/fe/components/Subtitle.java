@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components;
+package com.tpp.private_doh.fe.components;
 
 import android.content.Context;
 

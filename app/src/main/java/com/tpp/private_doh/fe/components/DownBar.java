@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components;
+package com.tpp.private_doh.fe.components;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,11 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
+import com.tpp.private_doh.fe.components.metrics_screen.MetricsLayout;
+import com.tpp.private_doh.factory.ShardingControllerFactory;
+
 public class DownBar extends RelativeLayout {
     private CustomButton vpnScreenButton;
     private CustomButton metricsScreenButton;
     private View vpnScreen;
-    private View metricScreen;
+    private MetricsLayout metricScreen;
     private int screenWidth;
     private int screenHeight;
 
@@ -62,7 +65,7 @@ public class DownBar extends RelativeLayout {
     public void setVpnScreen(View vpnScreen) {
         this.vpnScreen = vpnScreen;
     }
-    public void setMetricsScreen(View metricScreen) {
+    public void setMetricsScreen(MetricsLayout metricScreen) {
         this.metricScreen = metricScreen;
         metricScreen.setVisibility(INVISIBLE);
     }
@@ -74,5 +77,9 @@ public class DownBar extends RelativeLayout {
         int buttonSize = screenWidth / 4;
         int spacesSize = screenWidth / 6;
         createButtons(buttonSize, spacesSize);
+    }
+
+    public void setShardingControllerFactory(ShardingControllerFactory shardingControllerFactory) {
+        metricScreen.setShardingControllerFactory(shardingControllerFactory);
     }
 }

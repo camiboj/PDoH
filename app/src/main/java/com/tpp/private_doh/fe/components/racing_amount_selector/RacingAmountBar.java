@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components.racing_amount_selector;
+package com.tpp.private_doh.fe.components.racing_amount_selector;
 
 import android.content.Context;
 import android.view.ContextThemeWrapper;

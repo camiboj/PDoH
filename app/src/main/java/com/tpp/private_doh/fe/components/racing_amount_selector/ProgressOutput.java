@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components.racing_amount_selector;
+package com.tpp.private_doh.fe.components.racing_amount_selector;
 
 import android.content.Context;
 
@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.tpp.private_doh.R;
-import com.tpp.private_doh.components.CustomText;
+import com.tpp.private_doh.fe.components.CustomText;
 
 public class ProgressOutput extends CustomText {
     public ProgressOutput(@NonNull Context context) {

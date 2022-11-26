@@ -56,7 +56,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.tpp.private_doh.components.DownBar
+        <com.tpp.private_doh.fe.components.DownBar
             android:id="@+id/down_bar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -67,7 +67,7 @@
             android:background="@color/colorPrimaryLight">
 
 
-        </com.tpp.private_doh.components.DownBar>
+        </com.tpp.private_doh.fe.components.DownBar>
 
     </RelativeLayout>
 

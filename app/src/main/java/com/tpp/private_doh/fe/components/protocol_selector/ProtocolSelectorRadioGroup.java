@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components.protocol_selector;
+package com.tpp.private_doh.fe.components.protocol_selector;
 
 import android.content.Context;
 import android.util.Log;
@@ -10,7 +10,7 @@ import android.widget.RadioGroup;
 import androidx.core.content.ContextCompat;
 
 import com.tpp.private_doh.R;
-import com.tpp.private_doh.components.UnselectedProtocol;
+import com.tpp.private_doh.fe.components.UnselectedProtocol;
 import com.tpp.private_doh.controller.ProtocolId;
 
 import java.util.ArrayList;

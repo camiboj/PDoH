@@ -1,4 +1,4 @@
-package com.tpp.private_doh.components.racing_amount_selector;
+package com.tpp.private_doh.fe.components.racing_amount_selector;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -6,9 +6,9 @@ import android.util.AttributeSet;
 import androidx.annotation.Nullable;
 
 import com.tpp.private_doh.R;
-import com.tpp.private_doh.components.CustomLinearLayout;
-import com.tpp.private_doh.components.Subtitle;
-import com.tpp.private_doh.components.Title;
+import com.tpp.private_doh.fe.components.CustomLinearLayout;
+import com.tpp.private_doh.fe.components.Subtitle;
+import com.tpp.private_doh.fe.components.Title;
 
 public class RacingAmountSelectorLayout extends CustomLinearLayout {
 

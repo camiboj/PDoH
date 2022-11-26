@@ -1,27 +1,27 @@
-package com.tpp.private_doh.components.metrics;
+package com.tpp.private_doh.fe.components.metrics_screen;
 
 import android.content.Context;
-import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
 import com.tpp.private_doh.R;
-import com.tpp.private_doh.components.CustomButton;
+import com.tpp.private_doh.fe.components.metrics.RequesterMetric;
 import com.tpp.private_doh.dns.RTT;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
 
 import java.util.Map;
 
-public class MetricsScreen extends LinearLayout {
-    private CustomButton button;
+public class MetricsLayout extends LinearLayout {
     private ShardingControllerFactory shardingControllerFactory;
 
-    public MetricsScreen(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        this.setOrientation(VERTICAL);
+    public MetricsLayout(Context context,  android.view.ViewGroup.LayoutParams layoutParams) {
+        super(context);
+        setOrientation(VERTICAL);
+        setLayoutParams(layoutParams);
     }
+
 
     @Override
     public void setVisibility(int visibility) {

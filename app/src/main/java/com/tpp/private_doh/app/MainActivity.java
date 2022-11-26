@@ -17,6 +17,7 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,17 +26,20 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
-import com.tpp.private_doh.components.DownBar;
-import com.tpp.private_doh.components.StartVPNButton;
-import com.tpp.private_doh.components.UnselectedProtocol;
-import com.tpp.private_doh.components.metrics.MetricsScreen;
-import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout;
-import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorRadioGroup;
-import com.tpp.private_doh.components.racing_amount_selector.RacingAmountBar;
-import com.tpp.private_doh.components.racing_amount_selector.RacingAmountSelectorLayout;
+import com.tpp.private_doh.fe.components.DownBar;
+import com.tpp.private_doh.fe.components.StartVPNButton;
+import com.tpp.private_doh.fe.components.UnselectedProtocol;
+import com.tpp.private_doh.fe.components.metrics_screen.MetricsLayout;
+import com.tpp.private_doh.fe.components.metrics_screen.MetricsScrollView;
+import com.tpp.private_doh.fe.components.protocol_selector.ProtocolSelectorLayout;
+import com.tpp.private_doh.fe.components.protocol_selector.ProtocolSelectorRadioGroup;
+import com.tpp.private_doh.fe.components.racing_amount_selector.RacingAmountBar;
+import com.tpp.private_doh.fe.components.racing_amount_selector.RacingAmountSelectorLayout;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.controller.ProtocolId;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
+import com.tpp.private_doh.fe.controllers.BodyController;
+import com.tpp.private_doh.fe.controllers.ScreenController;
 import com.tpp.private_doh.network.InternetChecker;
 
 import java.util.Arrays;
@@ -86,12 +90,17 @@ public class MainActivity extends AppCompatActivity {
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(stopVpnInternet, new IntentFilter(Config.STOP_SIGNAL_FOR_INTERNET));
-        DownBar db = findViewById(R.id.down_bar);
         Point size = getDisplaySize();
+        new ScreenController(size.x, size.y);
+
+        DownBar db = findViewById(R.id.down_bar);
+
         db.setScreenSize(size.x, size.y);
         db.setVpnScreen(findViewById(R.id.vpn_layout));
-        db.setMetricsScreen(findViewById(R.id.metrics_layout));
+        db.setMetricsScreen();
     }
+
+
 
     private Point getDisplaySize() {
         Display display = getWindowManager().getDefaultDisplay();
@@ -141,8 +150,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setMetricsShardingController() {
-        MetricsScreen ms = findViewById(R.id.metrics_layout);
-        ms.setShardingControllerFactory(shardingControllerFactory);
+        DownBar db = findViewById(R.id.down_bar);
+        db.setShardingControllerFactory(shardingControllerFactory);
     }
 
     private void enableVpnComponents(boolean enabled) {

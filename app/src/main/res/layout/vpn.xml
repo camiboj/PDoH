@@ -24,7 +24,7 @@
         android:gravity="center"
         android:weightSum="3">
 
-        <com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout
+        <com.tpp.private_doh.fe.components.protocol_selector.ProtocolSelectorLayout
             android:id="@+id/protocolSelectorLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
             />
 
 
-        <com.tpp.private_doh.components.racing_amount_selector.RacingAmountSelectorLayout
+        <com.tpp.private_doh.fe.components.racing_amount_selector.RacingAmountSelectorLayout
             android:id="@+id/racingAmountLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                 android:gravity="center"
                 android:theme="@style/AppTheme.InternetErrorOutput"
                 />
-            <com.tpp.private_doh.components.StartVPNButton
+            <com.tpp.private_doh.fe.components.StartVPNButton
                 android:id="@+id/startVpn"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"

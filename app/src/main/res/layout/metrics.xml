@@ -25,12 +25,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-        <com.tpp.private_doh.components.metrics.MetricsScreen
-            android:id="@+id/metrics_layout"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:background="@color/colorMetric1"
-            tools:ignore="ScrollViewSize" />
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
