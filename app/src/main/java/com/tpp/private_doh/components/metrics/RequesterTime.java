@@ -13,7 +13,7 @@ public class RequesterTime extends RequesterOutputWithDescription {
         return String.format("R&#773;T&#773;T&#773;<sub>%s</sub>", subIndex);
     }
 
-    private static final String DESCRIPTIVE_MESSAGE = String.format("The average RTT is calculate with the formula used by TCP (RFC 2988)<br>%s;<sub>n</sub> = (1 - &alpha;) * %s;<sub>n-1</sub> + &alpha; * RTT;", getRTTHTML("n"), getRTTHTML("n-1"));
+    private static final String DESCRIPTIVE_MESSAGE = String.format("The average RTT is calculated with the formula used by TCP (RFC 2988)<br>%s;<sub>n</sub> = (1 - &alpha;) * %s;<sub>n-1</sub> + &alpha; * RTT;", getRTTHTML("n"), getRTTHTML("n-1"));
 
     public RequesterTime(Context context, RTT rtt) {
         super(
