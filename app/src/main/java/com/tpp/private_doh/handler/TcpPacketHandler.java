@@ -304,7 +304,11 @@ public class TcpPacketHandler implements Runnable {
     private void cleanPipe(TcpPipe pipe) {
         try {
             if (pipe.remote != null && pipe.remote.isOpen()) {
-                pipe.remote.close();
+                try {
+                    pipe.remote.close();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while closing remote socket", e);
+                }
             }
             pipes.remove(pipe.tunnelKey);
             this.objAttrUtil.removeAttr(pipe.remote);

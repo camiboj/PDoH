@@ -36,20 +36,6 @@ public class UdpDownWorker implements Runnable {
         this.headerSize = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
     }
 
-    private void sendUdpPack(UdpTunnel tunnel, byte[] data) throws IOException {
-        int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
-        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
-
-        ByteBuffer byteBuffer = ByteBufferPool.acquire();
-
-        byteBuffer.position(this.headerSize);
-        Optional.ofNullable(data).ifPresent(byteBuffer::put);
-        packet.updateUDPBuffer(byteBuffer, dataLen);
-        byteBuffer.position(this.headerSize + dataLen);
-
-        this.networkToDeviceQueue.offer(byteBuffer);
-    }
-
     @Override
     public void run() {
         try {
@@ -95,6 +81,21 @@ public class UdpDownWorker implements Runnable {
         } finally {
             Log.d(TAG, "UdpDownWorker quit");
         }
+    }
+
+    private void sendUdpPack(UdpTunnel tunnel, byte[] data) throws IOException {
+        int dataLen = Optional.ofNullable(data).map(dataAux -> dataAux.length).orElse(0);
+        Packet packet = IpUtil.buildUdpPacket(tunnel.getRemote(), tunnel.getLocal(), ipId.addAndGet(1));
+
+        ByteBuffer byteBuffer = ByteBufferPool.acquire();
+
+        byteBuffer.position(this.headerSize);
+        Optional.ofNullable(data).ifPresent(byteBuffer::put);
+        packet.updateUDPBuffer(byteBuffer, dataLen);
+        byteBuffer.position(this.headerSize + dataLen);
+
+        tunnel.getChannel().close();
+        this.networkToDeviceQueue.offer(byteBuffer);
     }
 
     private ByteBuffer getData(SelectionKey key) throws IOException {
