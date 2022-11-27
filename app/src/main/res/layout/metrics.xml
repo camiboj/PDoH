@@ -7,23 +7,30 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".app.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    android:layout_marginTop="?attr/actionBarSize"
+    android:layout_marginBottom="?attr/actionBarSize"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
 
 
-    <com.tpp.private_doh.components.MetricsScreen
-        android:id="@+id/metrics_layout"
-        android:layout_height="match_parent"
+
+    <ScrollView
+        android:id="@+id/scroll"
         android:layout_width="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
-
-
-
-    </com.tpp.private_doh.components.MetricsScreen>
+        <com.tpp.private_doh.components.metrics.MetricsScreen
+            android:id="@+id/metrics_layout"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:background="@color/colorMetric1"
+            tools:ignore="ScrollViewSize" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

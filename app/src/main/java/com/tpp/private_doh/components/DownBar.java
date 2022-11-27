@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 
 public class DownBar extends RelativeLayout {
@@ -12,19 +11,11 @@ public class DownBar extends RelativeLayout {
     private CustomButton metricsScreenButton;
     private View vpnScreen;
     private View metricScreen;
+    private int screenWidth;
+    private int screenHeight;
 
     public DownBar(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                int buttonSize = getWidth() / 4;
-                int spacesSize = getWidth() / 6;
-                createButtons(buttonSize, spacesSize);
-            }
-        });
     }
 
     private MarginLayoutParams getMarginLayoutParams(int buttonWidth, int spacesLeft, int spacesRight ) {
@@ -34,7 +25,7 @@ public class DownBar extends RelativeLayout {
     }
 
     private void createButtons(int buttonWidth, int spacesToClosestSize) {
-        int spacesToFarthestSize = getWidth() - buttonWidth - spacesToClosestSize;
+        int spacesToFarthestSize = screenWidth - buttonWidth - spacesToClosestSize;
 
         MarginLayoutParams vpnScreenButtonMlp = getMarginLayoutParams(buttonWidth, spacesToClosestSize, spacesToFarthestSize);
         MarginLayoutParams metricsScreenButtonMlp = getMarginLayoutParams(buttonWidth, spacesToFarthestSize, spacesToClosestSize);
@@ -74,5 +65,14 @@ public class DownBar extends RelativeLayout {
     public void setMetricsScreen(View metricScreen) {
         this.metricScreen = metricScreen;
         metricScreen.setVisibility(INVISIBLE);
+    }
+
+    public void setScreenSize(int width, int height) {
+        screenWidth = width;
+        screenHeight = height;
+
+        int buttonSize = screenWidth / 4;
+        int spacesSize = screenWidth / 6;
+        createButtons(buttonSize, spacesSize);
     }
 }

@@ -24,12 +24,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 
-public abstract class DoHRequester implements Requester {
+public abstract class DoHRequester extends Requester {
     protected String TAG;
 
     private String endpoint;
     private Map<String, List<String>> headers;
-    private int count;
 
     public DoHRequester(String endpoint, Map<String, List<String>> headers) {
         TAG = this.getClass().getSimpleName();
@@ -37,22 +36,8 @@ public abstract class DoHRequester implements Requester {
         this.headers = headers;
     }
 
-    @Override
-    public int getCount() {
-        return count;
-    }
-
-    public void restartCount() {
-        count = 0;
-    }
-
-    private Response processResponse(Response r) {
-        r.setOnWinning(() -> this.count += 1);
-        return r;
-    }
-
     public CompletableFuture<Response> executeRequest(String name, int type) {
-        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type))).thenApply(this::processResponse);
+        return CompletableFuture.supplyAsync(() -> executeRequest(buildUrl(name, type))).thenApply((response) -> this.processResponse(response, System.nanoTime()));
     }
 
     @VisibleForTesting

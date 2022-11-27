@@ -1,5 +1,6 @@
 package com.tpp.private_doh.controller;
 
+import com.tpp.private_doh.dns.RTT;
 import com.tpp.private_doh.dns.Response;
 import com.tpp.private_doh.util.Requester;
 
@@ -24,11 +25,20 @@ public abstract class ShardingController {
                 .collect(Collectors.toList());
     }
 
-    public Map<String, Integer> getRequestersMetrics() {
+    public Map<String, Integer> getRequestersWinningMetrics() {
         Map<String, Integer> metrics = new HashMap<>();
 
         for (Requester r : requesters) {
             metrics.put(r.getName(), r.getCount());
+        }
+        return metrics;
+    }
+
+    public Map<String, RTT> getRequestersTimesMetrics() {
+        Map<String, RTT> metrics = new HashMap<>();
+
+        for (Requester r : requesters) {
+            metrics.put(r.getName(), r.getAvgResponseTime());
         }
         return metrics;
     }

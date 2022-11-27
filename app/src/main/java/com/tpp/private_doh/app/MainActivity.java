@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -12,6 +13,7 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,15 +21,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.tpp.private_doh.PDoHVpnService;
 import com.tpp.private_doh.R;
 import com.tpp.private_doh.components.DownBar;
-import com.tpp.private_doh.components.MetricsScreen;
 import com.tpp.private_doh.components.StartVPNButton;
 import com.tpp.private_doh.components.UnselectedProtocol;
+import com.tpp.private_doh.components.metrics.MetricsScreen;
 import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorLayout;
 import com.tpp.private_doh.components.protocol_selector.ProtocolSelectorRadioGroup;
 import com.tpp.private_doh.components.racing_amount_selector.RacingAmountBar;
@@ -75,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // countOutput = findViewById(R.id.resolversCountsText);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-
         ProtocolSelectorLayout protocolSelectorLayout = findViewById(R.id.protocolSelectorLayout);
         protocolSelector = protocolSelectorLayout.getProtocolSelectorRadioGroup();
         RacingAmountSelectorLayout racingAmountLayout = findViewById(R.id.racingAmountLayout);
@@ -88,8 +88,17 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(stopVpnInternet, new IntentFilter(Config.STOP_SIGNAL_FOR_INTERNET));
         DownBar db = findViewById(R.id.down_bar);
+        Point size = getDisplaySize();
+        db.setScreenSize(size.x, size.y);
         db.setVpnScreen(findViewById(R.id.vpn_layout));
         db.setMetricsScreen(findViewById(R.id.metrics_layout));
+    }
+
+    private Point getDisplaySize() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
     }
 
     @Override
