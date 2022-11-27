@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static AtomicLong upByte = new AtomicLong(0);
     private final String TAG = this.getClass().getSimpleName();
     private int actualTransport = -1;
+    private boolean started = false;
 
     private ProtocolSelectorRadioGroup protocolSelector;
     private RacingAmountBar racingAmountBar;
@@ -133,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK && started) {
             Context context = getApplicationContext();
             Intent intent = new Intent(this, PDoHVpnService.class);
             context.startForegroundService(intent);
@@ -173,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
 
+        started = true;
         setInternetErrorMessage(false);
 
         ProtocolId protocol = ProtocolId.DOH;

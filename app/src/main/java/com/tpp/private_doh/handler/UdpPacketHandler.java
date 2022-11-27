@@ -41,8 +41,8 @@ public class UdpPacketHandler implements Runnable {
         try {
             BlockingQueue<UdpTunnel> tunnelQueue = new ArrayBlockingQueue<>(TUNNEL_CAPACITY);
             Selector selector = Selector.open();
-            UdpDownWorker udpdw = new UdpDownWorker(selector, networkToDeviceQueue, tunnelQueue);
-            Thread t = new Thread(udpdw);
+            UdpDownWorker udpDownWorker = new UdpDownWorker(selector, networkToDeviceQueue, tunnelQueue);
+            Thread t = new Thread(udpDownWorker);
             t.start();
 
             while (true) {
@@ -84,14 +84,19 @@ public class UdpPacketHandler implements Runnable {
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Udp write error", e);
-                    outputChannel.close();
-                    udpSockets.remove(ipAndPort);
+                    cleanSockets(outputChannel, ipAndPort);
                 }
+                udpSockets.remove(ipAndPort);
             }
         } catch (InterruptedException e) {
             Log.i(TAG, "The execution was interrupted");
         } catch (Exception e) {
             Log.e(TAG, "Error in BioUdpHandler", e);
         }
+    }
+
+    public void cleanSockets(DatagramChannel channel, String ipAndPort) throws Exception {
+        channel.close();
+        udpSockets.remove(ipAndPort);
     }
 }

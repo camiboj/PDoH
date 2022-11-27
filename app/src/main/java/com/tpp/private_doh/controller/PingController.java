@@ -11,7 +11,9 @@ import com.tpp.private_doh.util.CombinationUtils;
 import com.tpp.private_doh.util.Requester;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -38,11 +40,11 @@ public class PingController implements Runnable {
         return this.dnsRequesters;
     }
 
-    public List<Requester> getActiveRequesters() {
+    public synchronized List<Requester> getActiveRequesters() {
         if (shardingGroups.isEmpty()) {
             return new ArrayList<>();
         }
-        if (this.actualIdx == this.shardingGroups.size()) {
+        if (this.actualIdx >= this.shardingGroups.size()) {
             this.actualIdx = 0;
         }
         int actualIdx = this.actualIdx;
@@ -77,7 +79,9 @@ public class PingController implements Runnable {
         PublicDnsRequester publicDnsRequester = (PublicDnsRequester) requester;
         try {
             publicDnsRequester.executePingRequest(Config.PING_QUESTION, 1).get(Config.PING_TIMEOUT, TimeUnit.SECONDS);
-            this.activeIps.add(publicDnsRequester.getIp());
+            if (!this.activeIps.contains(publicDnsRequester.getIp())) {
+                this.activeIps.add(publicDnsRequester.getIp());
+            }
         } catch (Exception e) {
             Log.i(TAG, String.format("Not active ip: %s", publicDnsRequester.getIp()));
             this.activeIps.remove(publicDnsRequester.getIp());
@@ -89,17 +93,18 @@ public class PingController implements Runnable {
     private void reprocessIps() {
         // Remove all groups that included a disabled ip
         shardingGroups.removeIf(shardingGroup ->
-                shardingGroup.stream().noneMatch(requester -> this.activeIps.contains(requester)));
+                shardingGroup.stream().anyMatch(requester -> !this.activeIps.contains(requester)));
 
         // Create groups that include active ips
         List<List<String>> allGroups = CombinationUtils.combination(this.activeIps, this.nSharders);
         allGroups.forEach(group -> {
-            if (!shardingGroups.contains(group)) {
+            Set<String> groupSet = new HashSet<>(group);
+            if (shardingGroups.stream().noneMatch(shardingGroup -> new HashSet<>(shardingGroup).equals(groupSet))) {
                 shardingGroups.add(group);
             }
         });
 
-        Log.i(TAG, String.format("Actual idx: %d - Sharding groups: %s", actualIdx, shardingGroups));
+        Log.i(TAG, String.format("Actual idx: %d - Sharding groups: %d - Active ips: %d", actualIdx, shardingGroups.size(), activeIps.size()));
     }
 
     public void stop() {
