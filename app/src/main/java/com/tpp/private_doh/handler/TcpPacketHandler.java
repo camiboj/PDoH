@@ -190,6 +190,7 @@ public class TcpPacketHandler implements Runnable {
         buffer.clear();
         if (!pipe.upActive) {
             pipe.remote.shutdownOutput();
+            objAttrUtil.removeAttr(pipe.remote);
         }
         return true;
     }
@@ -203,7 +204,7 @@ public class TcpPacketHandler implements Runnable {
 
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to closeUpStream", e);
         }
         pipe.upActive = false;
 

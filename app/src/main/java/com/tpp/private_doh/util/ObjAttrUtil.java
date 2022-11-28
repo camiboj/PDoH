@@ -1,5 +1,6 @@
 package com.tpp.private_doh.util;
 
+import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,10 @@ public class ObjAttrUtil {
             map = objAttrs.get(obj);
         }
         map.put(k, value);
+    }
+
+    public void removeAttr(Object obj) {
+        objAttrs.remove(obj);
     }
 }
 
