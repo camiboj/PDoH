@@ -13,6 +13,7 @@ import com.tpp.private_doh.util.ByteBufferPool;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.BufferOverflowException;
@@ -301,11 +302,16 @@ public class TcpPacketHandler implements Runnable {
     private void cleanPipe(TcpPipe pipe) {
         try {
             if (pipe.remote != null && pipe.remote.isOpen()) {
-                pipe.remote.close();
+                try {
+                    pipe.remote.close();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while closing remote socket", e);
+                }
             }
             pipes.remove(pipe.tunnelKey);
+            this.objAttrUtil.removeAttr(pipe.remote);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to cleanPipe", e);
         }
     }
 
@@ -319,6 +325,7 @@ public class TcpPacketHandler implements Runnable {
     private void closeDownStream(TcpPipe pipe) throws Exception {
         if (pipe.remote != null && pipe.remote.isConnected()) {
             pipe.remote.shutdownInput();
+            objAttrUtil.removeAttr(pipe.remote);
             int ops = getKey(pipe.remote).interestOps() & (~SelectionKey.OP_READ);
             getKey(pipe.remote).interestOps(ops);
         }
@@ -389,8 +396,16 @@ public class TcpPacketHandler implements Runnable {
         try {
             selector = Selector.open();
             while (true) {
-                handleReadFromVpn();
-                handleSockets();
+                try {
+                    handleReadFromVpn();
+                } catch (IOException e) {
+                    Log.e(TAG, "There was an error reading from VPN", e);
+                }
+                try {
+                    handleSockets();
+                } catch (IOException e) {
+                    Log.e(TAG, "There was an error in socketHandling", e);
+                }
                 Thread.sleep(1);
             }
         } catch (InterruptedException e) {
