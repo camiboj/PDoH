@@ -16,10 +16,11 @@ public class DnsPacket extends Packet {
 
     public DnsPacket(IP4Header ip4Header, UdpHeader udpHeader, ByteBuffer buffer) {
         super(ip4Header, udpHeader, buffer);
-        this.dnsHeader = new DnsHeader(buffer);
+        ByteBuffer bufferDuplicated = buffer.duplicate();
+        this.dnsHeader = new DnsHeader(bufferDuplicated);
         this.questions = new ArrayList<>();
         for (int i = 0; i < dnsHeader.getNQuestions(); i++) {
-            questions.add(new DnsQuestion(buffer));
+            questions.add(new DnsQuestion(bufferDuplicated));
         }
         // For now we wont map answers because we will do that programmatically
     }
@@ -95,4 +96,3 @@ public class DnsPacket extends Packet {
                 '}';
     }
 }
-
