@@ -3,6 +3,9 @@ package com.tpp.private_doh;
 
 import static com.tpp.private_doh.config.Config.QUEUE_CAPACITY;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,8 +15,10 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.tpp.private_doh.app.MainActivity;
 import com.tpp.private_doh.config.Config;
 import com.tpp.private_doh.dns.DnsPacket;
 import com.tpp.private_doh.factory.ShardingControllerFactory;
@@ -24,6 +29,7 @@ import com.tpp.private_doh.network.NetworkManager;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.util.ResourceUtils;
 
+import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -32,6 +38,7 @@ import java.util.concurrent.Executors;
 
 public class PDoHVpnService extends VpnService {
     private static final String TAG = PDoHVpnService.class.getSimpleName();
+    private static ExecutorService executorService;
     private ParcelFileDescriptor vpnInterface = null;
     private BroadcastReceiver stopVpn = new BroadcastReceiver() {
         @Override
@@ -42,12 +49,19 @@ public class PDoHVpnService extends VpnService {
         }
     };
     private PendingIntent pendingIntent;
-
     private BlockingQueue<Packet> deviceToNetworkUDPQueue;
     private BlockingQueue<Packet> deviceToNetworkTCPQueue;
     private BlockingQueue<DnsPacket> dnsResponsesQueue;
     private BlockingQueue<ByteBuffer> networkToDeviceQueue;
-    private ExecutorService executorService;
+    private ExecutorService dnsWorkers;
+
+    public static void setShardingControllerFactory(ShardingControllerFactory scd) {
+        NetworkManager.setShardingControllerFactory(scd);
+    }
+
+    public static boolean isRunning() {
+        return executorService != null && !executorService.isShutdown();
+    }
 
     @Override
     public void onCreate() {
@@ -59,14 +73,19 @@ public class PDoHVpnService extends VpnService {
         dnsResponsesQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
         networkToDeviceQueue = new ArrayBlockingQueue<>(QUEUE_CAPACITY);
 
-        executorService = Executors.newFixedThreadPool(4);
+        executorService = Executors.newFixedThreadPool(Config.EXECUTOR_SERVICE_N);
+        dnsWorkers = Executors.newFixedThreadPool(Config.N_DNS_WORKERS);
+
+        FileDescriptor vpnFileDescriptor = vpnInterface.getFileDescriptor();
         executorService.submit(new UdpPacketHandler(deviceToNetworkUDPQueue, networkToDeviceQueue, this));
         executorService.submit(new TcpPacketHandler(deviceToNetworkTCPQueue, networkToDeviceQueue, this));
         executorService.submit(new DnsDownWorker(networkToDeviceQueue, dnsResponsesQueue));
-        executorService.submit(new NetworkManager(vpnInterface.getFileDescriptor(),
-                deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue));
+        executorService.submit(new NetworkManager(vpnFileDescriptor, deviceToNetworkUDPQueue,
+                deviceToNetworkTCPQueue, dnsResponsesQueue, networkToDeviceQueue, dnsWorkers));
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(stopVpn, new IntentFilter(Config.STOP_SIGNAL));
+
+        showServiceNotification();
     }
 
     private void setupVPN() {
@@ -87,7 +106,7 @@ public class PDoHVpnService extends VpnService {
     public void stopVpn() {
         try {
             if (vpnInterface != null) {
-                //vpnInterface.close();
+                vpnInterface.close();
                 vpnInterface = null;
             }
         } catch (Exception e) {
@@ -96,7 +115,6 @@ public class PDoHVpnService extends VpnService {
         stopSelf();
     }
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;
@@ -104,20 +122,37 @@ public class PDoHVpnService extends VpnService {
 
     @Override
     public void onDestroy() {
+        Log.e(TAG, "Stop was called");
         super.onDestroy();
         stopVpn();
-        executorService.shutdownNow();
         cleanup();
         Log.i(TAG, "Stopped");
     }
 
     private void cleanup() {
+        dnsWorkers.shutdownNow();
+        executorService.shutdownNow();
         ResourceUtils.closeResources(vpnInterface);
-        this.vpnInterface = null;
+        vpnInterface = null;
     }
 
-    public static void setShardingControllerFactory(ShardingControllerFactory scd) {
-        NetworkManager.setShardingControllerFactory(scd);
+    private void showServiceNotification() {
+        Intent activityNotificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingActivityIntent = PendingIntent.getActivity(this, 0, activityNotificationIntent, 0);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationChannel notificationChannel = new NotificationChannel(
+                Config.NOTIFICATION_CHANNEL_ID,
+                "VPN Status",
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+        notificationManager.createNotificationChannel(notificationChannel);
+        Notification notification = new NotificationCompat.Builder(this, Config.NOTIFICATION_CHANNEL_ID)
+                .setContentIntent(pendingActivityIntent)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .build();
+
+        startForeground(Config.NOTIFICATION_ID, notification);
     }
+
 }
-
