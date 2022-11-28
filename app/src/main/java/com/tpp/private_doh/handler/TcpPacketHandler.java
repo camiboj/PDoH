@@ -9,6 +9,7 @@ import com.tpp.private_doh.protocol.IpUtil;
 import com.tpp.private_doh.protocol.Packet;
 import com.tpp.private_doh.protocol.TCBStatus;
 import com.tpp.private_doh.protocol.TcpHeader;
+import com.tpp.private_doh.util.ByteBufferPool;
 import com.tpp.private_doh.util.ObjAttrUtil;
 import com.tpp.private_doh.util.SocketUtils;
 
@@ -72,7 +73,7 @@ public class TcpPacketHandler implements Runnable {
         Packet packet = IpUtil.buildTcpPacket(pipe.destinationAddress, pipe.sourceAddress, flag,
                 pipe.myAcknowledgementNum, pipe.mySequenceNum, pipe.packId);
         pipe.packId += 1;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(HEADER_SIZE + dataLen);
+        ByteBuffer byteBuffer = ByteBufferPool.acquireWithCapacity(HEADER_SIZE + dataLen);
         byteBuffer.position(HEADER_SIZE);
         if (data != null) {
             byteBuffer.put(data);
@@ -151,7 +152,7 @@ public class TcpPacketHandler implements Runnable {
             } catch (Exception e) {
                 int limit = pipe.remoteOutBuffer.limit();
                 limit *= 2;
-                ByteBuffer auxiliaryBuffer = ByteBuffer.allocate(limit);
+                ByteBuffer auxiliaryBuffer = ByteBufferPool.acquireWithCapacity(limit);
                 auxiliaryBuffer.put(pipe.remoteOutBuffer);
                 pipe.remoteOutBuffer = auxiliaryBuffer;
             }
@@ -413,7 +414,7 @@ public class TcpPacketHandler implements Runnable {
         public int packId = 1;
         public long timestamp = 0L;
         int synCount = 0;
-        private ByteBuffer remoteOutBuffer = ByteBuffer.allocate(Config.TCP_BUFFER_BYTES);
+        private ByteBuffer remoteOutBuffer = ByteBufferPool.acquireWithCapacity(Config.TCP_BUFFER_BYTES);
     }
 }
 

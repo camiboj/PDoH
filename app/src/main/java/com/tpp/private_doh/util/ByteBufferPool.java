@@ -8,5 +8,9 @@ public class ByteBufferPool {
     public static ByteBuffer acquire() {
         return ByteBuffer.allocate(BUFFER_SIZE);
     }
+
+    public static ByteBuffer acquireWithCapacity(int capacity) {
+        return ByteBuffer.allocate(capacity);
+    }
 }
 
