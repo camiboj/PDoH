@@ -281,6 +281,7 @@ public class TcpPacketHandler implements Runnable {
         TcpPipe pipe = (TcpPipe) objAttrUtil.getAttr(channel, "pipe");
 
         while (true) {
+            buffer.clear();
             int n = SocketUtils.read(channel, buffer);
             if (n == -1) {
                 shouldQuit = true;
@@ -408,7 +409,7 @@ public class TcpPacketHandler implements Runnable {
                 } catch (IOException e) {
                     Log.e(TAG, "There was an error in socketHandling", e);
                 }
-                Thread.sleep(1000);
+                Thread.sleep(1);
             }
         } catch (InterruptedException e) {
             Log.i(TAG, "The execution was interrupted");
