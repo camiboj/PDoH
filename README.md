@@ -9,7 +9,8 @@ Cecilia Hortas (chortas@fi.uba.ar)
 El objetivo general del trabajo es el desarrollo de una aplicación Android que permita redirigir el tráfico DNS a distintos proveedores DoH y/o DNS con la intención de preservar la privacidad y la anonimidad con el uso de distintas técnicas de privacidad y performance como sharding y racing.
 
 ## La aplicación
-![app](https://user-images.githubusercontent.com/37588761/204672566-01d1ec88-cc47-4d8f-81da-66239b72dfa2.jpg)
+
+<img src="https://user-images.githubusercontent.com/37588761/204672566-01d1ec88-cc47-4d8f-81da-66239b72dfa2.jpg" width="300">
 
 ## Instalación de la aplicación
 QR
