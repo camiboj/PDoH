@@ -94,7 +94,6 @@ public class UdpDownWorker implements Runnable {
         packet.updateUDPBuffer(byteBuffer, dataLen);
         byteBuffer.position(this.headerSize + dataLen);
 
-        tunnel.getChannel().close();
         this.networkToDeviceQueue.offer(byteBuffer);
     }
 
@@ -106,6 +105,8 @@ public class UdpDownWorker implements Runnable {
         } catch (PortUnreachableException e) {
             Log.i(TAG, String.format("Ping has failed for: %s", inputChannel.getRemoteAddress().toString()));
         }
+
+        inputChannel.close();
         return receiveBuffer;
     }
 }
