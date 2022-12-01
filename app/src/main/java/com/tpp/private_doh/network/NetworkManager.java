@@ -96,9 +96,6 @@ public class NetworkManager implements Runnable {
             }
         } catch (Exception e) {
             Log.w(TAG, e.toString(), e);
-        } finally {
-            ResourceUtils.closeResources(vpnInput, vpnOutput);
-            dnsWorkers.shutdown();
         }
     }
 
