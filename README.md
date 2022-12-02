@@ -15,6 +15,9 @@ El objetivo general del trabajo es el desarrollo de una aplicación Android que 
 ## Instalación de la aplicación
 QR
 
+<img src="https://user-images.githubusercontent.com/37588761/205361526-d2bfa6fd-f5e7-4eb5-871d-188558420184.png"
+width="200" height="200">
+
 ## Requisitos para correr la aplicación local
 - Utilizar algún IDE que facilite definir una aplicación como Android Studio
 - Disponer de un celular con acceso a internet y una versión de Android mayor a la 8 configurado con opciones de desarrollador y un cable para conectarlo a la computadora
