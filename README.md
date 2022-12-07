@@ -10,7 +10,7 @@ El objetivo general del trabajo es el desarrollo de una aplicación Android que 
 
 ## La aplicación
 
-<img src="https://user-images.githubusercontent.com/37588761/204672566-01d1ec88-cc47-4d8f-81da-66239b72dfa2.jpg" width="300">
+<img src="https://user-images.githubusercontent.com/37588761/206172959-646d8d5b-701b-4847-829f-bb59c95f046e.png" width="300">
 
 ## Instalación de la aplicación
 
