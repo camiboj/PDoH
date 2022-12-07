@@ -10,11 +10,11 @@ El objetivo general del trabajo es el desarrollo de una aplicación Android que 
 
 ## La aplicación
 
-<img src="https://user-images.githubusercontent.com/37588761/206172959-646d8d5b-701b-4847-829f-bb59c95f046e.png" width="300">
+<img src="https://user-images.githubusercontent.com/37588761/204672566-01d1ec88-cc47-4d8f-81da-66239b72dfa2.jpg" width="300">
 
 ## Instalación de la aplicación
 
-<img src="https://user-images.githubusercontent.com/37588761/205361526-d2bfa6fd-f5e7-4eb5-871d-188558420184.png"
+<img src="https://user-images.githubusercontent.com/37588761/206172959-646d8d5b-701b-4847-829f-bb59c95f046e.png"
 width="200" height="200">
 
 ## Requisitos para correr la aplicación local
