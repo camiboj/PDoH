@@ -47,7 +47,9 @@ public abstract class DoHRequester extends Requester {
         try {
             con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
+            con.setReadTimeout(1000);
             setHeaders(con);
+            Log.i(TAG, String.format("Executing request: %s", con.getURL().toString()));
             Log.i(TAG, String.format("Status: %s", con.getResponseCode()));
             // Response
             in = new BufferedReader(
@@ -64,9 +66,10 @@ public abstract class DoHRequester extends Requester {
             Log.i(TAG, String.format("DohAnswer: %s", dohResponse));
 
             return DoHToDnsMapper.map(dohResponse);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Something happened while executing request");
-        } finally {
+        }
+        finally {
             if (con != null) {
                 con.disconnect();
             }

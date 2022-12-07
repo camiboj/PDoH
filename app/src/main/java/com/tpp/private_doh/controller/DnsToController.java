@@ -21,7 +21,7 @@ public class DnsToController {
     }
 
     public List<Response> process(DnsPacket dnsPacket) {
-        Log.i(TAG, "Processing new package");
+        Log.i(TAG, String.format("Processing new package with questions %s", dnsPacket.getQuestions()));
         List<DnsQuestion> questions = dnsPacket.getQuestions();
         return questions.stream().map(this::processQuestion).collect(Collectors.toList());
     }

@@ -1,5 +1,7 @@
 package com.tpp.private_doh.dns;
 
+import android.util.Log;
+
 import com.tpp.private_doh.util.Requester;
 
 import java.util.List;
